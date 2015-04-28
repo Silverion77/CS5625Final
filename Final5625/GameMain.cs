@@ -74,6 +74,13 @@ namespace Chireiden
         {
             // Change camera's orientation based on mouse movement
             MouseState current = OpenTK.Input.Mouse.GetState();
+
+            float currWheel = current.WheelPrecise;
+            float prevWheel = previous.WheelPrecise;
+            float wheelDiff = currWheel - prevWheel;
+
+            camera.zoom(-wheelDiff);
+
             float mouseDX = current.X - previous.X;
             float mouseDY = current.Y - previous.Y;
             camera.addRotation(mouseDX, mouseDY);

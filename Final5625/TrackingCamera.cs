@@ -123,5 +123,11 @@ namespace Chireiden
             offset.Normalize();
             return offset;
         }
+
+        public void zoom(float amount)
+        {
+            distanceBehind += amount;
+            distanceBehind = Math.Max(Math.Min(distanceBehind, 100), 1);
+        }
     }
 }

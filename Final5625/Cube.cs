@@ -121,14 +121,6 @@ namespace Chireiden
             // TODO: why is toWorldMatrix the left operand...
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
 
-            Vector4 center = new Vector4(0, 0, 0, 1);
-            center = Vector4.Transform(center, toWorldMatrix);
-            Console.WriteLine("cube center in world space = {0}", center);
-            center = Vector4.Transform(center, viewMatrix);
-            Console.WriteLine("cube center in eye space = {0}", center);
-            center = Vector4.Transform(new Vector4(0,0,0,1), modelView);
-            Console.WriteLine("cube center in eye space using modelview = {0}", center);
-
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, eboHandle);
