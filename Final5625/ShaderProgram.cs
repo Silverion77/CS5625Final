@@ -73,5 +73,11 @@ namespace Chireiden
         {
             return GL.GetUniformLocation(programHandle, uniform);
         }
+
+        public void setUniformMatrix4(string name, Matrix4 mat)
+        {
+            int unifLoc = uniformLocation(name);
+            GL.UniformMatrix4(unifLoc, false, ref mat);
+        }
     }
 }

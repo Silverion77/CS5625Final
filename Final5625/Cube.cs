@@ -9,17 +9,19 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden
 {
-
-    public class Cube
+    public class Cube : TransformableObject
     {
         int positionVboHandle;
+
         int normalVboHandle;
         int eboHandle;
         int vaoHandle;
 
-        float scale = 1;
-        Vector3 translation = new Vector3(0, 0, 0);
-        Quaternion rotation = Quaternion.Identity;
+        public Cube() : base()
+        {
+            CreateVBOs();
+            CreateVAOs();
+        }
 
         Vector3[] positionVboData = new Vector3[]{
             new Vector3(-1.0f, -1.0f,  1.0f),
@@ -101,43 +103,37 @@ namespace Chireiden
             GL.BindVertexArray(0);
         }
 
-        public void update(FrameEventArgs e)
+        public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
+            base.update(e, parentToWorldMatrix);
         }
 
-        /// <summary>
-        /// Gives the matrix that transforms from this object's local space into its parent's space.
-        /// </summary>
-        /// <returns></returns>
-        public Matrix4 modelMatrix()
+        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
         {
-            Matrix4 scaleMat = Matrix4.Scale(scale);
-            Matrix4 translationMat = Matrix4.CreateTranslation(translation);
-            Matrix4 rotationMat = Matrix4.CreateFromQuaternion(rotation);
-            return Matrix4.Mult(translationMat, Matrix4.Mult(rotationMat, scaleMat));
-        }
+            // Compute transformation matrices
+            Matrix4 modelView = Matrix4.Mult(viewMatrix, toWorldMatrix);
 
-        public void render(Matrix4 parentModel, Matrix4 projection)
-        {
-            int projectionMatrixLocation = Shaders.CubeShader.uniformLocation("projection_matrix");
-            int modelviewMatrixLocation = Shaders.CubeShader.uniformLocation("modelview_matrix");
-
+            // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, eboHandle);
             Shaders.CubeShader.use();
 
-            Matrix4 localModelMat = modelMatrix();
-            Matrix4 modelView = Matrix4.Mult(parentModel, localModelMat);
-
-            GL.UniformMatrix4(projectionMatrixLocation, false, ref projection);
-            GL.UniformMatrix4(modelviewMatrixLocation, false, ref modelView);
+            Shaders.CubeShader.setUniformMatrix4("projection_matrix", projectionMatrix);
+            Shaders.CubeShader.setUniformMatrix4("modelview_matrix", modelView);
 
             GL.DrawElements(PrimitiveType.Triangles, indicesVboData.Length,
                 DrawElementsType.UnsignedInt, IntPtr.Zero);
 
+            // Clean up
             Shaders.CubeShader.unuse();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             GL.BindVertexArray(0);
+
+            // Render children if they exist
+            foreach (SceneTreeNode c in children)
+            {
+                c.render(viewMatrix, projectionMatrix);
+            }
         }
     }
 }
