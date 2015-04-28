@@ -33,12 +33,12 @@ namespace Chireiden
 
         MouseState previous;
 
-        TransformableObject camTarget;
+        MobileObject camTarget;
         TrackingCamera camera;
 
         public GameMain()
             : base(1200, 900,
-            new GraphicsMode(), "OpenGL 3 Example", 0,
+            new GraphicsMode(), "The Great Game", 0,
             DisplayDevice.Default, 3, 2,
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
         {}
@@ -48,9 +48,9 @@ namespace Chireiden
             World w = new World();
             Cube cube1 = new Cube();
             w.addChild(cube1);
-            EmptyObject empty = new EmptyObject();
-            w.addChild(empty);
-            camTarget = empty;
+            Cube cube2 = new Cube(new Vector3(2,1,0));
+            w.addChild(cube2);
+            camTarget = cube2;
             return w;
         }
 
@@ -72,19 +72,59 @@ namespace Chireiden
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            // Matrix4 rotation = Matrix4.CreateRotationY((float)e.Time);
-            // TODO: rotate the cube
-            world.update(e);
-
+            // Change camera's orientation based on mouse movement
             MouseState current = OpenTK.Input.Mouse.GetState();
             float mouseDX = current.X - previous.X;
             float mouseDY = current.Y - previous.Y;
-            camera.AddRotation(-mouseDX, -mouseDY);
+            camera.addRotation(mouseDX, mouseDY);
             previous = current;
+
+            // Because the viewpoint has changed, compute the new frame for the camera
+            camera.computeFrame();
+
+            // VELOCITY MODIFICATIONS HERE
+
+            // Here we should set the velocities of every object.
+
+            // This firstly includes physics objects -- we just modify their velocity
+            // by adding gravity, and whatever other damping effects we deem necessary.
+
+            // This also includes characters. Because there's just a simple
+            // direction they want to move in, we can just set their velocity to be in
+            // that direction, and scale by their move speed.
+
+            // Handle player's movement here
+            float moveX = 0;
+            float moveY = 0;
 
             var keyboard = OpenTK.Input.Keyboard.GetState();
             if (keyboard[OpenTK.Input.Key.Escape])
                 Exit();
+            if (keyboard[OpenTK.Input.Key.W])
+                moveY += 1;
+            if (keyboard[OpenTK.Input.Key.A])
+                moveX -= 1;
+            if (keyboard[OpenTK.Input.Key.S])
+                moveY -= 1;
+            if (keyboard[OpenTK.Input.Key.D])
+                moveX += 1;
+
+            if (moveX != 0 || moveY != 0)
+            {
+                Vector3 worldMovementVector = camera.getMovementVector(moveX, moveY);
+                camTarget.setVelocity(worldMovementVector);
+            }
+            else
+            {
+                camTarget.setVelocity(Vector3.Zero);
+            }
+
+            // TODO: handle enemy movement here, once enemies are implemented
+
+            // Update then adds velocity to position, and also updates modeling transformations.
+            world.update(e);
+
+            // TODO: probably game logic goes here, e.g. hit detection, damage calculations
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)

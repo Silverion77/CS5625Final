@@ -19,7 +19,7 @@ namespace Chireiden
         {
             foreach (SceneTreeNode c in children)
             {
-                c.update(e, toWorldMatrix);
+                c.update(e, Matrix4.Identity);
             }
 
         }

@@ -12,14 +12,14 @@ namespace Chireiden
     /// <summary>
     /// An object in the scene tree that can be subjected to translations, rotations, and scaling.
     /// </summary>
-    public abstract class TransformableObject : SceneTreeNode
+    public abstract class PlaceableObject : SceneTreeNode
     {
         protected float scale;
         protected Vector3 translation;
         protected Quaternion rotation;
         public Vector3 worldPosition;
 
-        public TransformableObject(float s, Vector3 t, Quaternion r) : base()
+        public PlaceableObject(float s, Vector3 t, Quaternion r) : base()
         {
             scale = s;
             translation = t;
@@ -27,11 +27,11 @@ namespace Chireiden
             worldPosition = Vector3.Zero;
         }
 
-        public TransformableObject(Vector3 translation)
+        public PlaceableObject(Vector3 translation)
             : this(1, translation, Quaternion.Identity)
         { }
 
-        public TransformableObject()
+        public PlaceableObject()
             : this(1, new Vector3(0, 0, 0), Quaternion.Identity)
         { }
 
@@ -55,7 +55,7 @@ namespace Chireiden
 
             foreach (SceneTreeNode c in children)
             {
-                c.update(e, parentToWorldMatrix);
+                c.update(e, toWorldMatrix);
             }
         }
     }

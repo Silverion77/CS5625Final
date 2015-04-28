@@ -8,9 +8,9 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 namespace Chireiden
 {
-    class EmptyObject : TransformableObject
+    class EmptyCamTarget : MobileObject
     {
-        public EmptyObject() : base() { }
+        public EmptyCamTarget() : base() { }
 
         public override void render(OpenTK.Matrix4 viewMatrix, OpenTK.Matrix4 projectionMatrix)
         {

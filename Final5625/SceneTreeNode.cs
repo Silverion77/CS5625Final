@@ -75,7 +75,7 @@ namespace Chireiden
         /// Updates the modeling transformations of this object to reflect the changes.
         /// </summary>
         /// <param name="e">Data describing what's happened between now and the previous frame.</param>
-        /// <param name="parentModelMatrix">The modeling transformation of the parent.</param>
+        /// <param name="parentToWorldMatrix">The modeling transformation of the parent.</param>
         abstract public void update(FrameEventArgs e, Matrix4 parentToWorldMatrix);
 
         /// <summary>

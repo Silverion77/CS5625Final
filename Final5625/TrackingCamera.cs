@@ -17,28 +17,26 @@ namespace Chireiden
     /// </summary>
     class TrackingCamera
     {
-        public float MoveSpeed = 0.2f;
         public float MouseSensitivity = 0.01f;
         public float distanceBehind = 5;
 
-        Vector3 position;
-        Vector3 orientation;
-        Vector3 offset;
+        float pitch = 0;
+        float yaw = 0;
 
         float fovy;
         float aspectRatio;
         float nearClip;
         float farClip;
 
+        Vector3 forward;
+        Vector3 right;
+
         Matrix4 projectionMatrix;
 
-        TransformableObject target;
+        MobileObject target;
 
-        public TrackingCamera(TransformableObject target, float fovy, float aspectRatio, float nearClip, float farClip)
+        public TrackingCamera(MobileObject target, float fovy, float aspectRatio, float nearClip, float farClip)
         {
-            offset = new Vector3();
-            position = new Vector3();
-            orientation = new Vector3((float)Math.PI, 0f, 0f);
             this.fovy = fovy;
             this.aspectRatio = aspectRatio;
             this.nearClip = nearClip;
@@ -53,27 +51,77 @@ namespace Chireiden
             return projectionMatrix;
         }
 
-        // Courtesy of http://neokabuto.blogspot.com/2014/01/opentk-tutorial-5-basic-camera.html
-        public Matrix4 getViewMatrix()
+        /// <summary>
+        /// Computes the forward and right vectors for the current camera position and lookAt.
+        /// </summary>
+        public void computeFrame()
         {
             Vector3 lookAt = target.worldPosition;
 
-            offset.X = (float)(Math.Sin((float)orientation.X) * Math.Cos((float)orientation.Y));
-            offset.Y = (float)Math.Sin((float)orientation.Y);
-            offset.Z = (float)(Math.Cos((float)orientation.X) * Math.Cos((float)orientation.Y));
-            offset = Vector3.Multiply(offset, distanceBehind);
+            // The default offset is (-1, 0, 0) to the target position
+            Vector3 offset = new Vector3(-1, 0, 0);
 
-            return Matrix4.LookAt(lookAt - offset, lookAt, Vector3.UnitY);
+            // First rotate by the pitch angle (around global up axis)
+            Quaternion pitchRotation = Quaternion.FromAxisAngle(Vector3.UnitY, pitch);
+            offset = Vector3.Transform(offset, pitchRotation);
+
+            // Now compute rightward vector -- distance from camera to lookAt = negation of offset
+            Vector3 right = Vector3.Cross(-offset, Vector3.UnitY);
+            // Rotate by yaw angle (around right axis)
+            Quaternion yawRotation = Quaternion.FromAxisAngle(right, yaw);
+            offset = Vector3.Transform(offset, yawRotation);
+
+            this.right = right;
+            this.forward = -offset;
+        }
+
+        public Matrix4 getViewMatrix()
+        {
+            // Assumes that computeFrame() has already been called this timestep,
+            // so this is really quite simple
+            Vector3 offset = Vector3.Multiply(forward, distanceBehind);
+
+            Matrix4 lookAtMat = Matrix4.LookAt(target.worldPosition - offset, target.worldPosition, Vector3.UnitY);
+
+            return lookAtMat;
         }
 
         // Courtesy of http://neokabuto.blogspot.com/2014/01/opentk-tutorial-5-basic-camera.html
-        public void AddRotation(float x, float y)
+        /// <summary>
+        /// Given the change in the mouse position, rotates the camera to track with the mouse movement.
+        /// </summary>
+        /// <param name="x">Distance moved by mouse in screen X direction</param>
+        /// <param name="y">Distance moved by mouse in screen Y direction</param>
+        public void addRotation(float x, float y)
         {
-            x = x * MouseSensitivity;
-            y = y * MouseSensitivity;
+            x = -x * MouseSensitivity;
+            y = -y * MouseSensitivity;
 
-            orientation.X = (orientation.X + x) % ((float)Math.PI * 2.0f);
-            orientation.Y = Math.Max(Math.Min(orientation.Y + y, (float)Math.PI / 2.0f - 0.1f), (float)-Math.PI / 2.0f + 0.1f);
+            pitch = (pitch + x) % ((float)Math.PI * 2.0f);
+            yaw = Math.Max(Math.Min(yaw + y, (float)Math.PI / 2.0f - 0.1f), (float)-Math.PI / 2.0f + 0.1f);
+        }
+
+        /// <summary>
+        /// Given a direction in screen space (with X right, Y up, Z into the screen),
+        /// transforms that into a movement direction for the tracked object in world space.
+        /// </summary>
+        /// <param name="x">Right direction in screen space; translates to rightward movement</param>
+        /// <param name="y">Up direction in screen space; translates to forward movement</param>
+        /// <returns></returns>
+        public Vector3 getMovementVector(float x, float y)
+        {
+            Vector3 offset = Vector3.Zero;
+
+            // Project the directions down to the ground plane
+            Vector3 rightParallelY = Vector3.Dot(right, Vector3.UnitY) * Vector3.UnitY;
+            Vector3 forwardParallelY = Vector3.Dot(forward, Vector3.UnitY) * Vector3.UnitY;
+            Vector3 rightProj = Vector3.Normalize(right - rightParallelY);
+            Vector3 forwardProj = Vector3.Normalize(forward - forwardParallelY);
+
+            offset = offset + x * rightProj;
+            offset = offset + y * forwardProj;
+            offset.Normalize();
+            return offset;
         }
     }
 }
