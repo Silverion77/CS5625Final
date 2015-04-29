@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace Chireiden
 {
     public class Shaders {
-        public static ShaderProgram CubeShader = new ShaderProgram("../../data/Simple_VS.vert", "../../data/Simple_FS.frag");
+        public static ShaderProgram CubeShader = new ShaderProgram("data/Simple_VS.vert", "data/Simple_FS.frag");
     }
 }

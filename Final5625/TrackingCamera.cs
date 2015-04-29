@@ -30,6 +30,7 @@ namespace Chireiden
 
         Vector3 forward;
         Vector3 right;
+        Vector3 up = Vector3.UnitZ;
 
         Matrix4 projectionMatrix;
 
@@ -58,15 +59,15 @@ namespace Chireiden
         {
             Vector3 lookAt = target.worldPosition;
 
-            // The default offset is (-1, 0, 0) to the target position
-            Vector3 offset = new Vector3(-1, 0, 0);
+            // The default offset is "behind" the target position in world space terms
+            Vector3 offset = new Vector3(0, -1, 0);
 
             // First rotate by the pitch angle (around global up axis)
-            Quaternion pitchRotation = Quaternion.FromAxisAngle(Vector3.UnitY, pitch);
+            Quaternion pitchRotation = Quaternion.FromAxisAngle(up, pitch);
             offset = Vector3.Transform(offset, pitchRotation);
 
             // Now compute rightward vector -- distance from camera to lookAt = negation of offset
-            Vector3 right = Vector3.Cross(-offset, Vector3.UnitY);
+            Vector3 right = Vector3.Cross(-offset, up);
             // Rotate by yaw angle (around right axis)
             Quaternion yawRotation = Quaternion.FromAxisAngle(right, yaw);
             offset = Vector3.Transform(offset, yawRotation);
@@ -81,7 +82,7 @@ namespace Chireiden
             // so this is really quite simple
             Vector3 offset = Vector3.Multiply(forward, distanceBehind);
 
-            Matrix4 lookAtMat = Matrix4.LookAt(target.worldPosition - offset, target.worldPosition, Vector3.UnitY);
+            Matrix4 lookAtMat = Matrix4.LookAt(target.worldPosition - offset, target.worldPosition, up);
 
             return lookAtMat;
         }
@@ -113,10 +114,10 @@ namespace Chireiden
             Vector3 offset = Vector3.Zero;
 
             // Project the directions down to the ground plane
-            Vector3 rightParallelY = Vector3.Dot(right, Vector3.UnitY) * Vector3.UnitY;
-            Vector3 forwardParallelY = Vector3.Dot(forward, Vector3.UnitY) * Vector3.UnitY;
-            Vector3 rightProj = Vector3.Normalize(right - rightParallelY);
-            Vector3 forwardProj = Vector3.Normalize(forward - forwardParallelY);
+            Vector3 rightParallelUp = Vector3.Dot(right, up) * up;
+            Vector3 forwardParallelUp = Vector3.Dot(forward, up) * up;
+            Vector3 rightProj = Vector3.Normalize(right - rightParallelUp);
+            Vector3 forwardProj = Vector3.Normalize(forward - forwardParallelUp);
 
             offset = offset + x * rightProj;
             offset = offset + y * forwardProj;

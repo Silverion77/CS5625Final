@@ -7,7 +7,9 @@
  * I'm going to write here. Feel free to add your own notes as well.
  *
  *      - We are using OpenGL 3.1.
- *      - The Y-axis is hereby defined to be up.
+ *      - The Z-axis is hereby defined to be up, and the negative Y-axis is
+ *          hereby defined to be forward. Why? Because Blender uses that, and
+ *          trying to get it to export otherwise is more trouble than it's worth...
  */
 
 using System;
@@ -20,16 +22,14 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
+using Chireiden.Meshes;
+
 namespace Chireiden
 {
     public class GameMain : GameWindow
     {
 
         World world;
-
-        Vector3 eyePos = new Vector3(5, 5, 5);
-        Vector3 lookAt = new Vector3(0, 0, 0);
-        Vector3 up = new Vector3(0, 1, 0);
 
         MouseState previous;
 
@@ -65,6 +65,8 @@ namespace Chireiden
             // Make the world
             world = createWorld();
             float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
+
+            var meshes = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
 
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();
