@@ -8,7 +8,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Chireiden
+namespace Chireiden.Scenes
 {
     /// <summary>
     /// All objects in the game will be organized into a scene tree, where each node
@@ -85,5 +85,33 @@ namespace Chireiden
         /// <param name="viewMatrix">The camera's view matrix.</param>
         /// <param name="projectionMatrix">The camera's projection matrix.</param>
         abstract public void render(Matrix4 viewMatrix, Matrix4 projectionMatrix);
+
+        /// <summary>
+        /// Updates every child of this scene tree node, using our toWorldMatrix.
+        /// Every implementation of update should call this at the end.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="toWorldMatrix"></param>
+        public void updateChildren(FrameEventArgs e, Matrix4 toWorldMatrix)
+        {
+            foreach (SceneTreeNode c in children)
+            {
+                c.update(e, toWorldMatrix);
+            }
+        }
+
+        /// <summary>
+        /// Renders every child of this scene tree node.
+        /// Every implementation of render should call this at the end.
+        /// </summary>
+        /// <param name="viewMatrix"></param>
+        /// <param name="projectionMatrix"></param>
+        public void renderChildren(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        {
+            foreach (SceneTreeNode c in children)
+            {
+                c.render(viewMatrix, projectionMatrix);
+            }
+        }
     }
 }

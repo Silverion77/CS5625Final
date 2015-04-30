@@ -23,6 +23,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Chireiden.Meshes;
+using Chireiden.Scenes;
 
 namespace Chireiden
 {

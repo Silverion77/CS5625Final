@@ -7,7 +7,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Chireiden
+namespace Chireiden.Scenes
 {
     /// <summary>
     /// An object in the scene tree that can be subjected to translations, rotations, and scaling.
@@ -18,6 +18,8 @@ namespace Chireiden
         protected Vector3 translation;
         protected Quaternion rotation;
         public Vector3 worldPosition;
+
+        static Vector4 localCenter = new Vector4(0, 0, 0, 1);
 
         public PlaceableObject(float s, Vector3 t, Quaternion r) : base()
         {
@@ -50,13 +52,9 @@ namespace Chireiden
 
             // The center of the local space object is (0, 0, 0), so we transform
             // that to world space.
-            Vector4 localCenter = new Vector4(0, 0, 0, 1);
             worldPosition = Vector4.Transform(localCenter, toWorldMatrix).Xyz;
 
-            foreach (SceneTreeNode c in children)
-            {
-                c.update(e, toWorldMatrix);
-            }
+            updateChildren(e, toWorldMatrix);
         }
     }
 }

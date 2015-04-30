@@ -9,6 +9,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 using Chireiden.Materials;
+using Chireiden.Scenes;
 
 namespace Chireiden.Meshes
 {

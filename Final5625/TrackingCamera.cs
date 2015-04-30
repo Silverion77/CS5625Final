@@ -7,6 +7,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
+using Chireiden.Scenes;
+
 namespace Chireiden
 {
     /// <summary>

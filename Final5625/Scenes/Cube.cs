@@ -7,7 +7,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Chireiden
+namespace Chireiden.Scenes
 {
     public class Cube : MobileObject
     {
@@ -136,10 +136,7 @@ namespace Chireiden
             GL.BindVertexArray(0);
 
             // Render children if they exist
-            foreach (SceneTreeNode c in children)
-            {
-                c.render(viewMatrix, projectionMatrix);
-            }
+            renderChildren(viewMatrix, projectionMatrix);
         }
     }
 }

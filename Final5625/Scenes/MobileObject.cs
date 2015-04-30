@@ -7,7 +7,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Chireiden
+namespace Chireiden.Scenes
 {
     /// <summary>
     /// A placeable object that also has velocity, causing its position

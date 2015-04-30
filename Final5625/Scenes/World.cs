@@ -8,20 +8,20 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Chireiden
+namespace Chireiden.Scenes
 {
     class World : SceneTreeNode
     {
+        List<PointLight> pointLights;
+
         public World() : base()
-        { }
+        {
+            pointLights = new List<PointLight>();
+        }
 
         public void update(FrameEventArgs e)
         {
-            foreach (SceneTreeNode c in children)
-            {
-                c.update(e, Matrix4.Identity);
-            }
-
+            updateChildren(e, Matrix4.Identity);
         }
 
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
@@ -31,10 +31,12 @@ namespace Chireiden
 
         public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
         {
-            foreach (SceneTreeNode c in children)
-            {
-                c.render(viewMatrix, projectionMatrix);
-            }
+            renderChildren(viewMatrix, projectionMatrix);
+        }
+
+        public void registerPointLight(PointLight p)
+        {
+            pointLights.Add(p);
         }
 
     }

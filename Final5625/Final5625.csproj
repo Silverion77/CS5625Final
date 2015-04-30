@@ -50,8 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AllShaders.cs" />
-    <Compile Include="Cube.cs" />
-    <Compile Include="EmptyObject.cs" />
+    <Compile Include="Scenes\Cube.cs" />
+    <Compile Include="Scenes\Empty.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Materials\BlenderMaterial.cs" />
     <Compile Include="Materials\Material.cs" />
@@ -60,13 +60,14 @@
     <Compile Include="Meshes\Texture.cs" />
     <Compile Include="Meshes\TextureManager.cs" />
     <Compile Include="Meshes\TriMesh.cs" />
-    <Compile Include="MobileObject.cs" />
+    <Compile Include="Scenes\MobileObject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SceneTreeNode.cs" />
+    <Compile Include="Scenes\PointLight.cs" />
+    <Compile Include="Scenes\SceneTreeNode.cs" />
     <Compile Include="ShaderProgram.cs" />
     <Compile Include="TrackingCamera.cs" />
-    <Compile Include="PlaceableObject.cs" />
-    <Compile Include="World.cs" />
+    <Compile Include="Scenes\PlaceableObject.cs" />
+    <Compile Include="Scenes\World.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

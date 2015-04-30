@@ -7,18 +7,17 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Chireiden
+namespace Chireiden.Scenes
 {
     class Empty : MobileObject
     {
         public Empty() : base() { }
 
+        public Empty(Vector3 loc) : base(loc) { }
+
         public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
         {
-            foreach (SceneTreeNode c in children)
-            {
-                c.render(viewMatrix, projectionMatrix);
-            }
+            renderChildren(viewMatrix, projectionMatrix);
         }
     }
 }
