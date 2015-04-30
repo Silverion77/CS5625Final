@@ -123,18 +123,16 @@ namespace Chireiden
 
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, eboHandle);
             Shaders.CubeShader.use();
 
-            Shaders.CubeShader.setUniformMatrix4("projection_matrix", projectionMatrix);
-            Shaders.CubeShader.setUniformMatrix4("modelview_matrix", modelView);
+            Shaders.CubeShader.setUniformMatrix4("projectionMatrix", projectionMatrix);
+            Shaders.CubeShader.setUniformMatrix4("modelViewMatrix", modelView);
 
             GL.DrawElements(PrimitiveType.Triangles, indicesVboData.Length,
                 DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             // Clean up
             Shaders.CubeShader.unuse();
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
             GL.BindVertexArray(0);
 
             // Render children if they exist

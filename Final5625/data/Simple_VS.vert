@@ -2,8 +2,8 @@
 
 precision highp float;
 
-uniform mat4 projection_matrix;
-uniform mat4 modelview_matrix;
+uniform mat4 projectionMatrix;
+uniform mat4 modelViewMatrix;
 
 in vec3 in_position;
 in vec3 in_normal;
@@ -13,7 +13,7 @@ out vec3 normal;
 void main(void)
 {
   //works only for orthogonal modelview
-  normal = (modelview_matrix * vec4(in_normal, 0)).xyz;
+  normal = (modelViewMatrix * vec4(in_normal, 0)).xyz;
   
-  gl_Position = projection_matrix * modelview_matrix * vec4(in_position, 1);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(in_position, 1);
 }

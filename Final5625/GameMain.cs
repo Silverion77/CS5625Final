@@ -46,17 +46,20 @@ namespace Chireiden
         World createWorld()
         {
             World w = new World();
-            Cube cube1 = new Cube();
-            w.addChild(cube1);
             Cube cube2 = new Cube(new Vector3(2,1,0));
             w.addChild(cube2);
-            camTarget = cube2;
+            Empty empty = new Empty();
+            w.addChild(empty);
+            camTarget = empty;
             return w;
         }
 
         protected override void OnLoad(System.EventArgs e)
         {
             VSync = VSyncMode.On;
+
+            // Load shaders here
+            Shaders.loadShaders();
 
             // Other state
             GL.Enable(EnableCap.DepthTest);
@@ -67,6 +70,9 @@ namespace Chireiden
             float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
 
             var meshes = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
+            foreach (TriMesh m in meshes) {
+                world.addChild(m);
+            }
 
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();

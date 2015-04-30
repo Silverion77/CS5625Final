@@ -131,12 +131,44 @@ namespace Chireiden.Meshes
                     texCoordArr = new Vector2[0];
                 }
 
+                Vector4[] tangentArr;
+                if (m.HasNormals && m.HasTangentBasis)
+                {
+                    tangentArr = new Vector4[numVerts];
+                    i = 0;
+                    foreach (Vector3D tan in m.Tangents)
+                    {
+                        tangentArr[i] = new Vector4(tan.X, tan.Y, tan.Z, 1);
+                        i++;
+                    }
+                    // Compute handedness of each tangent
+                    i = 0;
+                    foreach (Vector3D bit in m.BiTangents)
+                    {
+                        Vector3 b = new Vector3(bit.X, bit.Y, bit.Z);
+                        Vector3 n = normalArr[i];
+                        Vector3 t = tangentArr[i].Xyz;
+                        // Compare bitangent from cross product with stored one
+                        Vector3 crossed_b = Vector3.Cross(n, t);
+                        // If they point in opposite directions then handedness is negative
+                        if (Vector3.Dot(b, crossed_b) < 0)
+                        {
+                            tangentArr[i].W = -1;
+                        }
+                        i++;
+                    }
+                }
+                else
+                {
+                    tangentArr = new Vector4[0];
+                }
+
                 // Now manufacture the associated material with this mesh
                 int matID = m.MaterialIndex;
                 Assimp.Material mat = model.Materials[matID];
                 BlenderMaterial ourMat = new BlenderMaterial(mat, directory);
 
-                TriMesh outMesh = new TriMesh(vertArr, faceArr, normalArr, texCoordArr, ourMat);
+                TriMesh outMesh = new TriMesh(vertArr, faceArr, normalArr, texCoordArr, tangentArr, ourMat);
                 outMeshes.Add(outMesh);
             }
 

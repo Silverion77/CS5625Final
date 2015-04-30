@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Meshes
 {
-    class Texture
+    public class Texture
     {
         /// <summary>
         /// Internal texture ID that is known to OpenGL.
@@ -22,7 +22,12 @@ namespace Chireiden.Meshes
             textureID = id;
         }
 
-        public int getID()
+        /// <summary>
+        /// Returns the location of this texture, as used internally by OpenGL.
+        /// Use this value when binding the texture for shaders.
+        /// </summary>
+        /// <returns></returns>
+        public int getTextureID()
         {
             return textureID;
         }

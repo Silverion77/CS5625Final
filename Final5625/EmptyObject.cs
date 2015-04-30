@@ -6,13 +6,14 @@ using System.IO;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+
 namespace Chireiden
 {
-    class EmptyCamTarget : MobileObject
+    class Empty : MobileObject
     {
-        public EmptyCamTarget() : base() { }
+        public Empty() : base() { }
 
-        public override void render(OpenTK.Matrix4 viewMatrix, OpenTK.Matrix4 projectionMatrix)
+        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
         {
             foreach (SceneTreeNode c in children)
             {
