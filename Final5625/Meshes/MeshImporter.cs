@@ -168,6 +168,7 @@ namespace Chireiden.Meshes
                 // Now manufacture the associated material with this mesh
                 int matID = m.MaterialIndex;
                 Assimp.Material mat = model.Materials[matID];
+                Console.WriteLine("Found material {0}", mat.Name);
                 BlenderMaterial ourMat = new BlenderMaterial(mat, directory);
 
                 TriMesh outMesh = new TriMesh(vertArr, faceArr, normalArr, texCoordArr, tangentArr, ourMat);

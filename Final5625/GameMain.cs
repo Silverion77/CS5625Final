@@ -171,7 +171,6 @@ namespace Chireiden
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            GL.Disable(EnableCap.DepthTest);
 
             world.render(camera);
 
