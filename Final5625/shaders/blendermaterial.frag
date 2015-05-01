@@ -40,11 +40,11 @@ void main()
 	vec4 textureColor = vec4(1);	
 	if (mat_hasTexture) {
 		textureColor = texture2D(mat_texture, geom_texCoord);
-		baseColor = textureColor.xyz;
+		baseColor = 0.5 * textureColor.xyz;
 		result.a = textureColor.a;
 	}
 	else {
-		baseColor = mat_diffuse.xyz;
+		baseColor = 0.5 * mat_diffuse.xyz;
 		result.a = mat_diffuse.a;
 	}
 
@@ -59,7 +59,15 @@ void main()
 		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
 		vec3 color = baseColor * intensity;
 
-		float halfDot = max(0, dot(h, n));
+		float dotProd = dot(n, l);
+		if (mat_hasTexture) {
+			color += 0.7 * max(0,dotProd) * textureColor.xyz * intensity;
+		}
+		else {
+			color += 0.7 * max(0,dotProd) * mat_diffuse.xyz * intensity;
+		}
+
+		float halfDot = dot(h, n);
 		vec3 specular = pow(max(0.00001, halfDot), mat_shininess) * mat_specular * intensity;
 		color += specular;
 		result.rgb += color;
@@ -73,7 +81,7 @@ void main()
 		vec4 sphereMapColor = texture2D(mat_additiveTexture, t);
 		result.rgb += sphereMapColor.rgb;
 	}
-	
+
 	out_frag_color = result;
 
 }

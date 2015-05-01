@@ -45,6 +45,8 @@ namespace Chireiden
         float[] light_energy;
         Vector3[] light_color;
 
+        bool frozen;
+
         public TrackingCamera(MobileObject target, float fovy, float aspectRatio, float nearClip, float farClip)
         {
             this.fovy = fovy;
@@ -60,6 +62,8 @@ namespace Chireiden
 
             this.projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(fovy, aspectRatio, nearClip, farClip);
             computeFrame();
+
+            frozen = false;
         }
 
         public Matrix4 getProjectionMatrix()
@@ -74,6 +78,7 @@ namespace Chireiden
         public void computeFrame()
         {
             Vector3 lookAt = target.worldPosition;
+            lookAt.Z += 3.75f;
 
             // The default offset is "behind" the target position in world space terms
             Vector3 offset = new Vector3(0, -1, 0);
@@ -92,7 +97,7 @@ namespace Chireiden
             this.forward = -offset;
 
             Vector3 rotatedOffset = Vector3.Multiply(forward, distanceBehind);
-            viewMatrix = Matrix4.LookAt(target.worldPosition - rotatedOffset, target.worldPosition, up);
+            viewMatrix = Matrix4.LookAt(lookAt - rotatedOffset, lookAt, up);
         }
 
         public Matrix4 getViewMatrix()
@@ -125,6 +130,16 @@ namespace Chireiden
             program.setUniformVec3Array("light_color", light_color);
         }
 
+        /// <summary>
+        /// Toggles mouselook rotation of the camera on and off. If off, the camera will
+        /// remain in its current offset, but will continue to track with the target object.
+        /// </summary>
+        /// <param name="freeze"></param>
+        public void toggleCameraFrozen()
+        {
+            frozen = !frozen;
+        }
+
         // Courtesy of http://neokabuto.blogspot.com/2014/01/opentk-tutorial-5-basic-camera.html
         /// <summary>
         /// Given the change in the mouse position, rotates the camera to track with the mouse movement.
@@ -133,6 +148,7 @@ namespace Chireiden
         /// <param name="y">Distance moved by mouse in screen Y direction</param>
         public void addRotation(float x, float y)
         {
+            if (frozen) return;
             x = -x * MouseSensitivity;
             y = -y * MouseSensitivity;
 

@@ -49,7 +49,7 @@ namespace Chireiden
             new GraphicsMode(), "The Great Game", 0,
             DisplayDevice.Default, 3, 2,
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
-        {}
+        { }
 
         MeshNode meshCopy;
 
@@ -74,9 +74,9 @@ namespace Chireiden
 
             float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
 
-            var meshes = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
+            var danLDruce = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
 
-            MeshNode meshNode = new MeshNode(meshes);
+            MeshNode meshNode = new MeshNode(danLDruce);
             world.addChild(meshNode);
 
             var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
@@ -89,6 +89,18 @@ namespace Chireiden
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
+        }
+
+        protected override void OnKeyDown(KeyboardKeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.F:
+                    camera.toggleCameraFrozen();
+                    break;
+                default:
+                    break;
+            }
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)

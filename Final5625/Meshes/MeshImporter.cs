@@ -165,6 +165,14 @@ namespace Chireiden.Meshes
                     tangentArr = new Vector4[0];
                 }
 
+                if (m.HasBones)
+                {
+                    foreach (Bone b in m.Bones)
+                    {
+                        Console.WriteLine(b.Name);
+                    }
+                }
+
                 // Now manufacture the associated material with this mesh
                 int matID = m.MaterialIndex;
                 Assimp.Material mat = model.Materials[matID];
