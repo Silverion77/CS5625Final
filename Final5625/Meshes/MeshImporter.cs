@@ -122,7 +122,9 @@ namespace Chireiden.Meshes
                     foreach (Vector3D texC in texCoords)
                     {
                         // Since we're assuming UV coords, the Z component is unused
-                        texCoordArr[i] = new Vector2(texC.X, texC.Y);
+                        // Also, because OpenGL has texture coordinate (0,0) in the bottom left, but other
+                        // programs have (0,0) in the top left, we need to flip Y.
+                        texCoordArr[i] = new Vector2(texC.X, 1 - texC.Y);
                         i++;
                     }
                 }

@@ -37,7 +37,7 @@ namespace Chireiden.Scenes
         {
             toWorldMatrix = Matrix4.Identity;
             toParentMatrix = Matrix4.Identity;
-            children = new LinkedList<SceneTreeNode>();
+            children = new List<SceneTreeNode>();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Chireiden.Scenes
         /// <summary>
         /// The list of children of this scene tree node.
         /// </summary>
-        protected LinkedList<SceneTreeNode> children;
+        protected List<SceneTreeNode> children;
 
         /// <summary>
         /// Adds a new node as the child of this node.
@@ -66,7 +66,16 @@ namespace Chireiden.Scenes
         /// <param name="c">The child node to be added.</param>
         public void addChild(SceneTreeNode c)
         {
-            children.AddFirst(c);
+            children.Add(c);
+        }
+
+        /// <summary>
+        /// Removes the given node from the children of this node.
+        /// </summary>
+        /// <param name="c"></param>
+        public void removeChild(SceneTreeNode c)
+        {
+            children.Remove(c);
         }
 
         /// <summary>
@@ -79,12 +88,12 @@ namespace Chireiden.Scenes
         abstract public void update(FrameEventArgs e, Matrix4 parentToWorldMatrix);
 
         /// <summary>
-        /// Renders all of the contents of this scene tree node, using the
-        /// modeling transformation that was computed during the previous call to update.
+        /// Renders the contents of this scene tree node and all its children from the
+        /// viewpoint of the camera, using the modeling transformation that was computed
+        /// previously by update().
         /// </summary>
-        /// <param name="viewMatrix">The camera's view matrix.</param>
-        /// <param name="projectionMatrix">The camera's projection matrix.</param>
-        abstract public void render(Matrix4 viewMatrix, Matrix4 projectionMatrix);
+        /// <param name="camera"></param>
+        abstract public void render(Camera camera);
 
         /// <summary>
         /// Updates every child of this scene tree node, using our toWorldMatrix.
@@ -106,11 +115,11 @@ namespace Chireiden.Scenes
         /// </summary>
         /// <param name="viewMatrix"></param>
         /// <param name="projectionMatrix"></param>
-        public void renderChildren(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        public void renderChildren(Camera camera)
         {
             foreach (SceneTreeNode c in children)
             {
-                c.render(viewMatrix, projectionMatrix);
+                c.render(camera);
             }
         }
     }

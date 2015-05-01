@@ -7,9 +7,14 @@
  * I'm going to write here. Feel free to add your own notes as well.
  *
  *      - We are using OpenGL 3.1.
+ *      
  *      - The Z-axis is hereby defined to be up, and the negative Y-axis is
  *          hereby defined to be forward. Why? Because Blender uses that, and
  *          trying to get it to export otherwise is more trouble than it's worth...
+ *          
+ *      - The order of matrix multiplication in OpenTK isn't what any mathematician
+ *          would expect -- Matrix4.Mult(A, B) actually computes C = BA, i.e.
+ *          the composition applies A first, instead of B.
  */
 
 using System;
@@ -37,6 +42,8 @@ namespace Chireiden
         MobileObject camTarget;
         TrackingCamera camera;
 
+        Stopwatch stopwatch;
+
         public GameMain()
             : base(1200, 900,
             new GraphicsMode(), "The Great Game", 0,
@@ -44,16 +51,7 @@ namespace Chireiden
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
         {}
 
-        World createWorld()
-        {
-            World w = new World();
-            Cube cube2 = new Cube(new Vector3(2,1,0));
-            w.addChild(cube2);
-            Empty empty = new Empty();
-            w.addChild(empty);
-            camTarget = empty;
-            return w;
-        }
+        MeshNode meshCopy;
 
         protected override void OnLoad(System.EventArgs e)
         {
@@ -67,20 +65,36 @@ namespace Chireiden
             GL.ClearColor(System.Drawing.Color.MidnightBlue);
 
             // Make the world
-            world = createWorld();
+            world = new World();
+
+            // For now, our camera is going to focus on an empty, so that we can see things clearly
+            Empty empty = new Empty();
+            world.addChild(empty);
+            camTarget = empty;
+
             float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
 
             var meshes = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
-            foreach (TriMesh m in meshes) {
-                world.addChild(m);
-            }
+
+            MeshNode meshNode = new MeshNode(meshes);
+            world.addChild(meshNode);
+
+            var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
+
+            meshCopy = new MeshNode(okuu_meshes, new Vector3(4, 0, 0));
+            world.addChild(meshCopy);
+
+            world.addPointLight(new PointLight(new Vector3(2, -1.1f, 4), 1, 3, new Vector3(1, 1, 1)));
 
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();
+            stopwatch = new Stopwatch();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            stopwatch.Restart();
+
             // Change camera's orientation based on mouse movement
             MouseState current = OpenTK.Input.Mouse.GetState();
 
@@ -135,25 +149,35 @@ namespace Chireiden
                 camTarget.setVelocity(Vector3.Zero);
             }
 
+            meshCopy.addRotation(Vector3.UnitZ, (float)(e.Time));
+
             // TODO: handle enemy movement here, once enemies are implemented
 
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
+            // Console.WriteLine("Time to update: {0} ms", stopwatch.ElapsedMilliseconds);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            stopwatch.Restart();
+
             GL.Viewport(0, 0, Width, Height);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            Matrix4 viewMatrix = camera.getViewMatrix();
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
+            camera.transformPointLights(world.getPointLights());
 
-            world.render(viewMatrix, projectionMatrix);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Disable(EnableCap.DepthTest);
+
+            world.render(camera);
 
             SwapBuffers();
+
+            Console.Write("Render time: {0} ms   \r", stopwatch.ElapsedMilliseconds);
         }
 
         [STAThread]

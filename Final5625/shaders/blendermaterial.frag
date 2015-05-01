@@ -10,7 +10,8 @@ in vec3 geom_bitangent;
 
 uniform int light_count;
 uniform vec3 light_eyePosition[MAX_LIGHTS];
-uniform vec3 light_attenuation[MAX_LIGHTS];
+uniform float light_falloffDistance[MAX_LIGHTS];
+uniform float light_energy[MAX_LIGHTS];
 uniform vec3 light_color[MAX_LIGHTS];
 
 uniform vec3 mat_ambient;
@@ -33,12 +34,46 @@ void main()
 	vec4 result = vec4(0, 0, 0, mat_diffuse.a);
 	vec3 n = normalize(geom_normal);	
 
-	vec3 baseColor = 0.5 * mat_ambient;
+	vec3 baseColor;
+	result.rgb += mat_ambient;
+
 	vec4 textureColor = vec4(1);	
 	if (mat_hasTexture) {
-		textureColor = texture2D(mat_texture, vec2(geom_texCoord.x, 1 - geom_texCoord.y));
+		textureColor = texture2D(mat_texture, geom_texCoord);
+		baseColor = textureColor.xyz;
+		result.a = textureColor.a;
+	}
+	else {
+		baseColor = mat_diffuse.xyz;
+		result.a = mat_diffuse.a;
 	}
 
-	out_frag_color = vec4(textureColor.xyz, 1);
+	for (int i = 0; i < light_count; i++) {
+		vec3 v = -normalize(geom_position);
+		vec3 l = light_eyePosition[i] - geom_position;
+		float r_squared = dot(l, l);
+		vec3 h = normalize(v + l);
+
+		// The attenuation model used here is from http://wiki.blender.org/index.php/Doc:2.6/Manual/Lighting/Lights/Light_Attenuation
+		float d2 = light_falloffDistance[i] * light_falloffDistance[i];
+		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
+		vec3 color = baseColor * intensity;
+
+		float halfDot = max(0, dot(h, n));
+		vec3 specular = pow(max(0.00001, halfDot), mat_shininess) * mat_specular * intensity;
+		color += specular;
+		result.rgb += color;
+	}
+
+	if (mat_hasAdditiveTexture)
+	{
+		vec2 t = normalize(mat3(transpose(viewMatrix)) * n).xy;
+		t.x = t.x*0.5 + 0.5;
+		t.y = t.y*0.5 + 0.5;
+		vec4 sphereMapColor = texture2D(mat_additiveTexture, t);
+		result.rgb += sphereMapColor.rgb;
+	}
+	
+	out_frag_color = result;
 
 }

@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Scenes
 {
-    class World : SceneTreeNode
+    public class World : SceneTreeNode
     {
         List<PointLight> pointLights;
 
@@ -29,14 +29,26 @@ namespace Chireiden.Scenes
             update(e);
         }
 
-        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        public override void render(Camera camera)
         {
-            renderChildren(viewMatrix, projectionMatrix);
+            renderChildren(camera);
         }
 
-        public void registerPointLight(PointLight p)
+        public void addPointLight(PointLight p)
         {
             pointLights.Add(p);
+            addChild(p);
+        }
+
+        public void removePointLight(PointLight p)
+        {
+            pointLights.Remove(p);
+            removeChild(p);
+        }
+
+        public List<PointLight> getPointLights()
+        {
+            return pointLights;
         }
 
     }

@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Scenes
 {
-    class PointLight : PlaceableObject
+    public class PointLight : PlaceableObject
     {
         /// <summary>
         /// The brightness of the light.
@@ -56,9 +56,9 @@ namespace Chireiden.Scenes
             Color = color;
         }
 
-        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        public override void render(Camera camera)
         {
-            renderChildren(viewMatrix, projectionMatrix);
+            renderChildren(camera);
         }
     }
 }

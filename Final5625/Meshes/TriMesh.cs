@@ -16,11 +16,13 @@ namespace Chireiden.Meshes
     /// <summary>
     /// A mesh composed entirely of triangles.
     /// 
-    /// I'm enforcing that meshes by themselves should not move. If you
-    /// want them to move, then you have to set some mobile object as their parent
-    /// (e.g. a skeleton, or an empty).
+    /// Notice that this class does not go in the scene tree, and indeed, it has no
+    /// information about locations or transformations at all. This class must be wrapped
+    /// in a MeshNode to be placed in the world. This is because we will want to have 
+    /// multiple copies of the same mesh in different places in the world, and we don't want
+    /// to have to make an entirely new copy of the mesh data each time.
     /// </summary>
-    public class TriMesh : PlaceableObject
+    public class TriMesh
     {
         /// <summary>
         /// The set of vertices in this object, in local space points.
@@ -182,8 +184,11 @@ namespace Chireiden.Meshes
             GL.BindVertexArray(0);
         }
 
-        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        public void renderMesh(Camera camera, Matrix4 toWorldMatrix)
         {
+            Matrix4 viewMatrix = camera.getViewMatrix();
+            Matrix4 projectionMatrix = camera.getProjectionMatrix();
+
             // Compute transformation matrices
             // TODO: why is toWorldMatrix the left operand...
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
@@ -198,18 +203,14 @@ namespace Chireiden.Meshes
             Shaders.BlenderShader.setUniformMatrix4("modelViewMatrix", modelView);
             Shaders.BlenderShader.setUniformMatrix4("viewMatrix", viewMatrix);
 
+            camera.setPointLightUniforms(Shaders.BlenderShader);
+
             GL.DrawElements(PrimitiveType.Triangles, indexBuffer.Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             // Clean up
             material.unuseMaterialParameters(Shaders.BlenderShader);
             Shaders.BlenderShader.unuse();
             GL.BindVertexArray(0);
-
-            // TODO: get the material properties, and render that way
-            foreach (SceneTreeNode c in children)
-            {
-                render(viewMatrix, projectionMatrix);
-            }
         }
     }
 }

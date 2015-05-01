@@ -9,15 +9,15 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Scenes
 {
-    class Empty : MobileObject
+    public class Empty : MobileObject
     {
         public Empty() : base() { }
 
         public Empty(Vector3 loc) : base(loc) { }
 
-        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        public override void render(Camera camera)
         {
-            renderChildren(viewMatrix, projectionMatrix);
+            renderChildren(camera);
         }
     }
 }

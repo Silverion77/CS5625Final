@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Text;
+using System.Collections.Generic;
 using System.IO;
 
 using OpenTK;
@@ -17,7 +17,7 @@ namespace Chireiden
     /// while its eye position is always some configurable distance behind it.
     /// The eye position swings around the target following the mouse.
     /// </summary>
-    class TrackingCamera
+    class TrackingCamera : Camera
     {
         public float MouseSensitivity = 0.01f;
         public float distanceBehind = 5;
@@ -35,8 +35,15 @@ namespace Chireiden
         Vector3 up = Vector3.UnitZ;
 
         Matrix4 projectionMatrix;
+        Matrix4 viewMatrix;
 
         MobileObject target;
+
+        int num_lights;
+        Vector3[] light_eyePosition;
+        float[] light_falloffDistance;
+        float[] light_energy;
+        Vector3[] light_color;
 
         public TrackingCamera(MobileObject target, float fovy, float aspectRatio, float nearClip, float farClip)
         {
@@ -46,7 +53,13 @@ namespace Chireiden
             this.farClip = farClip;
             this.target = target;
 
+            light_eyePosition = new Vector3[ShaderProgram.MAX_LIGHTS];
+            light_falloffDistance = new float[ShaderProgram.MAX_LIGHTS];
+            light_energy = new float[ShaderProgram.MAX_LIGHTS];
+            light_color = new Vector3[ShaderProgram.MAX_LIGHTS];
+
             this.projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(fovy, aspectRatio, nearClip, farClip);
+            computeFrame();
         }
 
         public Matrix4 getProjectionMatrix()
@@ -55,7 +68,8 @@ namespace Chireiden
         }
 
         /// <summary>
-        /// Computes the forward and right vectors for the current camera position and lookAt.
+        /// Computes the forward and right vectors for the current camera position and lookAt,
+        /// and uses these to compute the new view matrix.
         /// </summary>
         public void computeFrame()
         {
@@ -76,17 +90,39 @@ namespace Chireiden
 
             this.right = right;
             this.forward = -offset;
+
+            Vector3 rotatedOffset = Vector3.Multiply(forward, distanceBehind);
+            viewMatrix = Matrix4.LookAt(target.worldPosition - rotatedOffset, target.worldPosition, up);
         }
 
         public Matrix4 getViewMatrix()
         {
-            // Assumes that computeFrame() has already been called this timestep,
-            // so this is really quite simple
-            Vector3 offset = Vector3.Multiply(forward, distanceBehind);
+            return viewMatrix;
+        }
 
-            Matrix4 lookAtMat = Matrix4.LookAt(target.worldPosition - offset, target.worldPosition, up);
+        public void transformPointLights(List<PointLight> lights)
+        {
+            num_lights = Math.Min(lights.Count, ShaderProgram.MAX_LIGHTS);
+            int i = 0;
+            foreach (PointLight light in lights)
+            {
+                if (i >= ShaderProgram.MAX_LIGHTS) break;
+                Vector3 worldPos = light.worldPosition;
+                Vector3 eyeSpace = Vector4.Transform(new Vector4(worldPos, 1), viewMatrix).Xyz;
+                light_eyePosition[i] = eyeSpace;
+                light_falloffDistance[i] = light.FalloffDistance;
+                light_energy[i] = light.Energy;
+                light_color[i] = light.Color;
+            }
+        }
 
-            return lookAtMat;
+        public void setPointLightUniforms(ShaderProgram program)
+        {
+            program.setUniformInt1("light_count", num_lights);
+            program.setUniformVec3Array("light_eyePosition", light_eyePosition);
+            program.setUniformFloatArray("light_falloffDistance", light_falloffDistance);
+            program.setUniformFloatArray("light_energy", light_energy);
+            program.setUniformVec3Array("light_color", light_color);
         }
 
         // Courtesy of http://neokabuto.blogspot.com/2014/01/opentk-tutorial-5-basic-camera.html

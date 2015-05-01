@@ -13,6 +13,11 @@ namespace Chireiden
 {
     public class ShaderProgram
     {
+        /// <summary>
+        /// The maximum number of point lights that can affect a single shader.
+        /// </summary>
+        public const int MAX_LIGHTS = 40;
+
         public int programHandle { get; private set; }
 
         public ShaderProgram(string vertFile, string fragFile)
@@ -102,6 +107,12 @@ namespace Chireiden
             GL.UniformMatrix4(unifLoc, false, ref mat);
         }
 
+        public void setUniformInt1(string name, int unif)
+        {
+            int unifLoc = uniformLocation(name);
+            GL.Uniform1(unifLoc, unif);
+        }
+
         public void setUniformFloat1(string name, float unif)
         {
             int unifLoc = uniformLocation(name);
@@ -124,6 +135,23 @@ namespace Chireiden
         {
             int unifLoc = uniformLocation(name);
             GL.Uniform4(unifLoc, unif);
+        }
+
+        public void setUniformFloatArray(string name, float[] unif)
+        {
+            int unifLoc = uniformLocation(name);
+            GL.Uniform1(unifLoc, unif.Length, unif);
+        }
+
+        unsafe public void setUniformVec3Array(string name, Vector3[] unif)
+        {
+            int unifLoc = uniformLocation(name);
+            // Pointer hacks necessary because for some reason OpenTK doesn't
+            // let you pass a Vector3 array directly
+            fixed (float* p = &unif[0].X)
+            {
+                GL.Uniform3(unifLoc, unif.Length, p);
+            }
         }
 
         public void setUniformBool(string name, bool unif)

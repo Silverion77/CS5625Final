@@ -42,19 +42,29 @@ namespace Chireiden.Scenes
             Matrix4 scaleMat = Matrix4.CreateScale(scale);
             Matrix4 translationMat = Matrix4.CreateTranslation(translation);
             Matrix4 rotationMat = Matrix4.CreateFromQuaternion(rotation);
-            return Matrix4.Mult(translationMat, Matrix4.Mult(rotationMat, scaleMat));
+            Matrix4 scaleRot = Matrix4.Mult(scaleMat, rotationMat);
+            return Matrix4.Mult(scaleRot, translationMat);
         }
 
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
             toParentMatrix = modelMatrix();
-            toWorldMatrix = Matrix4.Mult(parentToWorldMatrix, toParentMatrix);
+            toWorldMatrix = Matrix4.Mult(toParentMatrix, parentToWorldMatrix);
 
             // The center of the local space object is (0, 0, 0), so we transform
             // that to world space.
             worldPosition = Vector4.Transform(localCenter, toWorldMatrix).Xyz;
 
             updateChildren(e, toWorldMatrix);
+        }
+
+        /// <summary>
+        /// Rotates this object around the given axis, by the given angle.
+        /// </summary>
+        public void addRotation(Vector3 axis, float angle)
+        {
+            Quaternion toCompose = Quaternion.FromAxisAngle(axis, angle);
+            Quaternion.Multiply(ref toCompose, ref rotation, out rotation);
         }
     }
 }

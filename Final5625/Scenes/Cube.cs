@@ -115,8 +115,10 @@ namespace Chireiden.Scenes
             base.update(e, parentToWorldMatrix);
         }
 
-        public override void render(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+        public override void render(Camera camera)
         {
+            Matrix4 viewMatrix = camera.getViewMatrix();
+            Matrix4 projectionMatrix = camera.getProjectionMatrix();
             // Compute transformation matrices
             // TODO: why is toWorldMatrix the left operand...
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
@@ -128,6 +130,8 @@ namespace Chireiden.Scenes
             Shaders.CubeShader.setUniformMatrix4("projectionMatrix", projectionMatrix);
             Shaders.CubeShader.setUniformMatrix4("modelViewMatrix", modelView);
 
+            camera.setPointLightUniforms(Shaders.CubeShader);
+
             GL.DrawElements(PrimitiveType.Triangles, indicesVboData.Length,
                 DrawElementsType.UnsignedInt, IntPtr.Zero);
 
@@ -136,7 +140,7 @@ namespace Chireiden.Scenes
             GL.BindVertexArray(0);
 
             // Render children if they exist
-            renderChildren(viewMatrix, projectionMatrix);
+            renderChildren(camera);
         }
     }
 }
