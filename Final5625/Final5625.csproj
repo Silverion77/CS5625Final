@@ -52,12 +52,14 @@
   <ItemGroup>
     <Compile Include="AllShaders.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="Meshes\MeshGroup.cs" />
+    <Compile Include="Meshes\SkeletalTriMesh.cs" />
     <Compile Include="Scenes\Cube.cs" />
     <Compile Include="Scenes\Empty.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="Materials\BlenderMaterial.cs" />
     <Compile Include="Materials\Material.cs" />
-    <Compile Include="Meshes\Armature.cs" />
+    <Compile Include="Meshes\ArmatureBone.cs" />
     <Compile Include="Meshes\MeshImporter.cs" />
     <Compile Include="Meshes\Texture.cs" />
     <Compile Include="Meshes\TextureManager.cs" />

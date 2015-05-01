@@ -48,7 +48,7 @@ namespace Chireiden.Materials
             {
                 TextureSlot ts = textures[0];
                 string texFile = System.IO.Path.Combine(textureDirectory, ts.FilePath);
-                Console.WriteLine("Diffuse texture is at {0}", texFile);
+                //Console.WriteLine("Diffuse texture is at {0}", texFile);
                 Texture t = TextureManager.getTexture(texFile);
                 diffuseTexture = t;
             }
@@ -56,11 +56,11 @@ namespace Chireiden.Materials
             {
                 TextureSlot ts = textures[1];
                 string texFile = System.IO.Path.Combine(textureDirectory, ts.FilePath);
-                Console.WriteLine("Additive texture is at {0}", texFile);
+                //Console.WriteLine("Additive texture is at {0}", texFile);
                 Texture t = TextureManager.getTexture(texFile);
                 additiveTexture = t;
             }
-            Console.WriteLine("Material has texture with ID {0}", diffuseTexture.getTextureID());
+            //Console.WriteLine("Material has texture with ID {0}", diffuseTexture.getTextureID());
         }
 
         public bool hasDiffuseTexture()
