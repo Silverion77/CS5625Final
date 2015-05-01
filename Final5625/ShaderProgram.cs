@@ -59,11 +59,13 @@ namespace Chireiden
 
             if (vertStatus != 1)
             {
-                Console.WriteLine("Vertex shader compilation failed: {0}", GL.GetShaderInfoLog(vertexShaderHandle));
+                String error =  GL.GetShaderInfoLog(vertexShaderHandle);
+                Console.WriteLine("Vertex shader compilation failed: {0}", error);
             }
             if (fragStatus != 1)
             {
-                Console.WriteLine("Fragment shader compilation failed: {0}", GL.GetShaderInfoLog(fragmentShaderHandle));
+                String error = GL.GetShaderInfoLog(fragmentShaderHandle);
+                Console.WriteLine("Fragment shader compilation failed: {0}", error);
             }
 
             // Create program
@@ -176,6 +178,23 @@ namespace Chireiden
             TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
             int unifLoc = uniformLocation(name);
             int textureID = tex.getTextureID();
+            GL.ActiveTexture(actualUnit);
+            GL.BindTexture(TextureTarget.Texture2D, textureID);
+            GL.Uniform1(unifLoc, textureUnit);
+        }
+
+        /// <summary>
+        /// Binds the texture with the given id to the uniform name, using the given texture unit.
+        /// </summary>
+        /// <param name="name">The name of the uniform that we're binding to.</param>
+        /// <param name="textureUnit">Can think of this as a unique identifier for each texture.
+        /// Meaning, every texture we bind needs to have a different one.</param>
+        /// <param name="textureID">The id of the texture texture.</param>
+        public void bindTexture2D(string name, int textureUnit, uint textureID)
+        {
+            // Code written with the assistance of http://www.opentk.com/node/2559
+            TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
+            int unifLoc = uniformLocation(name);
             GL.ActiveTexture(actualUnit);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
             GL.Uniform1(unifLoc, textureUnit);
