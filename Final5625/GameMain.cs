@@ -47,9 +47,11 @@ namespace Chireiden
         public GameMain()
             : base(1200, 900,
             new GraphicsMode(), "The Great Game", 0,
-            DisplayDevice.Default, 3, 2,
+            DisplayDevice.Default, 4, 5,
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
-        { }
+        {
+            Framebuffer.Init(Width, Height);
+        }
 
         MeshNode meshCopy;
 
@@ -185,6 +187,8 @@ namespace Chireiden
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             world.render(camera);
+
+            Framebuffer.BlitToScreen();
 
             SwapBuffers();
 
