@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AllShaders.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="Framebuffer.cs" />
     <Compile Include="Meshes\MeshGroup.cs" />
     <Compile Include="Meshes\SkeletalTriMesh.cs" />
     <Compile Include="Scenes\Cube.cs" />
