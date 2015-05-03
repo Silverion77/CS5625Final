@@ -1,0 +1,3 @@
+idle 1 60
+walk 61 90
+cheer 91 150

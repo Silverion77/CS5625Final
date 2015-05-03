@@ -20,33 +20,23 @@ namespace Chireiden.Scenes
     /// </summary>
     public class MeshNode : MobileObject
     {
-        List<TriMesh> meshes;
+        MeshGroup meshes;
 
-        public MeshNode()
+        public MeshNode(MeshGroup m)
             : base()
         {
-            meshes = new List<TriMesh>();
+            meshes = m;
         }
 
-        public MeshNode(List<TriMesh> ms)
-            : base()
-        {
-            meshes = new List<TriMesh>();
-            meshes.AddRange(ms);
-        }
-
-        public MeshNode(List<TriMesh> ms, Vector3 loc)
+        public MeshNode(MeshGroup m, Vector3 loc)
             : base(loc)
         {
-            meshes = new List<TriMesh>();
-            meshes.AddRange(ms);
+            meshes = m;
         }
 
         public override void render(Camera camera)
         {
-            foreach (TriMesh m in meshes) {
-                m.renderMesh(camera, toWorldMatrix);
-            }
+            meshes.renderMesh(camera, toWorldMatrix);
             renderChildren(camera);
         }
     }

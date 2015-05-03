@@ -15,6 +15,9 @@
  *      - The order of matrix multiplication in OpenTK isn't what any mathematician
  *          would expect -- Matrix4.Mult(A, B) actually computes C = BA, i.e.
  *          the composition applies A first, instead of B.
+ *          
+ *      - When exporting from Blender, please DO NOT check "Deform bones only" or 
+ *          an equivalent setting -- it will mess up the bone hierarchy for the importer
  */
 
 using System;
@@ -84,7 +87,7 @@ namespace Chireiden
 
             var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
 
-            meshCopy = new MeshNode(okuu_meshes, new Vector3(4, 0, 0));
+            meshCopy = new MeshNode(danLDruce, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
 
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
@@ -96,7 +99,7 @@ namespace Chireiden
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
         }
-
+        
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             switch (e.Key)
@@ -200,7 +203,7 @@ namespace Chireiden
 
             SwapBuffers();
 
-            Console.Write("Render time: {0} ms   \r", stopwatch.ElapsedMilliseconds);
+            // Console.Write("Render time: {0} ms   \r", stopwatch.ElapsedMilliseconds);
         }
 
         [STAThread]
