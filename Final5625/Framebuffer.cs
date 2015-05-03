@@ -19,6 +19,8 @@ namespace Chireiden
         static uint ColorTexture;
         static uint DepthRenderbuffer;
 
+        static uint DownsampleTexture;
+
         static int FullscreenQuadVbo;
         static int FullscreenQuadVao;
 
@@ -60,6 +62,7 @@ namespace Chireiden
             height = fboHeight;
 
             // Based on: http://www.opentk.com/doc/graphics/frame-buffer-objects
+            
             // Create Color Texture
             GL.GenTextures(1, out ColorTexture);
             GL.BindTexture(TextureTarget.Texture2D, ColorTexture);
@@ -67,10 +70,18 @@ namespace Chireiden
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb16f, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            // TODO: test for GL Error here (might be unsupported format)
+            // Create Downsample Texture
+            GL.GenTextures(1, out DownsampleTexture);
+            GL.BindTexture(TextureTarget.Texture2D, DownsampleTexture);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R16f, width, height, 0, PixelFormat.Red, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
 
             // Create Depth Renderbuffer
             GL.GenRenderbuffers(1, out DepthRenderbuffer);
@@ -91,24 +102,43 @@ namespace Chireiden
             GL.DrawBuffer((DrawBufferMode)FramebufferAttachment.ColorAttachment0);
 
             GL.Viewport(0, 0, width, height);
+            
             generateFullscreenQuad();
+        }
+
+        private static void ComputeLogLuminance()
+        {
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, DownsampleTexture, 0);
+            
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorTexture, 0);
         }
 
         public static void BlitToScreen()
         {
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // return to visible framebuffer
-            GL.DrawBuffer(DrawBufferMode.Back);
+            GL.Disable(EnableCap.DepthTest);
 
+            //Compute log luminance
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, DownsampleTexture, 0);
+            Shaders.LogLuminanceShader.use();
+            Shaders.LogLuminanceShader.bindTexture2D("colorBuffer", 0, ColorTexture);
+            RenderFullscreenQuad();
+            Shaders.LogLuminanceShader.unuse();
+            GL.BindTexture(TextureTarget.Texture2D, DownsampleTexture);
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+            
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+            GL.DrawBuffer(DrawBufferMode.Back);
             Shaders.TonemapShader.use();
             Shaders.TonemapShader.bindTexture2D("colorBuffer", 0, ColorTexture);
-            GL.Disable(EnableCap.DepthTest);
+            Shaders.TonemapShader.bindTexture2D("logLuminance", 1, DownsampleTexture);
             RenderFullscreenQuad();
-            GL.Enable(EnableCap.DepthTest);
             Shaders.TonemapShader.unuse();
 
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FboHandle); // return to visible framebuffer
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FboHandle);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorTexture, 0);
             GL.DrawBuffer((DrawBufferMode)FramebufferAttachment.ColorAttachment0);
+            GL.Enable(EnableCap.DepthTest);
         }
     }
 }
-
