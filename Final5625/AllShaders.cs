@@ -18,7 +18,7 @@ namespace Chireiden
             BlenderShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/blendermaterial.frag");
             TonemapShader = new ShaderProgram("shaders/simple2d.vert", "shaders/tonemap.frag");
             LogLuminanceShader = new ShaderProgram("shaders/simple2d.vert", "shaders/logLuminance.frag");
-            ParticleShader = new ShaderProgram("shaders/particle.vert", "shaders/particle.frag");
+            ParticleShader = new ShaderProgram("shaders/particle.vert", "shaders/particle.geom", "shaders/particle.frag");
         }
     }
 }
