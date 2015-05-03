@@ -86,7 +86,7 @@ namespace Chireiden
             // Create Depth Renderbuffer
             GL.GenRenderbuffers(1, out DepthRenderbuffer);
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, DepthRenderbuffer);
-            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, (RenderbufferStorage)All.DepthComponent32, width, height);
+            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent32, width, height);
 
             // TODO: test for GL Error here (might be unsupported format)
 
@@ -106,11 +106,13 @@ namespace Chireiden
             generateFullscreenQuad();
         }
 
-        private static void ComputeLogLuminance()
+        public static void AttachDepthBuffer()
         {
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, DownsampleTexture, 0);
-            
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorTexture, 0);
+            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, DepthRenderbuffer);
+        }
+        public static void DetachDepthBuffer()
+        {
+            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, 0);
         }
 
         public static void BlitToScreen()

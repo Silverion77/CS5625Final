@@ -24,11 +24,14 @@ namespace Chireiden.Scenes
         {
             rate = particlesPerSecond;
         }
-
+        private float randomAngle()
+        {
+            return (float)rand.NextDouble() * 2.0f * 3.1415926535f;
+        }
         private Vector3 randomVector()
         {
             //See: http://math.stackexchange.com/a/44691
-            float theta = (float)rand.NextDouble() * 2.0f * 3.1415926535f;
+            float theta = randomAngle();
             float z = (float)rand.NextDouble() * 2.0f - 1.0f;
 
             float r = (float)Math.Sqrt(1.0 - z*z);
@@ -53,8 +56,14 @@ namespace Chireiden.Scenes
 
                 p.position = new Vector3(pos.X / pos.W, pos.Y / pos.W, pos.Z / pos.W);
                 p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, 2.0f);
-                p.gravity = 1.0f;
-                p.life = 2.0f;
+                p.rotation = randomAngle();
+                p.angularVelocity = 0;
+                
+                p.gravity = 0.0f;
+                p.radius = 1.0f;
+                p.life = 3.0f;
+                p.invTotalLife = 1.0f / p.life;
+                p.texture = 0;
                 ParticleSystem.SpawnParticle(p);
             }
         }

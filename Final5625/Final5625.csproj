@@ -53,6 +53,7 @@
     <Compile Include="AllShaders.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />
+	<Compile Include="ParticleSystem.cs" />
     <Compile Include="Meshes\Animations\AnimationClip.cs" />
     <Compile Include="Meshes\Animations\KeyframeSeries.cs" />
     <Compile Include="Meshes\MeshContainer.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Materials\Material.cs" />
     <Compile Include="Meshes\ArmatureBone.cs" />
     <Compile Include="Meshes\MeshImporter.cs" />
+	<Compile Include="Scenes\ParticleEmitter.cs" />
     <Compile Include="Meshes\Texture.cs" />
     <Compile Include="Meshes\TextureManager.cs" />
     <Compile Include="Meshes\TriMesh.cs" />
@@ -231,6 +233,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <Content Include="data\texture\particle\0.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\reaction.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="shaders\blendermaterial.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -243,9 +251,21 @@
     <Content Include="shaders\tonemap.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	<Content Include="shaders\logLuminance.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="shaders\skeletal_mesh.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="shaders\particle.geom">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="shaders\particle.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="shaders\particle.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="data\model\textCube\kuukrow.jpg">
