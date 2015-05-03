@@ -18,6 +18,17 @@ namespace Chireiden
         /// </summary>
         public const int MAX_LIGHTS = 40;
 
+        /// <summary>
+        /// The maximum number of bones that we can have in a skeleton.
+        /// </summary>
+        public const int MAX_BONES = 256;
+
+        /// <summary>
+        /// The maximum number of bones that can affect a single vertex.
+        /// This is rarely more than 4 (for Okuu, it is exactly 4).
+        /// </summary>
+        public const int MAX_BONES_PER_VERTEX = 4;
+
         public int programHandle { get; private set; }
 
         public ShaderProgram(string vertFile, string fragFile)
@@ -143,6 +154,16 @@ namespace Chireiden
         {
             int unifLoc = uniformLocation(name);
             GL.Uniform1(unifLoc, unif.Length, unif);
+        }
+
+        unsafe public void setUniformMat4Array(string name, Matrix4[] unif)
+        {
+            int unifLoc = uniformLocation(name);
+            // See below
+            fixed (float* p = &unif[0].Row0.X)
+            {
+                GL.UniformMatrix4(unifLoc, unif.Length, false, p);
+            }
         }
 
         unsafe public void setUniformVec3Array(string name, Vector3[] unif)

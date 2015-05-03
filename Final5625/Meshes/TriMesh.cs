@@ -27,41 +27,51 @@ namespace Chireiden.Meshes
         /// <summary>
         /// The set of vertices in this object, in local space points.
         /// </summary>
-        Vector3[] vertices;
+        protected Vector3[] vertices;
 
         /// <summary>
         /// The set of faces, stored as flattened triples of indices.
         /// </summary>
-        int[] indexBuffer;
+        protected int[] indexBuffer;
 
         /// <summary>
         /// Set of vertex normals in this object. Stored in the same order as vertices[].
         /// </summary>
-        Vector3[] normals;
+        protected Vector3[] normals;
 
         /// <summary>
         /// Set of UV texture coordinates in this object, in the same order as vertices[].
         /// </summary>
-        Vector2[] texCoords;
+        protected Vector2[] texCoords;
 
         /// <summary>
         /// Set of vertex tangents, in vertex order. The first three coordinates give the 
         /// actual (x,y,z) values, while the fourth coordinate is the handedness.
         /// </summary>
-        Vector4[] tangents;
+        protected Vector4[] tangents;
 
-        Material material;
+        protected Material material;
 
-        int positionVboHandle;
-        int normalVboHandle;
-        int texCoordVboHandle;
-        int tangentVboHandle;
-        int eboHandle;
+        protected int positionVboHandle;
+        protected int normalVboHandle;
+        protected int texCoordVboHandle;
+        protected int tangentVboHandle;
+        protected int eboHandle;
 
-        int vaoHandle;
+        protected int vaoHandle;
 
-        public TriMesh(Vector3[] vs, int[] fs, Vector3[] ns, Vector2[] tcs, Vector4[] tans, Material mat)
-            : base()
+        /// <summary>
+        /// Construct a TriMesh. The boolean flag is there because, if some subclasses have additional
+        /// vertex attributes, we'll need to set those fields before we call CreateVBOs / VAOs.
+        /// </summary>
+        /// <param name="vs"></param>
+        /// <param name="fs"></param>
+        /// <param name="ns"></param>
+        /// <param name="tcs"></param>
+        /// <param name="tans"></param>
+        /// <param name="mat"></param>
+        /// <param name="initVBOAndVAO"></param>
+        public TriMesh(Vector3[] vs, int[] fs, Vector3[] ns, Vector2[] tcs, Vector4[] tans, Material mat, bool initVBOAndVAO)
         {
             vertices = vs;
             indexBuffer = fs;
@@ -70,8 +80,20 @@ namespace Chireiden.Meshes
             tangents = tans;
             material = mat;
 
-            CreateVBOs();
-            CreateVAOs();
+            if (initVBOAndVAO)
+            {
+                CreateVBOs();
+                CreateVAOs();
+            }
+        }
+
+        public TriMesh(Vector3[] vs, int[] fs, Vector3[] ns, Vector2[] tcs, Vector4[] tans, Material mat)
+            : this(vs, fs, ns, tcs, tans, mat, true)
+        { }
+
+        protected virtual void initializeAllFields()
+        {
+
         }
 
         public bool hasNormals()
@@ -89,7 +111,7 @@ namespace Chireiden.Meshes
             return tangents.Length > 0;
         }
         
-        void CreateVBOs()
+        protected virtual void CreateVBOs()
         {
             // Create the VBO for vertex positions
             positionVboHandle = GL.GenBuffer();
@@ -143,7 +165,7 @@ namespace Chireiden.Meshes
         /// in vec2 vert_texCoord;
         /// in vec4 vert_tangent;
         /// </summary>
-        void CreateVAOs()
+        protected virtual void CreateVAOs()
         {
             // GL3 allows us to store the vertex layout in a "vertex array object" (VAO).
             // This means we do not have to re-issue VertexAttribPointer calls
@@ -183,33 +205,27 @@ namespace Chireiden.Meshes
             // Unbind the VAO to clean up.
             GL.BindVertexArray(0);
         }
-
-        public void renderMesh(Camera camera, Matrix4 toWorldMatrix)
+        /// <summary>
+        /// Renders this particular section of the mesh.
+        /// 
+        /// We can assume that global uniforms such as transformation matrices, which don't
+        /// change when we render different parts of the same object, have already been bound.
+        /// So all we need to do here is use the VAO that is specific to this mesh,
+        /// and bind the material properties for this mesh part.
+        /// </summary>
+        /// <param name="camera"></param>
+        /// <param name="toWorldMatrix"></param>
+        /// <param name="program"></param>
+        public virtual void renderMesh(Camera camera, Matrix4 toWorldMatrix, ShaderProgram program)
         {
-            Matrix4 viewMatrix = camera.getViewMatrix();
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
-
-            // Compute transformation matrices
-            // TODO: why is toWorldMatrix the left operand...
-            Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
-
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
-            Shaders.BlenderShader.use();
-            material.useMaterialParameters(Shaders.BlenderShader);
-
-            // TODO: set shader uniforms, incl. modelview and projection matrices
-            Shaders.BlenderShader.setUniformMatrix4("projectionMatrix", projectionMatrix);
-            Shaders.BlenderShader.setUniformMatrix4("modelViewMatrix", modelView);
-            Shaders.BlenderShader.setUniformMatrix4("viewMatrix", viewMatrix);
-
-            camera.setPointLightUniforms(Shaders.BlenderShader);
+            material.useMaterialParameters(program);
 
             GL.DrawElements(PrimitiveType.Triangles, indexBuffer.Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             // Clean up
-            material.unuseMaterialParameters(Shaders.BlenderShader);
-            Shaders.BlenderShader.unuse();
+            material.unuseMaterialParameters(program);
             GL.BindVertexArray(0);
         }
     }

@@ -6,6 +6,10 @@
  * Anything important that we ought to remember about the entire program,
  * I'm going to write here. Feel free to add your own notes as well.
  *
+ *      - If you are missing AssImp, go to Tools > [NuGet|Library] Package Manager
+ *          > Package Manager Console and type:
+ *              Install-Package AssimpNet 
+ * 
  *      - We are using OpenGL 3.1.
  *      
  *      - The Z-axis is hereby defined to be up, and the negative Y-axis is
@@ -47,6 +51,8 @@ namespace Chireiden
 
         Stopwatch stopwatch;
 
+        bool paused = false;
+
         public GameMain()
             : base(1200, 900,
             new GraphicsMode(), "The Great Game", 0,
@@ -58,7 +64,7 @@ namespace Chireiden
 
         protected override void OnLoad(System.EventArgs e)
         {
-            VSync = VSyncMode.On;
+            VSync = VSyncMode.Off;
 
             // Load shaders here
             Shaders.loadShaders();
@@ -82,7 +88,7 @@ namespace Chireiden
             MeshNode meshNode = new MeshNode(danLDruce);
             world.addChild(meshNode);
 
-            var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
+            // var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
 
             meshCopy = new MeshNode(danLDruce, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
@@ -100,6 +106,9 @@ namespace Chireiden
             {
                 case Key.F:
                     camera.toggleCameraFrozen();
+                    break;
+                case Key.Space:
+                    paused = !paused;
                     break;
                 default:
                     break;
@@ -121,8 +130,11 @@ namespace Chireiden
 
             float mouseDX = current.X - previous.X;
             float mouseDY = current.Y - previous.Y;
-            camera.addRotation(mouseDX, mouseDY);
             previous = current;
+
+            if (paused) return;
+
+            camera.addRotation(mouseDX, mouseDY);
 
             // Because the viewpoint has changed, compute the new frame for the camera
             camera.computeFrame();
@@ -178,6 +190,7 @@ namespace Chireiden
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             stopwatch.Restart();
+            if (paused) return;
 
             GL.Viewport(0, 0, Width, Height);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
