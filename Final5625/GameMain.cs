@@ -51,6 +51,7 @@ namespace Chireiden
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
         {
             Framebuffer.Init(Width, Height);
+            ParticleSystem.Init();
         }
 
         MeshNode meshCopy;
@@ -85,6 +86,9 @@ namespace Chireiden
 
             meshCopy = new MeshNode(okuu_meshes, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
+
+            var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
+            world.addChild(emitter);
 
             world.addPointLight(new PointLight(new Vector3(2, -1.1f, 4), 1, 3, new Vector3(1, 1, 1)));
 
@@ -170,6 +174,8 @@ namespace Chireiden
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
 
+            ParticleSystem.Update(e);
+
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
             // Console.WriteLine("Time to update: {0} ms", stopwatch.ElapsedMilliseconds);
         }
@@ -187,6 +193,8 @@ namespace Chireiden
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             world.render(camera);
+
+            ParticleSystem.Render(camera);
 
             Framebuffer.BlitToScreen();
 
