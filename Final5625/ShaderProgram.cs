@@ -37,7 +37,11 @@ namespace Chireiden
             programHandle = createShaderFromFiles(vertFile, fragFile);
             // TODO: get list of uniforms, basically copy CS 5625 framework
         }
-
+        public ShaderProgram(string vertFile, string geomFile, string fragFile)
+        {
+            programHandle = createShaderFromFiles(vertFile, geomFile, fragFile);
+            // TODO: get list of uniforms, basically copy CS 5625 framework
+        }
         public int createShaderFromFiles(string vertFile, string fragFile)
         {
             string vertSource, fragSource;
@@ -50,6 +54,24 @@ namespace Chireiden
                 fragSource = sr.ReadToEnd();
             }
             return createShaderFromSource(vertSource, fragSource);
+        }
+
+        public int createShaderFromFiles(string vertFile, string geomFile, string fragFile)
+        {
+            string vertSource, geomSource, fragSource;
+            using (StreamReader sr = new StreamReader(vertFile))
+            {
+                vertSource = sr.ReadToEnd();
+            }
+            using (StreamReader sr = new StreamReader(geomFile))
+            {
+                geomSource = sr.ReadToEnd();
+            }
+            using (StreamReader sr = new StreamReader(fragFile))
+            {
+                fragSource = sr.ReadToEnd();
+            }
+            return createShaderFromSource(vertSource, geomSource, fragSource);
         }
 
         public int createShaderFromSource(string vertSource, string fragSource)
@@ -93,6 +115,64 @@ namespace Chireiden
             if (linkStatus != 1)
             {
                 throw new Exception("Shader linking compilation failed: " + GL.GetProgramInfoLog(shaderProgramHandle));
+
+            }
+
+            Debug.WriteLine(GL.GetProgramInfoLog(shaderProgramHandle));
+            return shaderProgramHandle;
+        }
+
+        public int createShaderFromSource(string vertSource, string geomSource, string fragSource)
+        {
+            // Compile vert and frag shaders
+            int vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
+            int geometryShaderHandle = GL.CreateShader(ShaderType.GeometryShader);
+            int fragmentShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
+
+            GL.ShaderSource(vertexShaderHandle, vertSource);
+            GL.ShaderSource(geometryShaderHandle, geomSource);
+            GL.ShaderSource(fragmentShaderHandle, fragSource);
+
+            GL.CompileShader(vertexShaderHandle);
+            GL.CompileShader(geometryShaderHandle);
+            GL.CompileShader(fragmentShaderHandle);
+
+            int vertStatus, geomStatus, fragStatus;
+
+            GL.GetShader(vertexShaderHandle, ShaderParameter.CompileStatus, out vertStatus);
+            GL.GetShader(geometryShaderHandle, ShaderParameter.CompileStatus, out geomStatus);
+            GL.GetShader(fragmentShaderHandle, ShaderParameter.CompileStatus, out fragStatus);
+
+            if (vertStatus != 1)
+            {
+                String error = GL.GetShaderInfoLog(vertexShaderHandle);
+                Console.WriteLine("Vertex shader compilation failed: {0}", error);
+            }
+            if (geomStatus != 1)
+            {
+                String error = GL.GetShaderInfoLog(geometryShaderHandle);
+                Console.WriteLine("Geometry shader compilation failed: {0}", error);
+            }
+            if (fragStatus != 1)
+            {
+                String error = GL.GetShaderInfoLog(fragmentShaderHandle);
+                Console.WriteLine("Fragment shader compilation failed: {0}", error);
+            }
+
+            // Create program
+            int shaderProgramHandle = GL.CreateProgram();
+
+            GL.AttachShader(shaderProgramHandle, vertexShaderHandle);
+            GL.AttachShader(shaderProgramHandle, geometryShaderHandle);
+            GL.AttachShader(shaderProgramHandle, fragmentShaderHandle);
+
+            GL.LinkProgram(shaderProgramHandle);
+            int linkStatus;
+
+            GL.GetProgram(shaderProgramHandle, GetProgramParameterName.LinkStatus, out linkStatus);
+            if (linkStatus != 1)
+            {
+                Console.WriteLine("Shader linking compilation failed: {0}", GL.GetProgramInfoLog(shaderProgramHandle));
 
             }
 
