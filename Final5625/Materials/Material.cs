@@ -17,14 +17,16 @@ namespace Chireiden.Materials
     {
         /// <summary>
         /// Binds all the uniforms and textures associated with this material,
-        /// in preparation for shading. Returns the next texture unit that
+        /// in preparation for shading, binding the first texture it uses to 
+        /// the given texture unit. Returns the next texture unit that
         /// can be used after this.
         /// </summary>
-        int useMaterialParameters(ShaderProgram program);
+        int useMaterialParameters(ShaderProgram program, int startTexUnit);
 
         /// <summary>
-        /// Unbind everything that was bound in useMaterialParameters().
+        /// Unbind everything that was bound in useMaterialParameters(),
+        /// given the same starting texture unit as there.
         /// </summary>
-        void unuseMaterialParameters(ShaderProgram program);
+        void unuseMaterialParameters(ShaderProgram program, int startTexUnit);
     }
 }

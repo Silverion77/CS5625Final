@@ -20,7 +20,7 @@ namespace Chireiden.Scenes
     /// </summary>
     public class MeshNode : MobileObject
     {
-        MeshContainer meshes;
+        protected MeshContainer meshes;
 
         public MeshNode(MeshContainer m)
             : base()

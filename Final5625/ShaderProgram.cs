@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text;
 using System.IO;
+using System.Drawing;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -71,12 +72,12 @@ namespace Chireiden
             if (vertStatus != 1)
             {
                 String error =  GL.GetShaderInfoLog(vertexShaderHandle);
-                Console.WriteLine("Vertex shader compilation failed: {0}", error);
+                throw new Exception("Vertex shader compilation failed: " + error);
             }
             if (fragStatus != 1)
             {
                 String error = GL.GetShaderInfoLog(fragmentShaderHandle);
-                Console.WriteLine("Fragment shader compilation failed: {0}", error);
+                throw new Exception("Fragment shader compilation failed: " + error);
             }
 
             // Create program
@@ -91,7 +92,7 @@ namespace Chireiden
             GL.GetProgram(shaderProgramHandle, GetProgramParameterName.LinkStatus, out linkStatus);
             if (linkStatus != 1)
             {
-                Console.WriteLine("Shader linking compilation failed: {0}", GL.GetProgramInfoLog(shaderProgramHandle));
+                throw new Exception("Shader linking compilation failed: " + GL.GetProgramInfoLog(shaderProgramHandle));
 
             }
 
@@ -156,14 +157,17 @@ namespace Chireiden
             GL.Uniform1(unifLoc, unif.Length, unif);
         }
 
-        unsafe public void setUniformMat4Array(string name, Matrix4[] unif)
+        /// <summary>
+        /// Packs an array of 4x4 matrices into a texture to be transmitted to the shader.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="textureUnit"></param>
+        /// <param name="unif"></param>
+        /// <param name="tex"></param>
+        unsafe public void setUniformMat4Texture(string name, int textureUnit, Matrix4[] unif, MatrixTexture tex)
         {
-            int unifLoc = uniformLocation(name);
-            // See below
-            fixed (float* p = &unif[0].Row0.X)
-            {
-                GL.UniformMatrix4(unifLoc, unif.Length, false, p);
-            }
+            tex.setTextureData(unif);
+            bindTextureRect(name, textureUnit, tex);
         }
 
         unsafe public void setUniformVec3Array(string name, Vector3[] unif)
@@ -184,6 +188,23 @@ namespace Chireiden
                 GL.Uniform1(unifLoc, 1);
             else
                 GL.Uniform1(unifLoc, 0);
+        }
+
+        public void bindTextureRect(string name, int textureUnit, MatrixTexture tex)
+        {
+            TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
+            int unifLoc = uniformLocation(name);
+            int textureID = tex.getTextureID();
+            GL.ActiveTexture(actualUnit);
+            GL.BindTexture(TextureTarget.TextureRectangle, textureID);
+            GL.Uniform1(unifLoc, textureUnit);
+        }
+
+        public void unbindTextureRect(int textureUnit)
+        {
+            TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
+            GL.ActiveTexture(actualUnit);
+            GL.BindTexture(TextureTarget.TextureRectangle, 0);
         }
 
         /// <summary>

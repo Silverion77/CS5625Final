@@ -232,7 +232,8 @@ namespace Chireiden.Meshes.Animations
         {
             if (keyframes.Length == 1)
             {
-                return Matrix4.CreateTranslation(keyframes[0]);
+                Matrix4 mat = Matrix4.CreateTranslation(keyframes[0]);
+                return mat;
             }
             int frameBefore = findTimeBelow(t, times);
             if (frameBefore >= keyframes.Length - 1)

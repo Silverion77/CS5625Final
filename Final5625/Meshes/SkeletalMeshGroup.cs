@@ -20,6 +20,7 @@ namespace Chireiden.Meshes
         ArmatureBone[] bonesByID;
 
         Matrix4[] boneTransforms;
+        MatrixTexture matrixTexture;
 
         Dictionary<string, AnimationClip> animationLibrary;
 
@@ -35,7 +36,9 @@ namespace Chireiden.Meshes
             animationLibrary = new Dictionary<string, AnimationClip>();
             current = null;
             animTime = 0;
-            boneTransforms = new Matrix4[ShaderProgram.MAX_BONES];
+            boneTransforms = new Matrix4[bonesByID.Length];
+
+            matrixTexture = new MatrixTexture(boneTransforms);
         }
 
         public SkeletalMeshGroup(ArmatureBone root, ArmatureBone[] bones)
@@ -131,10 +134,10 @@ namespace Chireiden.Meshes
             program.setUniformMatrix4("modelViewMatrix", modelView);
             program.setUniformMatrix4("viewMatrix", viewMatrix);
 
-            // TODO: bind num_bones uniform
-            // TODO: bind bone_matrices array uniform
-            program.setUniformInt1("bone_count", numBones);
-            program.setUniformMat4Array("bone_matrices", boneTransforms);
+            // Bind bone texture data
+            program.setUniformMat4Texture("bone_matrices", 0, boneTransforms, matrixTexture);
+            program.setUniformInt1("bone_textureWidth", matrixTexture.Width);
+            program.setUniformInt1("bone_textureHeight", matrixTexture.Height);
 
             // TODO: SET BONE ARRAY UNIFORMS
 
@@ -142,17 +145,20 @@ namespace Chireiden.Meshes
 
             foreach (SkeletalTriMesh m in meshes)
             {
-                m.renderMesh(camera, toWorldMatrix, Shaders.AnimationShader);
+                m.renderMesh(camera, toWorldMatrix, Shaders.AnimationShader, 1);
             }
+
+            program.unbindTextureRect(0);
             program.unuse();
         }
 
-        public void advanceAnimation(float delta)
+        public void advanceAnimation(double delta)
         {
             if (current == null) return;
             double newTime = animTime + delta;
-            if (current.Wrap)
-                newTime = Math.IEEERemainder(newTime, current.Duration);
+            if (current.Wrap && newTime > current.Duration)
+                newTime = newTime % current.Duration;
+            animTime = newTime;
         }
     }
 }

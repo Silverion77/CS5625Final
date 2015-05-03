@@ -73,7 +73,7 @@ namespace Chireiden.Materials
             return additiveTexture != null;
         }
 
-        public int useMaterialParameters(ShaderProgram program)
+        public int useMaterialParameters(ShaderProgram program, int startTexUnit)
         {
             program.setUniformFloat3("mat_ambient", ambientColor);
             program.setUniformFloat4("mat_diffuse", diffuseColor);
@@ -83,24 +83,24 @@ namespace Chireiden.Materials
             if (hasDiffuseTexture())
             {
                 program.setUniformBool("mat_hasTexture", true);
-                program.bindTexture2D("mat_texture", 0, diffuseTexture);
+                program.bindTexture2D("mat_texture", startTexUnit, diffuseTexture);
             }
             else program.setUniformBool("mat_hasTexture", false);
             if (hasAdditiveTexture())
             {
                 program.setUniformBool("mat_hasAdditiveTexture", true);
-                program.bindTexture2D("mat_additiveTexture", 1, additiveTexture);
+                program.bindTexture2D("mat_additiveTexture", startTexUnit + 1, additiveTexture);
             }
             else program.setUniformBool("mat_hasAdditiveTexture", false);
 
-            // We bound 2 textures, so the next available texture unit is 2.
-            return 2;
+            // We bound 2 textures, so the next available texture unit is 2 + the start point.
+            return startTexUnit + 2;
         }
 
-        public void unuseMaterialParameters(ShaderProgram program)
+        public void unuseMaterialParameters(ShaderProgram program, int startTexUnit)
         {
-            program.unbindTexture2D(0);
-            program.unbindTexture2D(1);
+            program.unbindTexture2D(startTexUnit);
+            program.unbindTexture2D(startTexUnit + 1);
         }
     }
 }

@@ -114,6 +114,15 @@ namespace Chireiden.Meshes
             matrix.M43 = inputMat.D3;
             matrix.M44 = inputMat.D4;
 
+            // Correction: the above is the worst code, and this is the best code
+            matrix.Transpose();
+
+            // nb. AssImp stores matrices in row-major form, but OpenTK
+            // stores them in column-major form (so the translations in translation
+            // matrices are at the bottom, and not at the right).
+            // Column-major is also why the result of Mult(A,B) actually applies
+            // the transformation of A before B.
+
             return matrix;
         }
 

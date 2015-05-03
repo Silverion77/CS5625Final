@@ -50,7 +50,7 @@ namespace Chireiden.Meshes.Animations
 
         public void applyAnimationToSkeleton(ArmatureBone[] bones, double time)
         {
-            if (Wrap) time = Math.IEEERemainder(time, Duration);
+            if (Wrap) time = time % Duration;
 
             Matrix4 location;
             Matrix4 rotation;
@@ -60,11 +60,6 @@ namespace Chireiden.Meshes.Animations
                 bones[i].setPoseTranslation(location);
                 bones[i].setPoseRotation(rotation);
             }
-        }
-
-        public void applyAnimationToSkeleton(ArmatureBone[] bones, float time)
-        {
-            applyAnimationToSkeleton(bones, (double)time);
         }
     }
 }

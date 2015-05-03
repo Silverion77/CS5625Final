@@ -47,7 +47,7 @@ namespace Chireiden.Meshes
             camera.setPointLightUniforms(program);
 
             foreach (TriMesh m in meshes) {
-                m.renderMesh(camera, toWorldMatrix, Shaders.BlenderShader);
+                m.renderMesh(camera, toWorldMatrix, Shaders.BlenderShader, 0);
             }
 
             program.unuse();
@@ -63,7 +63,7 @@ namespace Chireiden.Meshes
             // A non-skeleton mesh group has no animations, so this does nothing.
         }
 
-        public void advanceAnimation(float f)
+        public void advanceAnimation(double f)
         {
             // Do nothing
         }

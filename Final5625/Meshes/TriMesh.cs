@@ -206,7 +206,7 @@ namespace Chireiden.Meshes
             GL.BindVertexArray(0);
         }
         /// <summary>
-        /// Renders this particular section of the mesh.
+        /// Renders this particular section of the mesh, binding the first texture to startTexUnit.
         /// 
         /// We can assume that global uniforms such as transformation matrices, which don't
         /// change when we render different parts of the same object, have already been bound.
@@ -216,16 +216,16 @@ namespace Chireiden.Meshes
         /// <param name="camera"></param>
         /// <param name="toWorldMatrix"></param>
         /// <param name="program"></param>
-        public virtual void renderMesh(Camera camera, Matrix4 toWorldMatrix, ShaderProgram program)
+        public virtual void renderMesh(Camera camera, Matrix4 toWorldMatrix, ShaderProgram program, int startTexUnit)
         {
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
-            material.useMaterialParameters(program);
+            material.useMaterialParameters(program, startTexUnit);
 
             GL.DrawElements(PrimitiveType.Triangles, indexBuffer.Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             // Clean up
-            material.unuseMaterialParameters(program);
+            material.unuseMaterialParameters(program, startTexUnit);
             GL.BindVertexArray(0);
         }
     }

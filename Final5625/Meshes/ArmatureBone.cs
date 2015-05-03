@@ -110,7 +110,7 @@ namespace Chireiden.Meshes
             // Compute this bone's local-to-parent transformation matrix.
             Matrix4 poseLocalToParent;
             Matrix4.Mult(ref poseRotation, ref poseTranslation, out poseLocalToParent);
-            Matrix4.Mult(ref poseLocalToParent, ref restTranslation, out poseLocalToParent);
+            Console.WriteLine("{1}'s pose translation:\n{0}", poseLocalToParent, Name);
 
             // If we have no parent, then this transforms straight to world space,
             // so we can stop here.

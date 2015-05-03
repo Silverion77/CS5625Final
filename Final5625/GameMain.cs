@@ -63,7 +63,7 @@ namespace Chireiden
             ParticleSystem.Init();
         }
 
-        MeshNode meshCopy;
+        SkeletalMeshNode meshCopy;
 
         protected override void OnLoad(System.EventArgs e)
         {
@@ -93,7 +93,7 @@ namespace Chireiden
 
             // var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
 
-            meshCopy = new MeshNode(danLDruce, new Vector3(4, 0, 0));
+            meshCopy = new SkeletalMeshNode(danLDruce, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
 
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
@@ -104,6 +104,8 @@ namespace Chireiden
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
+
+            meshCopy.switchAnimation("gyrate");
         }
         
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
@@ -182,7 +184,7 @@ namespace Chireiden
                 camTarget.setVelocity(Vector3.Zero);
             }
 
-            meshCopy.addRotation(Vector3.UnitZ, (float)(e.Time));
+            meshCopy.advanceAnimation(e.Time);
 
             // TODO: handle enemy movement here, once enemies are implemented
 

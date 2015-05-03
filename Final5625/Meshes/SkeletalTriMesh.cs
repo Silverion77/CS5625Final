@@ -105,16 +105,16 @@ namespace Chireiden.Meshes
         /// <param name="camera"></param>
         /// <param name="toWorldMatrix"></param>
         /// <param name="program"></param>
-        public override void renderMesh(Camera camera, Matrix4 toWorldMatrix, ShaderProgram program)
+        public override void renderMesh(Camera camera, Matrix4 toWorldMatrix, ShaderProgram program, int startTexUnit)
         {
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
-            material.useMaterialParameters(program);
+            material.useMaterialParameters(program, startTexUnit);
 
             GL.DrawElements(PrimitiveType.Triangles, indexBuffer.Length, DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             // Clean up
-            material.unuseMaterialParameters(program);
+            material.unuseMaterialParameters(program, startTexUnit);
             GL.BindVertexArray(0);
         }
     }

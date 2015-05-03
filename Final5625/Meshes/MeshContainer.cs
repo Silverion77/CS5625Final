@@ -21,7 +21,7 @@ namespace Chireiden.Meshes
         /// Advances the current position of the currently playing animation by the given delta, in seconds.
         /// </summary>
         /// <param name="delta"></param>
-        void advanceAnimation(float delta);
+        void advanceAnimation(double delta);
 
         /// <summary>
         /// Renders the meshes in this container, at the current time of the currently set animation.

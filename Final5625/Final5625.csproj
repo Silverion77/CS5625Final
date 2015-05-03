@@ -55,12 +55,15 @@
     <Compile Include="Framebuffer.cs" />
     <Compile Include="Meshes\Animations\AnimationClip.cs" />
     <Compile Include="Meshes\Animations\KeyframeSeries.cs" />
+    <Compile Include="Meshes\MatrixTexture.cs" />
     <Compile Include="Meshes\MeshContainer.cs" />
     <Compile Include="Meshes\MeshGroup.cs" />
     <Compile Include="Meshes\MeshImporter_Animations.cs" />
     <Compile Include="Meshes\MeshImporter_Bones.cs" />
     <Compile Include="Meshes\SkeletalMeshGroup.cs" />
     <Compile Include="Meshes\SkeletalTriMesh.cs" />
+    <Compile Include="Scenes\ParticleEmitter.cs" />
+    <Compile Include="ParticleSystem.cs" />
     <Compile Include="Scenes\Cube.cs" />
     <Compile Include="Scenes\Empty.cs" />
     <Compile Include="GameMain.cs" />
@@ -76,6 +79,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenes\PointLight.cs" />
     <Compile Include="Scenes\SceneTreeNode.cs" />
+    <Compile Include="Scenes\SkeletalMeshNode.cs" />
     <Compile Include="ShaderProgram.cs" />
     <Compile Include="TrackingCamera.cs" />
     <Compile Include="Scenes\PlaceableObject.cs" />
@@ -244,6 +248,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\skeletal_mesh.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\logluminance.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\particle.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\particle.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
