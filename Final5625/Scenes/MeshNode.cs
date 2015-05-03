@@ -20,15 +20,15 @@ namespace Chireiden.Scenes
     /// </summary>
     public class MeshNode : MobileObject
     {
-        MeshGroup meshes;
+        MeshContainer meshes;
 
-        public MeshNode(MeshGroup m)
+        public MeshNode(MeshContainer m)
             : base()
         {
             meshes = m;
         }
 
-        public MeshNode(MeshGroup m, Vector3 loc)
+        public MeshNode(MeshContainer m, Vector3 loc)
             : base(loc)
         {
             meshes = m;
@@ -36,7 +36,7 @@ namespace Chireiden.Scenes
 
         public override void render(Camera camera)
         {
-            meshes.renderMesh(camera, toWorldMatrix);
+            meshes.renderMeshes(camera, toWorldMatrix);
             renderChildren(camera);
         }
     }
