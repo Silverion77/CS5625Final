@@ -64,6 +64,9 @@ namespace Chireiden
 
         static LinkedList<Particle> particles = new LinkedList<Particle>();
 
+        static Texture reactionTexture;
+        static Texture particleTexture;
+
         public static void Init()
         {
             BufferStorageFlags createFlags = BufferStorageFlags.MapWriteBit
@@ -103,6 +106,9 @@ namespace Chireiden
             GL.BindVertexArray(0);
 
             Fences[0] = Fences[1] = Fences[2] = IntPtr.Zero;
+
+            reactionTexture = new Texture("data/texture/particle/reaction.png");
+            particleTexture = new Texture("data/texture/particle/0.png");
         }
 
         public static void SpawnParticle(Particle particle)
@@ -174,17 +180,18 @@ namespace Chireiden
             ShaderLibrary.ParticleShader.use();
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.getTexture("data/texture/particle/reaction.png").getTextureID());
+            GL.BindTexture(TextureTarget.Texture2D, reactionTexture.getTextureID());
             ShaderLibrary.ParticleShader.setUniformInt1("reaction", 0);
 
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.getTexture("data/texture/particle/0.png").getTextureID());
+            GL.BindTexture(TextureTarget.Texture2D, particleTexture.getTextureID());
             ShaderLibrary.ParticleShader.setUniformInt1("tex", 1);
 
             ShaderLibrary.ParticleShader.setUniformMatrix4("viewProjectionMatrix", viewProjectionMatrix);
             ShaderLibrary.ParticleShader.setUniformFloat3("up", up / up.Length);
             ShaderLibrary.ParticleShader.setUniformFloat3("right", right / right.Length); 
             GL.BindVertexArray(VAO);
+
             GL.DrawArrays(PrimitiveType.Points, (int)ringbufferHead * MAX_PARTICLES, particles.Count());
             GL.BindVertexArray(0);
             ShaderLibrary.ParticleShader.unuse();

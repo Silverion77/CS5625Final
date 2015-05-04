@@ -14,6 +14,8 @@ namespace Chireiden
         public static ShaderProgram AnimationShader;
         public static ShaderProgram LogLuminanceShader;
         public static ShaderProgram CopyShader;
+        public static ShaderProgram BloomXShader;
+        public static ShaderProgram BloomYShader;
         public static ShaderProgram ParticleShader;
 
         public static void loadShaders() {
@@ -23,6 +25,8 @@ namespace Chireiden
             AnimationShader = new ShaderProgram("shaders/skeletal_mesh.vert", "shaders/blendermaterial.frag");
             LogLuminanceShader = new ShaderProgram("shaders/simple2d.vert", "shaders/logLuminance.frag");
             CopyShader = new ShaderProgram("shaders/simple2d.vert", "shaders/copy.frag");
+            BloomXShader = new ShaderProgram("shaders/simple2d.vert", "shaders/bloomX.frag");
+            BloomYShader = new ShaderProgram("shaders/simple2d.vert", "shaders/bloomY.frag");
             ParticleShader = new ShaderProgram("shaders/particle.vert", "shaders/particle.geom", "shaders/particle.frag");
         }
     }

@@ -206,7 +206,7 @@ namespace Chireiden
             ParticleSystem.Update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
-            updateTime = stopwatch.ElapsedMilliseconds;
+            updateTime = (1000.0f * stopwatch.ElapsedTicks) / Stopwatch.Frequency;
         }
 
         float renderTime = 0;
@@ -234,8 +234,8 @@ namespace Chireiden
 
             SwapBuffers();
 
-            renderTime = stopwatch.ElapsedMilliseconds;
-            Console.Write("Update time: {0} ms               Render time: {1} ms   \r", updateTime, renderTime);
+            renderTime = (1000.0f * stopwatch.ElapsedTicks) / Stopwatch.Frequency;
+            Console.Write("Update time: {0,2:F1} ms      Render time: {1,2:F1} ms   \r", updateTime, renderTime);
         }
 
         [STAThread]

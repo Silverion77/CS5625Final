@@ -321,11 +321,9 @@ namespace Chireiden
         public void bindTexture2D(string name, int textureUnit, uint textureID)
         {
             // Code written with the assistance of http://www.opentk.com/node/2559
-            TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
-            int unifLoc = uniformLocation(name);
-            GL.ActiveTexture(actualUnit);
+            GL.ActiveTexture(TextureUnit.Texture0 + textureUnit);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            GL.Uniform1(unifLoc, textureUnit);
+            setUniformInt1(name, textureUnit);
         }
 
         /// <summary>
