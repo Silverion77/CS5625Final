@@ -17,6 +17,7 @@ namespace Chireiden
 
         static uint FboHandle;
         static uint ColorTexture;
+        static uint TransparencyColorTexture;
         static uint DepthRenderbuffer;
 
         static uint DownsampleTexture;
@@ -66,11 +67,21 @@ namespace Chireiden
             // Create Color Texture
             GL.GenTextures(1, out ColorTexture);
             GL.BindTexture(TextureTarget.Texture2D, ColorTexture);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb16f, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            // Create Transparency Color Texture
+            GL.GenTextures(1, out TransparencyColorTexture);
+            GL.BindTexture(TextureTarget.Texture2D, TransparencyColorTexture);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
             // Create Downsample Texture
@@ -106,13 +117,33 @@ namespace Chireiden
             generateFullscreenQuad();
         }
 
-        public static void AttachDepthBuffer()
+        /// <summary>
+        /// Transparent particles are rendered using premultiplied alpha, which allows for additive blending.
+        /// To properly compose them into the scene, it is necessary to render them to a seperate buffer
+        /// and then later blend them with the rest of the scene.
+        /// </summary>
+        public static void StartTransparency()
         {
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, DepthRenderbuffer);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, TransparencyColorTexture, 0);
+
+            GL.Viewport(0, 0, width, height);
+
+            GL.ClearColor(0, 0, 0, 0);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
         }
-        public static void DetachDepthBuffer()
+        public static void EndTransparency()
         {
-            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorTexture, 0);
+            GL.Viewport(0, 0, width, height);
+
+            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Disable(EnableCap.DepthTest);
+            Shaders.CopyShader.use();
+            Shaders.CopyShader.bindTexture2D("tex", 0, TransparencyColorTexture);
+            RenderFullscreenQuad();
+            Shaders.CopyShader.unuse();
+            GL.Enable(EnableCap.DepthTest);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
         }
 
         public static void BlitToScreen()

@@ -12,6 +12,7 @@ namespace Chireiden
         public static ShaderProgram TonemapShader;
         public static ShaderProgram AnimationShader;
         public static ShaderProgram LogLuminanceShader;
+        public static ShaderProgram CopyShader;
         public static ShaderProgram ParticleShader;
 
         public static void loadShaders() {
@@ -20,6 +21,7 @@ namespace Chireiden
             TonemapShader = new ShaderProgram("shaders/simple2d.vert", "shaders/tonemap.frag");
             AnimationShader = new ShaderProgram("shaders/skeletal_mesh.vert", "shaders/blendermaterial.frag");
             LogLuminanceShader = new ShaderProgram("shaders/simple2d.vert", "shaders/logLuminance.frag");
+            CopyShader = new ShaderProgram("shaders/simple2d.vert", "shaders/copy.frag");
             ParticleShader = new ShaderProgram("shaders/particle.vert", "shaders/particle.geom", "shaders/particle.frag");
         }
     }
