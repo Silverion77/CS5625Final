@@ -5,6 +5,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
+using Chireiden.Meshes.Animations;
+
 namespace Chireiden.Meshes
 {
     /// <summary>
@@ -53,19 +55,15 @@ namespace Chireiden.Meshes
             program.unuse();
         }
 
-        public void clearAnimation()
+        public void renderMeshes(Camera c, Matrix4 m, AnimationClip clip, double time)
         {
-            // A non-skeleton mesh group has no animations, so this does nothing.
+            renderMeshes(c, m);
         }
 
-        public void setCurrentAnimation(string s)
+        public AnimationClip fetchAnimation(string s)
         {
-            // A non-skeleton mesh group has no animations, so this does nothing.
-        }
-
-        public void advanceAnimation(double f)
-        {
-            // Do nothing
+            // Nothing to return.
+            return null;
         }
 
         public void addMesh(TriMesh m)

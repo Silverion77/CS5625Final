@@ -23,12 +23,7 @@ namespace Chireiden.Meshes
         {
             if (rootNode.Name.Equals("Armature"))
             {
-                if (rootNode.HasChildren)
-                {
-                    Node child = rootNode.Children[0];
-                    Console.WriteLine("Root bone is {0}", child.Name);
-                    return child;
-                }
+                return rootNode;
             }
             else
             {
@@ -139,6 +134,7 @@ namespace Chireiden.Meshes
             if (neededNodes.Contains(root))
             {
                 rootBone = new ArmatureBone(convertMatrix(root.Transform), root.Name);
+                Console.WriteLine("added {0}", rootBone.Name);
                 foreach (Node child in root.Children)
                 {
                     ArmatureBone childBone = constructArmature(neededNodes, child);

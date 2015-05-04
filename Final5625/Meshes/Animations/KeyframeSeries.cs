@@ -220,9 +220,17 @@ namespace Chireiden.Meshes.Animations
             for (int i = 0; i < numFrames; i++)
             {
                 times[i] = locations[startFrame + i].Time - startTime;
-                Assimp.Vector3D trans = locations[startFrame + i].Value;
-                Vector3 ourTrans = new Vector3(trans.X, trans.Y, trans.Z);
-                keyframes[i] = ourTrans;
+                Assimp.Vector3D r = locations[startFrame + i].Value;
+                Vector3 ourLocation = new Vector3(r.X, r.Y, r.Z);
+
+                keyframes[i] = ourLocation;
+            }
+
+            if (wrap && numFrames > 1)
+            {
+                double timeStep = times[1] - times[0];
+                keyframes[numFrames] = keyframes[0];
+                times[numFrames] = times[numFrames - 1] + timeStep;
             }
 
             Length = times[times.Length - 1];
@@ -249,6 +257,7 @@ namespace Chireiden.Meshes.Animations
             double blendFactor = (t - timeBefore) / (timeAfter - timeBefore);
 
             Vector3 interpolated = Vector3.Lerp(keyframes[frameBefore], keyframes[frameAfter], (float)blendFactor);
+            // Console.WriteLine("Interpolated \n  {0}\n  {1}\n  with blend factor {2} =\n  {3}", keyframes[frameBefore], keyframes[frameAfter], blendFactor, interpolated);
             return Matrix4.CreateTranslation(interpolated);
         }
     }

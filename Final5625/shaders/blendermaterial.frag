@@ -50,13 +50,19 @@ void main()
 
 	for (int i = 0; i < light_count; i++) {
 		vec3 v = -normalize(geom_position);
-		vec3 l = light_eyePosition[i] - geom_position;
+		vec3 l = geom_position - light_eyePosition[i];
 		float r_squared = dot(l, l);
+		l = normalize(l);
 		vec3 h = normalize(v + l);
 
 		// The attenuation model used here is from http://wiki.blender.org/index.php/Doc:2.6/Manual/Lighting/Lights/Light_Attenuation
 		float d2 = light_falloffDistance[i] * light_falloffDistance[i];
 		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
+
+		// quick hack to make things darker if they're on the wrong side
+		//float nlDot = min(1, dot(n,l) + 1);
+		//intensity *= nlDot;
+
 		vec3 color = baseColor * intensity;
 
 		float dotProd = dot(n, l);

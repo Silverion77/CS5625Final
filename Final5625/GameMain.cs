@@ -63,7 +63,9 @@ namespace Chireiden
             ParticleSystem.Init();
         }
 
+        SkeletalMeshNode meshOrig;
         SkeletalMeshNode meshCopy;
+        SkeletalMeshNode okuu;
 
         protected override void OnLoad(System.EventArgs e)
         {
@@ -88,24 +90,29 @@ namespace Chireiden
 
             var danLDruce = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
 
-            MeshNode meshNode = new MeshNode(danLDruce);
-            world.addChild(meshNode);
+            meshOrig = new SkeletalMeshNode(danLDruce);
+            world.addChild(meshOrig);
 
-            // var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
+            var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
 
             meshCopy = new SkeletalMeshNode(danLDruce, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
 
+            okuu = new SkeletalMeshNode(okuu_meshes, new Vector3(2, 2, 0));
+            world.addChild(okuu);
+
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
             world.addChild(emitter);
 
-            world.addPointLight(new PointLight(new Vector3(2, -1.1f, 4), 1, 3, new Vector3(1, 1, 1)));
+            world.addPointLight(new PointLight(new Vector3(0, 0, 4), 1, 3, new Vector3(1, 1, 1)));
 
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
 
+            meshOrig.switchAnimation("twist");
             meshCopy.switchAnimation("gyrate");
+            okuu.switchAnimation("cheer");
         }
         
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
@@ -122,6 +129,8 @@ namespace Chireiden
                     break;
             }
         }
+
+        float updateTime = 0;
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
@@ -185,18 +194,21 @@ namespace Chireiden
             }
 
             meshCopy.advanceAnimation(e.Time);
+            meshOrig.advanceAnimation(e.Time);
+            okuu.advanceAnimation(e.Time);
 
             // TODO: handle enemy movement here, once enemies are implemented
 
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
 
-            ParticleSystem.Update(e);
+            // ParticleSystem.Update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
-            // Console.WriteLine("Time to update: {0} ms", stopwatch.ElapsedMilliseconds);
+            updateTime = stopwatch.ElapsedMilliseconds;
         }
 
+        float renderTime = 0;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             stopwatch.Restart();
@@ -212,13 +224,14 @@ namespace Chireiden
 
             world.render(camera);
 
-            ParticleSystem.Render(camera);
+            // ParticleSystem.Render(camera);
 
             Framebuffer.BlitToScreen();
 
             SwapBuffers();
 
-            // Console.Write("Render time: {0} ms   \r", stopwatch.ElapsedMilliseconds);
+            renderTime = stopwatch.ElapsedMilliseconds;
+            // Console.Write("Update time: {0} ms      Render time: {1} ms   \r", updateTime, renderTime);
         }
 
         [STAThread]

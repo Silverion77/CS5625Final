@@ -8,6 +8,9 @@ namespace Chireiden.Scenes
 {
     class SkeletalMeshNode : MeshNode
     {
+        double animTime = 0;
+        AnimationClip currentAnimation = null;
+
         public SkeletalMeshNode(MeshContainer m)
             : base(m)
         { }
@@ -17,17 +20,26 @@ namespace Chireiden.Scenes
         { }
 
         public void advanceAnimation(double delta) {
-            meshes.advanceAnimation(delta);
+            if (currentAnimation == null || currentAnimation.Duration == 0) animTime = 0;
+            else animTime = (animTime + delta) % currentAnimation.Duration;
         }
 
         public void clearAnimation()
         {
-            meshes.clearAnimation();
+            currentAnimation = null;
+            animTime = 0;
         }
 
         public void switchAnimation(string animation)
         {
-            meshes.setCurrentAnimation(animation);
+            animTime = 0;
+            currentAnimation = meshes.fetchAnimation(animation);
+        }
+
+        public override void render(Camera camera)
+        {
+            meshes.renderMeshes(camera, toWorldMatrix, currentAnimation, animTime);
+            renderChildren(camera);
         }
     }
 }

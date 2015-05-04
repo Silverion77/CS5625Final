@@ -29,7 +29,7 @@ namespace Chireiden.Meshes.Animations
                 int boneID;
                 if (!boneDict.TryGetValue(frames.NodeName, out boneID))
                 {
-                    Console.WriteLine("Animation referenced nonexistent or non-deforming bone {0}, ignoring", frames.NodeName);
+                    // Console.WriteLine("Animation referenced nonexistent or non-deforming bone {0}, ignoring", frames.NodeName);
                     continue;
                 }
                 RotationKeyframes rotFrames = new RotationKeyframes(frames.RotationKeys, cue.StartTime, cue.EndTime, cue.Wrap);
@@ -44,21 +44,27 @@ namespace Chireiden.Meshes.Animations
             Duration = 0;
 
             foreach (LocRotKeyframes frames in boneChannels) {
+                if (frames == null) continue;
                 Duration = Math.Max(Duration, frames.Length);
             }
         }
 
         public void applyAnimationToSkeleton(ArmatureBone[] bones, double time)
         {
-            if (Wrap) time = time % Duration;
-
             Matrix4 location;
             Matrix4 rotation;
             for (int i = 0; i < bones.Length; i++)
             {
-                boneChannels[i].getFrameAtTime(time, out location, out rotation);
-                bones[i].setPoseTranslation(location);
-                bones[i].setPoseRotation(rotation);
+                if (boneChannels[i] == null)
+                {
+                    bones[i].setPoseToRest();
+                }
+                else
+                {
+                    boneChannels[i].getFrameAtTime(time, out location, out rotation);
+                    bones[i].setPoseTranslation(location);
+                    bones[i].setPoseRotation(rotation);
+                }
             }
         }
     }

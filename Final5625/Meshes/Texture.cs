@@ -67,7 +67,8 @@ namespace Chireiden.Meshes
                 throw new ArgumentException(filename);
 
             Bitmap bmp = new Bitmap(filename);
-            return LoadTexture(bmp);
+            int id = LoadTexture(bmp);
+            return id;
         }
     }
 }

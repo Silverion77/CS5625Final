@@ -60,7 +60,7 @@ namespace Chireiden.Materials
                 Texture t = TextureManager.getTexture(texFile);
                 additiveTexture = t;
             }
-            //Console.WriteLine("Material has texture with ID {0}", diffuseTexture.getTextureID());
+            // Console.WriteLine("Material has texture with ID {0}", diffuseTexture.getTextureID());
         }
 
         public bool hasDiffuseTexture()

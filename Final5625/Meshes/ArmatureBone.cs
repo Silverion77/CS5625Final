@@ -42,7 +42,7 @@ namespace Chireiden.Meshes
         public ArmatureBone(Matrix4 bindPoseTransform, string name)
         {
             restTranslation = bindPoseTransform;
-            poseTranslation = Matrix4.Identity;
+            poseTranslation = restTranslation;
             poseRotation = Matrix4.Identity;
 
             Children = new List<ArmatureBone>();
@@ -54,6 +54,12 @@ namespace Chireiden.Meshes
         public void setPoseTranslation(Matrix4 newTranslation)
         {
             poseTranslation = newTranslation;
+        }
+
+        public void setPoseToRest()
+        {
+            poseTranslation = restTranslation;
+            poseRotation = Matrix4.Identity;
         }
 
         public void setPoseRotation(Matrix4 newRotation)
@@ -109,8 +115,13 @@ namespace Chireiden.Meshes
         {
             // Compute this bone's local-to-parent transformation matrix.
             Matrix4 poseLocalToParent;
-            Matrix4.Mult(ref poseRotation, ref poseTranslation, out poseLocalToParent);
-            Console.WriteLine("{1}'s pose translation:\n{0}", poseLocalToParent, Name);
+            poseLocalToParent = poseRotation * poseTranslation;
+
+            if (Name.Equals("base"))
+            {
+                Console.WriteLine("Pose transform\n{0}", poseTranslation);
+                Console.WriteLine("Rest transform\n{0}", restTranslation);
+            }
 
             // If we have no parent, then this transforms straight to world space,
             // so we can stop here.
@@ -123,11 +134,11 @@ namespace Chireiden.Meshes
             else 
             {
                 Matrix4 parentToWorldMatrix = Parent.poseToWorldMatrix;
-                Matrix4.Mult(ref poseLocalToParent, ref parentToWorldMatrix, out poseToWorldMatrix);
+                poseToWorldMatrix = poseLocalToParent * parentToWorldMatrix;
             }
 
             // Compute the bone matrix that can be directly used for linear blend skinning
-            Matrix4.Mult(ref inverseRestMatrix, ref poseToWorldMatrix, out boneMatrix);
+            boneMatrix = inverseRestMatrix * poseToWorldMatrix;
 
             // Recursively do the same for all children.
             foreach (ArmatureBone child in Children)

@@ -73,6 +73,8 @@ void main()
 	position = vec3(0);
 	vec3 tangent = vec3(0);
 	vec3 bitangent = vec3(0);
+
+	float totalWeight = 0;
 	
 	for (int i = 0; i < 4; i++) {
 		int boneID = int(vert_boneIDs[i] + 0.1);
@@ -80,11 +82,17 @@ void main()
 		if (boneID >= 0 && boneWeight > 0) {
 			mat4 boneTransform = getBoneXform(boneID);
 
+			totalWeight += boneWeight;
+
 			position += boneWeight * (boneTransform * vec4(P, 1)).xyz;
 			tangent += boneWeight * (boneTransform * vec4(T, 0)).xyz;
 			bitangent += boneWeight * (boneTransform * vec4(B, 0)).xyz;
 		}
 	}
+
+	position /= totalWeight;
+	tangent /= totalWeight;
+	bitangent /= totalWeight;
 
 	tangent = normalize(tangent);
 	bitangent = normalize(bitangent);

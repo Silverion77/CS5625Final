@@ -68,6 +68,7 @@ namespace Chireiden.Meshes
 
     public partial class MeshImporter
     {
+
         /// <summary>
         /// The number of keyframes per second that Blender has exported.
         /// </summary>

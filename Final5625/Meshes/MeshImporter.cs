@@ -51,8 +51,8 @@ namespace Chireiden.Meshes
 
             List<TriMesh> outMeshes = new List<TriMesh>();
 
-            //Console.WriteLine("Original node hierarchy:");
-            //printNodeTree(model.RootNode, 0);
+            Console.WriteLine("Original node hierarchy:");
+            printNodeTree(model.RootNode, 0);
 
             // Import the skeleton
             ArmatureBone rootBone;
