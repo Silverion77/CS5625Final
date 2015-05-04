@@ -117,12 +117,6 @@ namespace Chireiden.Meshes
             Matrix4 poseLocalToParent;
             poseLocalToParent = poseRotation * poseTranslation;
 
-            if (Name.Equals("base"))
-            {
-                Console.WriteLine("Pose transform\n{0}", poseTranslation);
-                Console.WriteLine("Rest transform\n{0}", restTranslation);
-            }
-
             // If we have no parent, then this transforms straight to world space,
             // so we can stop here.
             if (Parent == null)

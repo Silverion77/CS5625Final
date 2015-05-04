@@ -42,17 +42,10 @@ namespace Chireiden.Meshes
             //is imported, loaded into managed memory. Then the unmanaged memory is released, and everything is reset.
             Scene model = importer.ImportFile(filename, PostProcessPreset.TargetRealTimeMaximumQuality);
 
-            Console.WriteLine("number of meshes = {0}", model.Meshes.Count);
-            Console.WriteLine("number of animations = {0}", model.AnimationCount);
-
             // Get the direction where the textures will be
             string directory = System.IO.Path.GetDirectoryName(filename);
-            Console.WriteLine("Looking in directory {0}", directory);
 
             List<TriMesh> outMeshes = new List<TriMesh>();
-
-            Console.WriteLine("Original node hierarchy:");
-            printNodeTree(model.RootNode, 0);
 
             // Import the skeleton
             ArmatureBone rootBone;
@@ -67,7 +60,9 @@ namespace Chireiden.Meshes
                 if (!m.HasBones) allMeshesHaveBones = false;
             }
 
-            if (boneArray.Length > ShaderProgram.MAX_BONES)
+            Console.WriteLine("All meshes have bones? {0}", allMeshesHaveBones);
+
+            if (boneArray != null && boneArray.Length > ShaderProgram.MAX_BONES)
             {
                 throw new Exception("Skeleton has " + boneArray.Length + " bones, which exceeds the maximum of " + ShaderProgram.MAX_BONES);
             }
@@ -75,8 +70,10 @@ namespace Chireiden.Meshes
             //Console.WriteLine("Imported bone hierarchy");
             //rootBone.printBoneTree();
 
+
             foreach (Mesh m in model.Meshes)
             {
+                Console.WriteLine("Importing mesh with {0} verts, {1} faces", m.VertexCount, m.FaceCount);
                 // We should only be interested in meshes with vertices
                 if (!m.HasVertices) continue;
                 var verts = m.Vertices;

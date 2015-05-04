@@ -73,6 +73,7 @@ void main()
 	position = vec3(0);
 	vec3 tangent = vec3(0);
 	vec3 bitangent = vec3(0);
+	vec3 normal = vec3(0);
 
 	float totalWeight = 0;
 	
@@ -85,24 +86,23 @@ void main()
 			totalWeight += boneWeight;
 
 			position += boneWeight * (boneTransform * vec4(P, 1)).xyz;
+			normal += boneWeight * (boneTransform * vec4(N, 0)).xyz;
 			tangent += boneWeight * (boneTransform * vec4(T, 0)).xyz;
-			bitangent += boneWeight * (boneTransform * vec4(B, 0)).xyz;
 		}
 	}
 
 	position /= totalWeight;
 	tangent /= totalWeight;
-	bitangent /= totalWeight;
+	normal /= totalWeight;
 
+	normal = normalize(normal);
 	tangent = normalize(tangent);
-	bitangent = normalize(bitangent);
-	vec3 normal = normalize(cross(tangent, bitangent));
 	bitangent = normalize(cross(normal, tangent)) * vert_tangent.w;
 
 	gl_Position = projectionMatrix *
 			(modelViewMatrix * vec4(position,1));
 
-	geom_position = (modelViewMatrix * vec4(position,1)).xyz;	
+	geom_position = (modelViewMatrix * vec4(position,1)).xyz;
 	geom_texCoord = vert_texCoord;
 
 	geom_normal = normalize(modelViewMatrix * vec4(normal,0)).xyz;	

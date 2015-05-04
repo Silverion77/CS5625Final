@@ -94,6 +94,10 @@ namespace Chireiden
 
             var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
 
+            var happysphere = MeshImporter.importFromFile("data/model/happysphere/happysphere.dae");
+            MeshNode happyNode = new MeshNode(happysphere, new Vector3(0, 0, 5));
+            world.addChild(happyNode);
+
             meshCopy = new SkeletalMeshNode(danLDruce, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
 
@@ -103,7 +107,8 @@ namespace Chireiden
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
             world.addChild(emitter);
 
-            world.addPointLight(new PointLight(new Vector3(0, 0, 4), 1, 3, new Vector3(1, 1, 1)));
+            var light = new PointLight(new Vector3(0.5f, 1f, 4), 1, 3, new Vector3(1, 1, 1));
+            world.addPointLight(light);
 
             camera = new TrackingCamera(camTarget, (float)Math.PI / 4, aspectRatio, 1, 100);
             previous = OpenTK.Input.Mouse.GetState();

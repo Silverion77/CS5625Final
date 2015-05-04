@@ -134,7 +134,6 @@ namespace Chireiden.Meshes
             if (neededNodes.Contains(root))
             {
                 rootBone = new ArmatureBone(convertMatrix(root.Transform), root.Name);
-                Console.WriteLine("added {0}", rootBone.Name);
                 foreach (Node child in root.Children)
                 {
                     ArmatureBone childBone = constructArmature(neededNodes, child);

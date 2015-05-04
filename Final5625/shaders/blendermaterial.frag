@@ -32,7 +32,7 @@ out vec4 out_frag_color;
 void main()
 {
 	vec4 result = vec4(0, 0, 0, mat_diffuse.a);
-	vec3 n = normalize(geom_normal);	
+	vec3 n = normalize(geom_normal);
 
 	vec3 baseColor;
 	result.rgb += mat_ambient;
@@ -40,43 +40,39 @@ void main()
 	vec4 textureColor = vec4(1);	
 	if (mat_hasTexture) {
 		textureColor = texture2D(mat_texture, geom_texCoord);
-		baseColor = 0.5 * textureColor.xyz;
+		baseColor = textureColor.xyz;
 		result.a = textureColor.a;
 	}
 	else {
-		baseColor = 0.5 * mat_diffuse.xyz;
+		baseColor = mat_diffuse.xyz;
 		result.a = mat_diffuse.a;
 	}
 
+	vec3 v = -normalize(geom_position);
+
 	for (int i = 0; i < light_count; i++) {
-		vec3 v = -normalize(geom_position);
-		vec3 l = geom_position - light_eyePosition[i];
+
+		vec3 l = light_eyePosition[i] - geom_position;
 		float r_squared = dot(l, l);
 		l = normalize(l);
-		vec3 h = normalize(v + l);
 
 		// The attenuation model used here is from http://wiki.blender.org/index.php/Doc:2.6/Manual/Lighting/Lights/Light_Attenuation
 		float d2 = light_falloffDistance[i] * light_falloffDistance[i];
 		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
+		// Compute diffuse
+		float diffuse_dot = max(dot(n,l), 0);
 
-		// quick hack to make things darker if they're on the wrong side
-		//float nlDot = min(1, dot(n,l) + 1);
-		//intensity *= nlDot;
+		// give some ambient lighting
+		result.xyz += 0.3 * baseColor;
+		// the rest depends on the light angle (diffuse_dot)
+		result.xyz += 0.7 * baseColor * diffuse_dot * light_color[i] * intensity;
 
-		vec3 color = baseColor * intensity;
-
-		float dotProd = dot(n, l);
-		if (mat_hasTexture) {
-			color += 0.7 * max(0,dotProd) * textureColor.xyz * intensity;
+		// Compute specular, but only if the light source is not behind the surface
+		if (dot(l, n) > 0.000001) {
+			vec3 h = normalize(v + l);
+			float specular_dot = pow(max(0, dot(n, h)), mat_shininess);
+			result.xyz += mat_specular * specular_dot * light_color[i] * intensity;
 		}
-		else {
-			color += 0.7 * max(0,dotProd) * mat_diffuse.xyz * intensity;
-		}
-
-		float halfDot = dot(h, n);
-		vec3 specular = pow(max(0.00001, halfDot), mat_shininess) * mat_specular * intensity;
-		color += specular;
-		result.rgb += color;
 	}
 
 	if (mat_hasAdditiveTexture)
@@ -87,6 +83,8 @@ void main()
 		vec4 sphereMapColor = texture2D(mat_additiveTexture, t);
 		result.rgb += sphereMapColor.rgb;
 	}
+
+	vec3 norm = (n + 1) / 2;
 
 	out_frag_color = result;
 

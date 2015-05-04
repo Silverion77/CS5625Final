@@ -31,7 +31,7 @@ namespace Chireiden.Meshes
 
         public void renderMeshes(Camera camera, Matrix4 toWorldMatrix)
         {
-            ShaderProgram program = Shaders.AnimationShader;
+            ShaderProgram program = Shaders.BlenderShader;
 
             Matrix4 viewMatrix = camera.getViewMatrix();
             Matrix4 projectionMatrix = camera.getProjectionMatrix();
