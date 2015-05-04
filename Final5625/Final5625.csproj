@@ -53,6 +53,7 @@
     <Compile Include="AllShaders.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />
+    <Compile Include="ParticleSystem.cs" />
     <Compile Include="Meshes\Animations\AnimationClip.cs" />
     <Compile Include="Meshes\Animations\KeyframeSeries.cs" />
     <Compile Include="Meshes\MatrixTexture.cs" />
@@ -63,7 +64,6 @@
     <Compile Include="Meshes\SkeletalMeshGroup.cs" />
     <Compile Include="Meshes\SkeletalTriMesh.cs" />
     <Compile Include="Scenes\ParticleEmitter.cs" />
-    <Compile Include="ParticleSystem.cs" />
     <Compile Include="Scenes\Cube.cs" />
     <Compile Include="Scenes\Empty.cs" />
     <Compile Include="GameMain.cs" />
@@ -255,6 +255,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\skeletal_mesh.vert">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\logLuminance.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\logluminance.frag">
@@ -273,6 +276,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\particle.geom">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\copy.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

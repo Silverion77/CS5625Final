@@ -76,7 +76,6 @@ namespace Chireiden
 
             // Other state
             GL.Enable(EnableCap.DepthTest);
-            GL.ClearColor(System.Drawing.Color.MidnightBlue);
 
             // Make the world
             world = new World();
@@ -215,6 +214,7 @@ namespace Chireiden
             if (paused) return;
 
             GL.Viewport(0, 0, Width, Height);
+            GL.ClearColor(System.Drawing.Color.MidnightBlue);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             camera.transformPointLights(world.getPointLights());
@@ -224,7 +224,9 @@ namespace Chireiden
 
             world.render(camera);
 
-            // ParticleSystem.Render(camera);
+            Framebuffer.StartTransparency();
+            ParticleSystem.Render(camera);
+            Framebuffer.EndTransparency();
 
             Framebuffer.BlitToScreen();
 
