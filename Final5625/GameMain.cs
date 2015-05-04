@@ -72,7 +72,9 @@ namespace Chireiden
             VSync = VSyncMode.Off;
 
             // Load shaders here
-            Shaders.loadShaders();
+            ShaderLibrary.loadShaders();
+            // Load meshes
+            MeshLibrary.loadMeshes();
 
             // Other state
             GL.Enable(EnableCap.DepthTest);
@@ -87,21 +89,16 @@ namespace Chireiden
 
             float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
 
-            var danLDruce = MeshImporter.importFromFile("data/model/textCube/textureCube.dae");
-
-            meshOrig = new SkeletalMeshNode(danLDruce);
+            meshOrig = new SkeletalMeshNode(MeshLibrary.TextCube);
             world.addChild(meshOrig);
 
-            var okuu_meshes = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
-
-            var happysphere = MeshImporter.importFromFile("data/model/happysphere/happysphere.dae");
-            MeshNode happyNode = new MeshNode(happysphere, new Vector3(0, 0, 5));
+            MeshNode happyNode = new MeshNode(MeshLibrary.HappySphere, new Vector3(0, 0, 5));
             world.addChild(happyNode);
 
-            meshCopy = new SkeletalMeshNode(danLDruce, new Vector3(4, 0, 0));
+            meshCopy = new SkeletalMeshNode(MeshLibrary.TextCube, new Vector3(4, 0, 0));
             world.addChild(meshCopy);
 
-            okuu = new SkeletalMeshNode(okuu_meshes, new Vector3(2, 2, 0));
+            okuu = new SkeletalMeshNode(MeshLibrary.Okuu, new Vector3(2, 2, 0));
             world.addChild(okuu);
 
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
@@ -206,7 +203,7 @@ namespace Chireiden
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
 
-            // ParticleSystem.Update(e);
+            ParticleSystem.Update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
             updateTime = stopwatch.ElapsedMilliseconds;
@@ -238,7 +235,7 @@ namespace Chireiden
             SwapBuffers();
 
             renderTime = stopwatch.ElapsedMilliseconds;
-            // Console.Write("Update time: {0} ms      Render time: {1} ms   \r", updateTime, renderTime);
+            Console.Write("Update time: {0} ms               Render time: {1} ms   \r", updateTime, renderTime);
         }
 
         [STAThread]

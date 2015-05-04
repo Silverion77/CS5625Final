@@ -19,6 +19,7 @@ in vec4 vert_boneWeights;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
 
 uniform sampler2DRect bone_matrices;
 uniform int bone_textureWidth;
@@ -88,16 +89,18 @@ void main()
 			position += boneWeight * (boneTransform * vec4(P, 1)).xyz;
 			normal += boneWeight * (boneTransform * vec4(N, 0)).xyz;
 			tangent += boneWeight * (boneTransform * vec4(T, 0)).xyz;
+			bitangent += boneWeight * (boneTransform * vec4(B, 0)).xyz;
 		}
 	}
 
 	position /= totalWeight;
 	tangent /= totalWeight;
 	normal /= totalWeight;
+	bitangent /= totalWeight;
 
-	normal = normalize(normal);
 	tangent = normalize(tangent);
-	bitangent = normalize(cross(normal, tangent)) * vert_tangent.w;
+	bitangent = normalize(bitangent);
+	normal = normalize(cross(tangent, bitangent) * vert_tangent.w);
 
 	gl_Position = projectionMatrix *
 			(modelViewMatrix * vec4(position,1));
@@ -105,7 +108,7 @@ void main()
 	geom_position = (modelViewMatrix * vec4(position,1)).xyz;
 	geom_texCoord = vert_texCoord;
 
-	geom_normal = normalize(modelViewMatrix * vec4(normal,0)).xyz;	
+	geom_normal = normalize(normalMatrix * normal);	
 	geom_tangent = normalize(modelViewMatrix * vec4(tangent,0)).xyz;
-	geom_bitangent = normalize(modelViewMatrix * vec4(bitangent,0)).xyz;	
+	geom_bitangent = normalize(modelViewMatrix * vec4(bitangent,0)).xyz;
 }

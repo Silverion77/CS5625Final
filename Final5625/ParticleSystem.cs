@@ -171,23 +171,23 @@ namespace Chireiden
 
             GL.DepthMask(false);
             GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
-            Shaders.ParticleShader.use();
+            ShaderLibrary.ParticleShader.use();
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.getTexture("data/texture/particle/reaction.png").getTextureID());
-            Shaders.ParticleShader.setUniformInt1("reaction", 0);
+            ShaderLibrary.ParticleShader.setUniformInt1("reaction", 0);
 
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.getTexture("data/texture/particle/0.png").getTextureID());
-            Shaders.ParticleShader.setUniformInt1("tex", 1);
+            ShaderLibrary.ParticleShader.setUniformInt1("tex", 1);
 
-            Shaders.ParticleShader.setUniformMatrix4("viewProjectionMatrix", viewProjectionMatrix);
-            Shaders.ParticleShader.setUniformFloat3("up", up / up.Length);
-            Shaders.ParticleShader.setUniformFloat3("right", right / right.Length); 
+            ShaderLibrary.ParticleShader.setUniformMatrix4("viewProjectionMatrix", viewProjectionMatrix);
+            ShaderLibrary.ParticleShader.setUniformFloat3("up", up / up.Length);
+            ShaderLibrary.ParticleShader.setUniformFloat3("right", right / right.Length); 
             GL.BindVertexArray(VAO);
             GL.DrawArrays(PrimitiveType.Points, (int)ringbufferHead * MAX_PARTICLES, particles.Count());
             GL.BindVertexArray(0);
-            Shaders.ParticleShader.unuse();
+            ShaderLibrary.ParticleShader.unuse();
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.DepthMask(true);
 

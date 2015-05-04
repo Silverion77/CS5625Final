@@ -100,18 +100,14 @@ namespace Chireiden.Meshes
         /// <param name="toWorldMatrix"></param>
         public void renderMeshes(Camera camera, Matrix4 toWorldMatrix, AnimationClip clip, double time)
         {
-            ShaderProgram program = Shaders.AnimationShader;
+            ShaderProgram program = ShaderLibrary.AnimationShader;
 
             Matrix4 viewMatrix = camera.getViewMatrix();
             Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
             // Compute transformation matrices
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
-
-            if (clip != null && clip.Name.Equals("raise_arm"))
-            {
-                //Console.WriteLine("OKUU CLIP: DURATION {0}", clip.Duration);
-            }
+            Matrix3 normalMatrix = Utils.normalMatrix(modelView);
 
             // Apply animated pose if supplied
             if (clip != null)
@@ -134,6 +130,7 @@ namespace Chireiden.Meshes
             program.setUniformMatrix4("projectionMatrix", projectionMatrix);
             program.setUniformMatrix4("modelViewMatrix", modelView);
             program.setUniformMatrix4("viewMatrix", viewMatrix);
+            program.setUniformMatrix3("normalMatrix", normalMatrix);
 
             // Bind bone texture data
             program.setUniformMat4Texture("bone_matrices", 0, boneTransforms, matrixTexture);
@@ -144,7 +141,7 @@ namespace Chireiden.Meshes
 
             foreach (SkeletalTriMesh m in meshes)
             {
-                m.renderMesh(camera, toWorldMatrix, Shaders.AnimationShader, 1);
+                m.renderMesh(camera, toWorldMatrix, ShaderLibrary.AnimationShader, 1);
             }
 
             program.unbindTextureRect(0);

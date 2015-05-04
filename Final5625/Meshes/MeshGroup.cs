@@ -31,13 +31,14 @@ namespace Chireiden.Meshes
 
         public void renderMeshes(Camera camera, Matrix4 toWorldMatrix)
         {
-            ShaderProgram program = Shaders.BlenderShader;
+            ShaderProgram program = ShaderLibrary.BlenderShader;
 
             Matrix4 viewMatrix = camera.getViewMatrix();
             Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
             // Compute transformation matrices
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
+            Matrix3 normalMatrix = Utils.normalMatrix(modelView);
 
             program.use();
 
@@ -45,11 +46,12 @@ namespace Chireiden.Meshes
             program.setUniformMatrix4("projectionMatrix", projectionMatrix);
             program.setUniformMatrix4("modelViewMatrix", modelView);
             program.setUniformMatrix4("viewMatrix", viewMatrix);
+            program.setUniformMatrix3("normalMatrix", normalMatrix);
 
             camera.setPointLightUniforms(program);
 
             foreach (TriMesh m in meshes) {
-                m.renderMesh(camera, toWorldMatrix, Shaders.BlenderShader, 0);
+                m.renderMesh(camera, toWorldMatrix, ShaderLibrary.BlenderShader, 0);
             }
 
             program.unuse();

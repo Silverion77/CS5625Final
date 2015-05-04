@@ -16,6 +16,7 @@ in vec4 vert_tangent;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat3 normalMatrix;
 
 out vec3 geom_position;
 out vec3 geom_normal;
@@ -34,7 +35,7 @@ void main()
 	vec3 N = normalize(vert_normal);
 	vec3 T = normalize(vert_tangent.xyz);
 	vec3 B = normalize(cross(N, T) * vert_tangent.w);
-	geom_normal = normalize(modelViewMatrix * vec4(N,0)).xyz;	
+	geom_normal = normalize(normalMatrix * N);	
 	geom_tangent = normalize(modelViewMatrix * vec4(T,0)).xyz;
 	geom_bitangent = normalize(modelViewMatrix * vec4(B,0)).xyz;
 }

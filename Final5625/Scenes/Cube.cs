@@ -125,18 +125,18 @@ namespace Chireiden.Scenes
 
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(vaoHandle);
-            Shaders.CubeShader.use();
+            ShaderLibrary.CubeShader.use();
 
-            Shaders.CubeShader.setUniformMatrix4("projectionMatrix", projectionMatrix);
-            Shaders.CubeShader.setUniformMatrix4("modelViewMatrix", modelView);
+            ShaderLibrary.CubeShader.setUniformMatrix4("projectionMatrix", projectionMatrix);
+            ShaderLibrary.CubeShader.setUniformMatrix4("modelViewMatrix", modelView);
 
-            camera.setPointLightUniforms(Shaders.CubeShader);
+            camera.setPointLightUniforms(ShaderLibrary.CubeShader);
 
             GL.DrawElements(PrimitiveType.Triangles, indicesVboData.Length,
                 DrawElementsType.UnsignedInt, IntPtr.Zero);
 
             // Clean up
-            Shaders.CubeShader.unuse();
+            ShaderLibrary.CubeShader.unuse();
             GL.BindVertexArray(0);
 
             // Render children if they exist

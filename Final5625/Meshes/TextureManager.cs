@@ -21,6 +21,7 @@ namespace Chireiden.Meshes
             else
             {
                 t = new Texture(filename);
+                dict.Add(filename, t);
                 return t;
             }
         }

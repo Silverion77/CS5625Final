@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Chireiden
 {
-    public class Shaders {
+    public class ShaderLibrary {
+
         public static ShaderProgram CubeShader;
         public static ShaderProgram BlenderShader;
         public static ShaderProgram TonemapShader;

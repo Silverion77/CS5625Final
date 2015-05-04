@@ -138,10 +138,10 @@ namespace Chireiden
 
             GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Disable(EnableCap.DepthTest);
-            Shaders.CopyShader.use();
-            Shaders.CopyShader.bindTexture2D("tex", 0, TransparencyColorTexture);
+            ShaderLibrary.CopyShader.use();
+            ShaderLibrary.CopyShader.bindTexture2D("tex", 0, TransparencyColorTexture);
             RenderFullscreenQuad();
-            Shaders.CopyShader.unuse();
+            ShaderLibrary.CopyShader.unuse();
             GL.Enable(EnableCap.DepthTest);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
         }
@@ -152,21 +152,21 @@ namespace Chireiden
 
             //Compute log luminance
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, DownsampleTexture, 0);
-            Shaders.LogLuminanceShader.use();
-            Shaders.LogLuminanceShader.bindTexture2D("colorBuffer", 0, ColorTexture);
+            ShaderLibrary.LogLuminanceShader.use();
+            ShaderLibrary.LogLuminanceShader.bindTexture2D("colorBuffer", 0, ColorTexture);
             RenderFullscreenQuad();
-            Shaders.LogLuminanceShader.unuse();
+            ShaderLibrary.LogLuminanceShader.unuse();
             GL.BindTexture(TextureTarget.Texture2D, DownsampleTexture);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
             
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
             GL.DrawBuffer(DrawBufferMode.Back);
-            Shaders.TonemapShader.use();
-            Shaders.TonemapShader.bindTexture2D("colorBuffer", 0, ColorTexture);
-            Shaders.TonemapShader.bindTexture2D("logLuminance", 1, DownsampleTexture);
+            ShaderLibrary.TonemapShader.use();
+            ShaderLibrary.TonemapShader.bindTexture2D("colorBuffer", 0, ColorTexture);
+            ShaderLibrary.TonemapShader.bindTexture2D("logLuminance", 1, DownsampleTexture);
             RenderFullscreenQuad();
-            Shaders.TonemapShader.unuse();
+            ShaderLibrary.TonemapShader.unuse();
 
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FboHandle);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorTexture, 0);

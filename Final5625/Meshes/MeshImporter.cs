@@ -24,6 +24,7 @@ namespace Chireiden.Meshes
         /// <returns></returns>
         public static MeshContainer importFromFile(string filename)
         {
+            Console.WriteLine("Importing {0}", filename);
             // Create a new importer
             AssimpContext importer = new AssimpContext();
 
@@ -31,12 +32,12 @@ namespace Chireiden.Meshes
             NormalSmoothingAngleConfig config = new NormalSmoothingAngleConfig(66.0f);
             importer.SetConfig(config);
 
-            //This is how we add a logging callback 
-            LogStream logstream = new LogStream(delegate(String msg, String userData)
+            //This is how we add a logging callback
+            /* LogStream logstream = new LogStream(delegate(String msg, String userData)
             {
                 Console.WriteLine(msg);
             });
-            logstream.Attach();
+            logstream.Attach(); */
 
             //Import the model. All configs are set. The model
             //is imported, loaded into managed memory. Then the unmanaged memory is released, and everything is reset.
@@ -60,8 +61,6 @@ namespace Chireiden.Meshes
                 if (!m.HasBones) allMeshesHaveBones = false;
             }
 
-            Console.WriteLine("All meshes have bones? {0}", allMeshesHaveBones);
-
             if (boneArray != null && boneArray.Length > ShaderProgram.MAX_BONES)
             {
                 throw new Exception("Skeleton has " + boneArray.Length + " bones, which exceeds the maximum of " + ShaderProgram.MAX_BONES);
@@ -73,7 +72,6 @@ namespace Chireiden.Meshes
 
             foreach (Mesh m in model.Meshes)
             {
-                Console.WriteLine("Importing mesh with {0} verts, {1} faces", m.VertexCount, m.FaceCount);
                 // We should only be interested in meshes with vertices
                 if (!m.HasVertices) continue;
                 var verts = m.Vertices;
