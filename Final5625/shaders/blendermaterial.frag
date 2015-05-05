@@ -63,9 +63,9 @@ void main()
 		float diffuse_dot = max(dot(n,l), 0);
 
 		// give some ambient lighting
-		result.xyz += 0.3 * baseColor;
+		result.xyz += 0.1 * baseColor;
 		// the rest depends on the light angle (diffuse_dot)
-		result.xyz += 0.7 * baseColor * diffuse_dot * light_color[i] * intensity;
+		result.xyz += 0.9 * baseColor * diffuse_dot * light_color[i] * intensity;
 
 		// Compute specular, but only if the light source is not behind the surface
 		if (dot(l, n) > 0.000001) {

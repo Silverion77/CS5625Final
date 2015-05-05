@@ -21,6 +21,7 @@ namespace Chireiden
     {
         public float MouseSensitivity = 0.01f;
         public float distanceBehind = 5;
+        public float MouseWheelSensitivity = 0.5f;
 
         float pitch = 0;
         float yaw = 0;
@@ -181,7 +182,7 @@ namespace Chireiden
 
         public void zoom(float amount)
         {
-            distanceBehind += amount;
+            distanceBehind += amount * MouseWheelSensitivity;
             distanceBehind = Math.Max(Math.Min(distanceBehind, 100), 1);
         }
     }

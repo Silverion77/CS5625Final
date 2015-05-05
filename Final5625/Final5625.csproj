@@ -81,6 +81,7 @@
     <Compile Include="Scenes\PointLight.cs" />
     <Compile Include="Scenes\SceneTreeNode.cs" />
     <Compile Include="Scenes\SkeletalMeshNode.cs" />
+    <Compile Include="Scenes\UtsuhoReiuji.cs" />
     <Compile Include="ShaderProgram.cs" />
     <Compile Include="TrackingCamera.cs" />
     <Compile Include="Scenes\PlaceableObject.cs" />

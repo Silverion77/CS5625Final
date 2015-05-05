@@ -63,6 +63,11 @@ namespace Chireiden.Meshes
             return clip;
         }
 
+        public bool hasAnimation(string s)
+        {
+            return animationLibrary.ContainsKey(s);
+        }
+
         public void addAnimation(AnimationClip c)
         {
             Console.WriteLine("Added animation {0} to skeletal mesh group, duration {1}", c.Name, c.Duration);

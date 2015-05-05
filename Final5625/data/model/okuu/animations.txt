@@ -1,3 +1,4 @@
-idle 0 59 true
-walk 60 89 true
-cheer 90 149 true
+idle 0 60 true
+walk 61 91 true
+run 92 108 true
+cheer 109 169 true

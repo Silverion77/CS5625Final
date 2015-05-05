@@ -15,6 +15,13 @@ namespace Chireiden.Meshes
         AnimationClip fetchAnimation(string anim);
 
         /// <summary>
+        /// Returns whether or not this container has an animation with the given name.
+        /// </summary>
+        /// <param name="anim"></param>
+        /// <returns></returns>
+        bool hasAnimation(string anim);
+
+        /// <summary>
         /// Renders the meshes in this container, with no animation.
         /// </summary>
         /// <param name="camera"></param>

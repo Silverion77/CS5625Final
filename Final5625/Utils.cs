@@ -25,5 +25,18 @@ namespace Chireiden
             normalMat.Transpose();
             return normalMat;
         }
+
+        public static Vector3 FORWARD = -Vector3.UnitY;
+        public static Vector3 UP = Vector3.UnitZ;
+
+        public static double xyPlaneRotation(Vector3 v1, Vector3 v2)
+        {
+            return Math.Atan2(v2.Y, v2.X) - Math.Atan2(v1.Y, v1.X);
+        }
+
+        public static double worldRotationOfDir(Vector3 dir)
+        {
+            return xyPlaneRotation(FORWARD, dir);
+        }
     }
 }

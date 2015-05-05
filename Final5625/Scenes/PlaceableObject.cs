@@ -46,15 +46,18 @@ namespace Chireiden.Scenes
             return Matrix4.Mult(scaleRot, translationMat);
         }
 
-        public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
+        protected void updateMatricesAndWorldPos(Matrix4 parentToWorldMatrix)
         {
             toParentMatrix = modelMatrix();
             toWorldMatrix = Matrix4.Mult(toParentMatrix, parentToWorldMatrix);
-
             // The center of the local space object is (0, 0, 0), so we transform
             // that to world space.
             worldPosition = Vector4.Transform(localCenter, toWorldMatrix).Xyz;
+        }
 
+        public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
+        {
+            updateMatricesAndWorldPos(parentToWorldMatrix);
             updateChildren(e, toWorldMatrix);
         }
 

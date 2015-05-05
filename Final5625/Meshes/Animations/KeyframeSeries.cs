@@ -135,11 +135,9 @@ namespace Chireiden.Meshes.Animations
             int startFrame = findTimeBelow(startTime + LEEWAY, rotations);
             int endFrame = findTimeBelow(endTime + LEEWAY, rotations);
 
-            int wrapAdd;
-            if (wrap && startFrame != endFrame) wrapAdd = 1; else wrapAdd = 0;
             int numFrames = endFrame - startFrame + 1;
-            keyframes = new Quaternion[numFrames + wrapAdd];
-            times = new double[numFrames + wrapAdd];
+            keyframes = new Quaternion[numFrames];
+            times = new double[numFrames];
 
             startTime = rotations[startFrame].Time;
 
@@ -149,13 +147,6 @@ namespace Chireiden.Meshes.Animations
                 Assimp.Quaternion r = rotations[startFrame + i].Value;
                 Quaternion ourRotation = new Quaternion(r.X, r.Y, r.Z, r.W);
                 keyframes[i] = ourRotation;
-            }
-
-            if (wrap && numFrames > 1)
-            {
-                double timeStep = times[1] - times[0];
-                keyframes[numFrames] = keyframes[0];
-                times[numFrames] = times[numFrames - 1] + timeStep;
             }
 
             Length = times[times.Length - 1];
@@ -209,11 +200,9 @@ namespace Chireiden.Meshes.Animations
             int startFrame = findTimeBelow(startTime + LEEWAY, locations);
             int endFrame = findTimeBelow(endTime + LEEWAY, locations);
 
-            int wrapAdd;
-            if (wrap && startFrame != endFrame) wrapAdd = 1; else wrapAdd = 0;
             int numFrames = endFrame - startFrame + 1;
-            keyframes = new Vector3[numFrames + wrapAdd];
-            times = new double[numFrames + wrapAdd];
+            keyframes = new Vector3[numFrames];
+            times = new double[numFrames];
 
             startTime = locations[startFrame].Time;
 
@@ -224,13 +213,6 @@ namespace Chireiden.Meshes.Animations
                 Vector3 ourLocation = new Vector3(r.X, r.Y, r.Z);
 
                 keyframes[i] = ourLocation;
-            }
-
-            if (wrap && numFrames > 1)
-            {
-                double timeStep = times[1] - times[0];
-                keyframes[numFrames] = keyframes[0];
-                times[numFrames] = times[numFrames - 1] + timeStep;
             }
 
             Length = times[times.Length - 1];

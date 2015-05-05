@@ -68,6 +68,11 @@ namespace Chireiden.Meshes
             return null;
         }
 
+        public bool hasAnimation(string s)
+        {
+            return false;
+        }
+
         public void addMesh(TriMesh m)
         {
             meshes.Add(m);
