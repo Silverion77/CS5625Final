@@ -54,6 +54,7 @@
     <Compile Include="AllShaders.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />
+    <Compile Include="Materials\POMMaterial.cs" />
     <Compile Include="ParticleSystem.cs" />
     <Compile Include="Meshes\Animations\AnimationClip.cs" />
     <Compile Include="Meshes\Animations\KeyframeSeries.cs" />
