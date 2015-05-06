@@ -68,6 +68,11 @@ namespace Chireiden.Scenes
             animTime = 0;
         }
 
+        protected Clip fetchAnimation(string animation)
+        {
+            return meshes.fetchAnimation(animation);
+        }
+
         /// <summary>
         /// Switches the current animation to the requested one, and also resets
         /// the playback time.

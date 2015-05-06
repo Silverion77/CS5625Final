@@ -20,6 +20,8 @@ namespace Chireiden.Scenes
         Recovering,         // Okuu is recovering from an attack. Can be interrupted by backstep, and possibly by continuing the attack
                             //      (depending on the attack stage), but not by anything else.
         Backstepping,       // Okuu is backstepping. Can't interrupt. Has invulnerability frames.
+        Transitioning,      // Okuu is moving from one state to another. Can't be interrupted, except by damage.
+        Aiming,             // Okuu is aiming her cannon. Can fire, backstep, or lower the cannon, but can't do anything else.
         Uninterruptable,    // Okuu is performing some action that cannot be interrupted until it has finished.
         KO                  // Okuu is knocked out. So sad.
     }
@@ -66,6 +68,7 @@ namespace Chireiden.Scenes
         bool cheerPressed = false;
         bool attackPressed = false;
         bool backstepPressed = false;
+        bool cannonPressed = false;
 
         BufferAction bufferedAction;
 
@@ -99,7 +102,7 @@ namespace Chireiden.Scenes
         const double backstepEndMove = 17.0 / 24;
 
         bool running = true;
-        bool ready = false;
+        bool readyForAction = false;
 
         // The time in seconds it should take to smoothly interpolate from one rotation to another.
         const double rotationInterpDuration = 0.1;
@@ -107,6 +110,9 @@ namespace Chireiden.Scenes
         double currentRotationInterp;
         // Whether or not rotation interpolation is in process
         bool RotationInterpActive { get { return currentRotationInterp < rotationInterpDuration; } }
+
+        // The state that we will go to after the current Uninterruptable state ends
+        OkuuState transitionState = OkuuState.Idle;
 
         public UtsuhoReiuji(MeshContainer m, Vector3 loc)
             : base(m, loc)
@@ -126,37 +132,61 @@ namespace Chireiden.Scenes
             if (running != newRunning)
             {
                 running = newRunning;
-                if (running) run();
-                else walk();
+                if (okuuState == OkuuState.Moving)
+                {
+                    if (running) run();
+                    else walk();
+                }
+            }
+        }
+
+        public void toggleReadyIdle()
+        {
+            toggleReadyIdle(!readyForAction);
+        }
+
+        public void toggleReadyIdle(bool newReady)
+        {
+            if (readyForAction != newReady)
+            {
+                readyForAction = newReady;
+                if (okuuState == OkuuState.Idle)
+                {
+                    if (readyForAction) ready();
+                    else idle();
+                }
             }
         }
 
         public void runOrWalk()
         {
+            okuuState = OkuuState.Moving;
             if (running) run(); else walk();
         }
 
         public void run()
         {
-            okuuState = OkuuState.Moving;
             switchAnimationSmooth("run");
         }
 
         public void walk()
         {
-            okuuState = OkuuState.Moving;
             switchAnimationSmooth("walk");
         }
 
         public void readyOrIdle()
         {
-            // TODO: add conditions for ready
-            idle();
+            okuuState = OkuuState.Idle;
+            if (readyForAction) ready(); else idle();
+        }
+
+        public void ready()
+        {
+            switchAnimationSmooth("ready");
         }
 
         public void idle()
         {
-            okuuState = OkuuState.Idle;
             switchAnimationSmooth("idle");
         }
 
@@ -228,12 +258,44 @@ namespace Chireiden.Scenes
             switchAnimationSmooth("backstep");
         }
 
+        public void startAiming()
+        {
+            // After playing the raise_cannon animation, which should be uninterruptable, 
+            // we should go to the Aiming state, and start playing the aiming animation.
+            okuuState = OkuuState.Transitioning;
+            switchAnimationSmooth("raise_cannon");
+            transitionState = OkuuState.Aiming;
+        }
+
+        public void aim()
+        {
+            okuuState = OkuuState.Aiming;
+            // The aiming animation is designed to follow smoothly from the raise cannon animation
+            switchAnimation("aiming");
+        }
+
+        public void fire()
+        {
+            okuuState = OkuuState.Uninterruptable;
+            switchAnimationSmooth("fire");
+            transitionState = OkuuState.Aiming;
+        }
+
+        public void stopAiming()
+        {
+            // After we play the lower_cannon animation, go back to idle.
+            okuuState = OkuuState.Transitioning;
+            switchAnimationSmooth("lower_cannon");
+            transitionState = OkuuState.Idle;
+        }
+
         void clearInputFlags()
         {
             inputMovement = Vector3.Zero;
             cheerPressed = false;
             attackPressed = false;
             backstepPressed = false;
+            cannonPressed = false;
         }
 
         public override float getMoveSpeed()
@@ -322,6 +384,24 @@ namespace Chireiden.Scenes
             speed = oldSpeed * (1f - blendFactor) + targetSpeed * blendFactor;
         }
 
+        void transition()
+        {
+            switch (transitionState)
+            {
+                case OkuuState.Aiming:
+                    aim();
+                    break;
+                case OkuuState.Idle:
+                    readyOrIdle();
+                    break;
+                default:
+                    Console.WriteLine("Transitioning to other states is not implemented.");
+                    readyOrIdle();
+                    break;
+            }
+            transitionState = OkuuState.Idle;
+        }
+
         /// <summary>
         /// Take any actions that are entailed by the current state.
         /// </summary>
@@ -338,10 +418,9 @@ namespace Chireiden.Scenes
                         // Just keep idling
                         break;
                     case OkuuState.Interruptable:
-                    case OkuuState.Uninterruptable:
                     case OkuuState.Backstepping:
                         // If we finished some action, regardless of interruptability, then go back to idle
-                        idle();
+                        readyOrIdle();
                         break;
                     case OkuuState.Attacking:
                         // The follow-on depends on what the user has done
@@ -368,8 +447,15 @@ namespace Chireiden.Scenes
                         attackStage = 0;
                         readyOrIdle();
                         break;
+                    case OkuuState.Uninterruptable:
+                    case OkuuState.Transitioning:
+                        // Complete the transition
+                        transition();
+                        break;
+                    case OkuuState.Aiming:
                     case OkuuState.Moving:
                     case OkuuState.KO:
+                        // If we're aiming, keep aiming
                         // If we're moving, keep moving
                         // And if she's out, she's out
                         break;
@@ -382,6 +468,7 @@ namespace Chireiden.Scenes
         /// 
         ///     - Player inputs a backstep
         ///     - Player inputs an attack
+        ///     - Player inputs raise/lower cannon
         ///     - Player inputs movement
         ///     - Player inputs cheering emote
         ///     - Player does nothing
@@ -398,6 +485,10 @@ namespace Chireiden.Scenes
             else if (attackPressed)
             {
                 return processAttackInput();
+            }
+            else if (cannonPressed)
+            {
+                return processCannonInput();
             }
             else if (!inputMovement.Equals(Vector3.Zero))
             {
@@ -445,6 +536,7 @@ namespace Chireiden.Scenes
                 case OkuuState.Interruptable:
                 case OkuuState.Moving:
                 case OkuuState.Recovering:
+                case OkuuState.Aiming:
                     // All of these are OK to step out of
                     backstep();
                     return true;
@@ -456,12 +548,8 @@ namespace Chireiden.Scenes
                         bufferedAction = BufferAction.Backstep;
                     }
                     return false;
-                case OkuuState.Backstepping:
-                case OkuuState.Uninterruptable:
-                case OkuuState.KO:
-                    // Can't step out of any of these
-                    return false;
                 default:
+                    // Can't step out of anything else
                     return false;
             }
         }
@@ -496,12 +584,32 @@ namespace Chireiden.Scenes
                         return true;
                     }
                     else return false;
-                case OkuuState.Backstepping:
-                case OkuuState.Uninterruptable:
-                case OkuuState.KO:
-                    // Can't attack out of these.
-                    return false;
+                case OkuuState.Aiming:
+                    // In this case, we want to shoot the cannon.
+                    fire();
+                    return true;
                 default:
+                    // Can't attack out of anything else.
+                    return false;
+            }
+        }
+
+        bool processCannonInput()
+        {
+            switch (okuuState)
+            {
+                case OkuuState.Idle:
+                case OkuuState.Interruptable:
+                case OkuuState.Moving:
+                    // These are all OK to start aiming out of
+                    startAiming();
+                    return true;
+                case OkuuState.Aiming:
+                    // In this case we want to stop aiming
+                    stopAiming();
+                    return true;
+                default:
+                    // In any other case, we can't toggle aiming.
                     return false;
             }
         }
@@ -526,14 +634,8 @@ namespace Chireiden.Scenes
                     // direction, but not set her animation.
                     setTargetRotationAndVelocityFromDir(inputMovement);
                     return false;
-                case OkuuState.Attacking:
-                case OkuuState.Recovering:
-                case OkuuState.Uninterruptable:
-                case OkuuState.Backstepping:
-                case OkuuState.KO:
-                    // If she's in some uninterruptable state, nothing changes.
-                    return false;
                 default:
+                    // There's no other state where we can start moving.
                     return false;
             }
         }
@@ -552,15 +654,8 @@ namespace Chireiden.Scenes
                     // then we can cheer.
                     cheer();
                     return true;
-                case OkuuState.Moving:
-                case OkuuState.Attacking:
-                case OkuuState.Recovering:
-                case OkuuState.Uninterruptable:
-                case OkuuState.Backstepping:
-                case OkuuState.KO:
-                    // Otherwise she's indisposed and cannot cheer.
-                    return false;
                 default:
+                    // Otherwise she's indisposed and cannot cheer.
                     return false;
             }
         }
@@ -579,12 +674,14 @@ namespace Chireiden.Scenes
                 case OkuuState.Attacking:
                 case OkuuState.Recovering:
                 case OkuuState.Backstepping:
+                case OkuuState.Transitioning:
+                case OkuuState.Aiming:
                 case OkuuState.KO:
                     // In any of these cases we should keep doing what we were doing
                     return false;
                 case OkuuState.Moving:
                     // Here we should stop moving
-                    idle();
+                    readyOrIdle();
                     return true;
                 default:
                     return false;
@@ -609,6 +706,11 @@ namespace Chireiden.Scenes
         public void inputBackstep()
         {
             backstepPressed = true;
+        }
+
+        public void inputCannon()
+        {
+            cannonPressed = true;
         }
     }
 }

@@ -117,6 +117,9 @@ namespace Chireiden
                 case MouseButton.Left:
                     okuu.inputAttack();
                     break;
+                case MouseButton.Right:
+                    okuu.inputCannon();
+                    break;
                 default:
                     break;
             }
@@ -137,6 +140,9 @@ namespace Chireiden
                     break;
                 case Key.Tab:
                     okuu.inputBackstep();
+                    break;
+                case Key.R:
+                    okuu.toggleReadyIdle();
                     break;
                 default:
                     break;
