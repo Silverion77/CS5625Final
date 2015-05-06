@@ -136,6 +136,7 @@ namespace Chireiden
                     okuu.inputCheer();
                     break;
                 case Key.Tab:
+                    okuu.inputBackstep();
                     break;
                 default:
                     break;
@@ -161,12 +162,12 @@ namespace Chireiden
             float mouseDY = current.Y - previous.Y;
             previous = current;
 
-            if (paused) return;
-
             camera.addRotation(mouseDX, mouseDY);
 
             // Because the viewpoint has changed, compute the new frame for the camera
             camera.computeFrame();
+
+            if (paused) return;
 
             // VELOCITY MODIFICATIONS HERE
 
@@ -199,8 +200,6 @@ namespace Chireiden
             if (keyboard[OpenTK.Input.Key.LShift])
                 running = false;
 
-
-
             if (moveX != 0 || moveY != 0)
             {
                 Vector3 worldMovementVector = camera.getMovementVector(moveX, moveY);
@@ -226,7 +225,6 @@ namespace Chireiden
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             stopwatch.Restart();
-            if (paused) return;
 
             GL.Viewport(0, 0, Width, Height);
             GL.ClearColor(System.Drawing.Color.MidnightBlue);

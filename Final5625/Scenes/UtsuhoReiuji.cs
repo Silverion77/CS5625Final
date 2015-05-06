@@ -19,8 +19,16 @@ namespace Chireiden.Scenes
         Attacking,          // Okuu is swinging her control rod around. Can't be interrupted, but can buffer another attack after it.
         Recovering,         // Okuu is recovering from an attack. Can be interrupted by backstep, and possibly by continuing the attack
                             //      (depending on the attack stage), but not by anything else.
+        Backstepping,       // Okuu is backstepping. Can't interrupt. Has invulnerability frames.
         Uninterruptable,    // Okuu is performing some action that cannot be interrupted until it has finished.
-        KOO                 // Okuu is knocked out. So sad.
+        KO                  // Okuu is knocked out. So sad.
+    }
+
+    enum BufferAction
+    {
+        Nothing,
+        Attack,
+        Backstep
     }
 
     class UtsuhoReiuji : SkeletalMeshNode
@@ -57,7 +65,9 @@ namespace Chireiden.Scenes
         Vector3 inputMovement = Vector3.Zero;
         bool cheerPressed = false;
         bool attackPressed = false;
-        bool attackBuffered = false;
+        bool backstepPressed = false;
+
+        BufferAction bufferedAction;
 
         Vector3 velocityDir;
         float targetSpeed = 0;
@@ -72,15 +82,24 @@ namespace Chireiden.Scenes
 
         const float runSpeed = 8;
         const float walkSpeed = 2;
+
+        // Speed and movement duration for the 3rd attack, which moves us forward
         const float attackMoveSpeed = 6;
-        const float recoverBackSpeed = -1.6f;
         const double attackStartMove = 5.0 / 24;
         const double attackEndMove = 19.0 / 24;
 
+        // The recovery from the 3rd attack moves us back a little
+        const float recoverBackSpeed = -1.6f;
         const double recoverStartMove = 22.0 / 24;
         const double recoverEndMove = 36.0 / 24;
 
-        bool running;
+        // Backstepping obviously moves us back
+        const float backstepSpeed = -8;
+        const double backstepStartMove = 2.0 / 24;
+        const double backstepEndMove = 17.0 / 24;
+
+        bool running = true;
+        bool ready = false;
 
         // The time in seconds it should take to smoothly interpolate from one rotation to another.
         const double rotationInterpDuration = 0.1;
@@ -96,7 +115,6 @@ namespace Chireiden.Scenes
             {
                 throw new Exception("Okuu doesn't have all of her animations.");
             }
-            running = true;
             oldRotation = Quaternion.Identity;
             targetRotation = Quaternion.Identity;
             velocityDir = Vector3.Zero;
@@ -181,11 +199,6 @@ namespace Chireiden.Scenes
             attackStage++;
         }
 
-        public void bufferAttack()
-        {
-            attackBuffered = true;
-        }
-
         public void attackRecover()
         {
             okuuState = OkuuState.Recovering;
@@ -208,11 +221,19 @@ namespace Chireiden.Scenes
             switchAnimation(recovery);
         }
 
+        public void backstep()
+        {
+            okuuState = OkuuState.Backstepping;
+            attackStage = 0;
+            switchAnimationSmooth("backstep");
+        }
+
         void clearInputFlags()
         {
             inputMovement = Vector3.Zero;
             cheerPressed = false;
             attackPressed = false;
+            backstepPressed = false;
         }
 
         public override float getMoveSpeed()
@@ -224,6 +245,10 @@ namespace Chireiden.Scenes
             else if (okuuState == OkuuState.Recovering && attackStage == 3 && animTime >= recoverStartMove && animTime <= recoverEndMove)
             {
                 return recoverBackSpeed;
+            }
+            else if (okuuState == OkuuState.Backstepping && animTime >= backstepStartMove && animTime <= backstepEndMove)
+            {
+                return backstepSpeed;
             }
             else if (okuuState == OkuuState.Moving)
             {
@@ -314,22 +339,29 @@ namespace Chireiden.Scenes
                         break;
                     case OkuuState.Interruptable:
                     case OkuuState.Uninterruptable:
+                    case OkuuState.Backstepping:
                         // If we finished some action, regardless of interruptability, then go back to idle
                         idle();
                         break;
                     case OkuuState.Attacking:
                         // The follow-on depends on what the user has done
-                        if (attackBuffered)
+                        switch (bufferedAction)
                         {
-                            // If the user has buffered another attack, activate it right away.
-                            attack();
-                            attackBuffered = false;
+                            case BufferAction.Attack:
+                                // If the user has buffered another attack, activate it right away.
+                                attack();
+                                break;
+                            case BufferAction.Backstep:
+                                // If the user has buffered a backstep, do that.
+                                backstep();
+                                break;
+                            default:
+                                // Otherwise nothing in particular was buffered, so recover.
+                                attackRecover();
+                                break;
                         }
-                        else
-                        {
-                            // Otherwise recover
-                            attackRecover();
-                        }
+                        // Regardless, clear the buffer.
+                        bufferedAction = BufferAction.Nothing;
                         break;
                     case OkuuState.Recovering:
                         // If we finished recovering, go back to the ready/idle position
@@ -337,7 +369,7 @@ namespace Chireiden.Scenes
                         readyOrIdle();
                         break;
                     case OkuuState.Moving:
-                    case OkuuState.KOO:
+                    case OkuuState.KO:
                         // If we're moving, keep moving
                         // And if she's out, she's out
                         break;
@@ -348,6 +380,7 @@ namespace Chireiden.Scenes
         /// <summary>
         /// Current priority of operations (high priority to low)
         /// 
+        ///     - Player inputs a backstep
         ///     - Player inputs an attack
         ///     - Player inputs movement
         ///     - Player inputs cheering emote
@@ -358,7 +391,11 @@ namespace Chireiden.Scenes
         /// </summary>
         bool setNextState()
         {
-            if (attackPressed)
+            if (backstepPressed)
+            {
+                return processBackstepInput();
+            }
+            else if (attackPressed)
             {
                 return processAttackInput();
             }
@@ -400,6 +437,35 @@ namespace Chireiden.Scenes
             velocityDir = vec;
         }
 
+        bool processBackstepInput()
+        {
+            switch (okuuState)
+            {
+                case OkuuState.Idle:
+                case OkuuState.Interruptable:
+                case OkuuState.Moving:
+                case OkuuState.Recovering:
+                    // All of these are OK to step out of
+                    backstep();
+                    return true;
+                case OkuuState.Attacking:
+                    // Can't step out of attack, but can buffer it.
+                    if (animTime >= 0.50 * currentAnimation.Duration)
+                    {
+                        // Buffer it if we're late enough in the animation.
+                        bufferedAction = BufferAction.Backstep;
+                    }
+                    return false;
+                case OkuuState.Backstepping:
+                case OkuuState.Uninterruptable:
+                case OkuuState.KO:
+                    // Can't step out of any of these
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
         /// <summary>
         /// If the player's most significant input is attack, then do this.
         /// </summary>
@@ -415,14 +481,13 @@ namespace Chireiden.Scenes
                     attack();
                     return true;
                 case OkuuState.Attacking:
-                    // TODO: Can't directly attack here, but can buffer an attack.
+                    // Can't directly attack here, but can buffer an attack.
                     if (animTime >= 0.50 * currentAnimation.Duration && attackStage < 3)
                     {
                         // If we're late into the attack animation, buffer the attack.
-                        bufferAttack();
-                        return false;
+                        bufferedAction = BufferAction.Attack;
                     }
-                    else return false;
+                    return false;
                 case OkuuState.Recovering:
                     // If we haven't thrown the last hit of the combo, we can still attack
                     if (attackStage < 3)
@@ -431,8 +496,9 @@ namespace Chireiden.Scenes
                         return true;
                     }
                     else return false;
+                case OkuuState.Backstepping:
                 case OkuuState.Uninterruptable:
-                case OkuuState.KOO:
+                case OkuuState.KO:
                     // Can't attack out of these.
                     return false;
                 default:
@@ -463,7 +529,8 @@ namespace Chireiden.Scenes
                 case OkuuState.Attacking:
                 case OkuuState.Recovering:
                 case OkuuState.Uninterruptable:
-                case OkuuState.KOO:
+                case OkuuState.Backstepping:
+                case OkuuState.KO:
                     // If she's in some uninterruptable state, nothing changes.
                     return false;
                 default:
@@ -489,7 +556,8 @@ namespace Chireiden.Scenes
                 case OkuuState.Attacking:
                 case OkuuState.Recovering:
                 case OkuuState.Uninterruptable:
-                case OkuuState.KOO:
+                case OkuuState.Backstepping:
+                case OkuuState.KO:
                     // Otherwise she's indisposed and cannot cheer.
                     return false;
                 default:
@@ -510,7 +578,8 @@ namespace Chireiden.Scenes
                 case OkuuState.Uninterruptable:
                 case OkuuState.Attacking:
                 case OkuuState.Recovering:
-                case OkuuState.KOO:
+                case OkuuState.Backstepping:
+                case OkuuState.KO:
                     // In any of these cases we should keep doing what we were doing
                     return false;
                 case OkuuState.Moving:
@@ -535,6 +604,11 @@ namespace Chireiden.Scenes
         public void inputAttack()
         {
             attackPressed = true;
+        }
+
+        public void inputBackstep()
+        {
+            backstepPressed = true;
         }
     }
 }
