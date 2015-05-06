@@ -200,6 +200,7 @@ namespace Chireiden
 
             GL.Viewport(0, 0, width, height);
             ShaderLibrary.LogLuminanceShader.use();
+            ShaderLibrary.LogLuminanceShader.setUniformFloat1("alpha", 0.015f);
             ShaderLibrary.LogLuminanceShader.bindTexture2D("colorBuffer", 0, ColorBuffers[0]);
 
             RenderFullscreenQuad();
