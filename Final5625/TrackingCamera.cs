@@ -46,6 +46,10 @@ namespace Chireiden
         float[] light_energy;
         Vector3[] light_color;
 
+        Vector3 worldSpacePos;
+
+        public Vector3 WorldPosition { get { return worldSpacePos; } }
+
         bool frozen;
 
         public TrackingCamera(MobileObject target, float fovy, float aspectRatio, float nearClip, float farClip)
@@ -98,7 +102,8 @@ namespace Chireiden
             this.forward = -offset;
 
             Vector3 rotatedOffset = Vector3.Multiply(forward, distanceBehind);
-            viewMatrix = Matrix4.LookAt(lookAt - rotatedOffset, lookAt, up);
+            worldSpacePos = lookAt - rotatedOffset;
+            viewMatrix = Matrix4.LookAt(worldSpacePos, lookAt, up);
         }
 
         public Matrix4 getViewMatrix()

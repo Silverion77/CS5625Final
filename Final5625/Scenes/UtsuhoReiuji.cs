@@ -548,14 +548,6 @@ namespace Chireiden.Scenes
                     knockedOut();
                     return true;
                 }
-                switch (okuuState)
-                {
-                    case OkuuState.KO:
-                        return false;
-                    default:
-                        knockedOut();
-                        return true;
-                }
             }
             else if (damageTaken)
             {
@@ -609,11 +601,6 @@ namespace Chireiden.Scenes
         {
             setTargetRotationFromDir(vec);
             velocityDir = vec;
-        }
-
-        bool processInstaKO()
-        {
-
         }
 
         bool processDamageTaken()
