@@ -69,6 +69,9 @@ namespace Chireiden.Scenes
         bool attackPressed = false;
         bool backstepPressed = false;
         bool cannonPressed = false;
+        bool damageTaken = false;
+        bool instantKO = false;
+        bool miracle = false;
 
         BufferAction bufferedAction;
 
@@ -158,45 +161,45 @@ namespace Chireiden.Scenes
             }
         }
 
-        public void runOrWalk()
+        void runOrWalk()
         {
             okuuState = OkuuState.Moving;
             if (running) run(); else walk();
         }
 
-        public void run()
+        void run()
         {
             switchAnimationSmooth("run");
         }
 
-        public void walk()
+        void walk()
         {
             switchAnimationSmooth("walk");
         }
 
-        public void readyOrIdle()
+        void readyOrIdle()
         {
             okuuState = OkuuState.Idle;
             if (readyForAction) ready(); else idle();
         }
 
-        public void ready()
+        void ready()
         {
             switchAnimationSmooth("ready");
         }
 
-        public void idle()
+        void idle()
         {
             switchAnimationSmooth("idle");
         }
 
-        public void cheer()
+        void cheer()
         {
             okuuState = OkuuState.Interruptable;
             switchAnimationSmooth("cheer");
         }
 
-        public void attack()
+        void attack()
         {
             okuuState = OkuuState.Attacking;
             // If the player is simultaneously holding movement keys down,
@@ -229,7 +232,7 @@ namespace Chireiden.Scenes
             attackStage++;
         }
 
-        public void attackRecover()
+        void attackRecover()
         {
             okuuState = OkuuState.Recovering;
             string recovery = "cheer";
@@ -251,14 +254,14 @@ namespace Chireiden.Scenes
             switchAnimation(recovery);
         }
 
-        public void backstep()
+        void backstep()
         {
             okuuState = OkuuState.Backstepping;
             attackStage = 0;
             switchAnimationSmooth("backstep");
         }
 
-        public void startAiming()
+        void startAiming()
         {
             // After playing the raise_cannon animation, which should be uninterruptable, 
             // we should go to the Aiming state, and start playing the aiming animation.
@@ -267,26 +270,59 @@ namespace Chireiden.Scenes
             transitionState = OkuuState.Aiming;
         }
 
-        public void aim()
+        void aim()
         {
             okuuState = OkuuState.Aiming;
             // The aiming animation is designed to follow smoothly from the raise cannon animation
-            switchAnimation("aiming");
+            switchAnimationSmooth("aiming");
         }
 
-        public void fire()
+        void fire()
         {
             okuuState = OkuuState.Uninterruptable;
             switchAnimationSmooth("fire");
             transitionState = OkuuState.Aiming;
         }
 
-        public void stopAiming()
+        void stopAiming()
         {
             // After we play the lower_cannon animation, go back to idle.
             okuuState = OkuuState.Transitioning;
             switchAnimationSmooth("lower_cannon");
             transitionState = OkuuState.Idle;
+        }
+
+        void beHurt()
+        {
+            switch (okuuState)
+            {
+                case OkuuState.Idle:
+                    if (readyForAction)
+                        switchAnimationSmooth("ready_hurt");
+                    else
+                        switchAnimationSmooth("idle_hurt");
+                    transitionState = OkuuState.Idle;
+                    break;
+                case OkuuState.Moving:
+                    switchAnimationSmooth("run_hurt");
+                    transitionState = OkuuState.Moving;
+                    break;
+                case OkuuState.Aiming:
+                    switchAnimationSmooth("ready_hurt");
+                    transitionState = OkuuState.Aiming;
+                    break;
+                default:
+                    switchAnimationSmooth("ready_hurt");
+                    transitionState = OkuuState.Idle;
+                    break;
+            }
+            okuuState = OkuuState.Transitioning;
+        }
+
+        void knockedOut()
+        {
+            okuuState = OkuuState.KO;
+            switchAnimationSmooth("ko");
         }
 
         void clearInputFlags()
@@ -296,6 +332,9 @@ namespace Chireiden.Scenes
             attackPressed = false;
             backstepPressed = false;
             cannonPressed = false;
+            damageTaken = false;
+            instantKO = false;
+            miracle = false;
         }
 
         public override float getMoveSpeed()
@@ -315,6 +354,11 @@ namespace Chireiden.Scenes
             else if (okuuState == OkuuState.Moving)
             {
                 return running ? runSpeed : walkSpeed;
+            }
+            else if (okuuState == OkuuState.Transitioning && transitionState == OkuuState.Moving)
+            {
+                float normalSpeed = running ? runSpeed : walkSpeed;
+                return 0.5f * normalSpeed;
             }
             else return 0;
         }
@@ -394,6 +438,9 @@ namespace Chireiden.Scenes
                 case OkuuState.Idle:
                     readyOrIdle();
                     break;
+                case OkuuState.Moving:
+                    runOrWalk();
+                    break;
                 default:
                     Console.WriteLine("Transitioning to other states is not implemented.");
                     readyOrIdle();
@@ -466,6 +513,9 @@ namespace Chireiden.Scenes
         /// <summary>
         /// Current priority of operations (high priority to low)
         /// 
+        ///     - Revival triggered (debugging only)
+        ///     - Instant KO triggered (debugging only)
+        ///     - Damage was taken
         ///     - Player inputs a backstep
         ///     - Player inputs an attack
         ///     - Player inputs raise/lower cannon
@@ -478,7 +528,40 @@ namespace Chireiden.Scenes
         /// </summary>
         bool setNextState()
         {
-            if (backstepPressed)
+            if (miracle)
+            {
+                if (okuuState == OkuuState.KO)
+                {
+                    okuuState = OkuuState.Idle;
+                    return true;
+                }
+                else return false;
+            }
+            else if (instantKO)
+            {
+                if (okuuState == OkuuState.KO)
+                {
+                    return false;
+                }
+                else
+                {
+                    knockedOut();
+                    return true;
+                }
+                switch (okuuState)
+                {
+                    case OkuuState.KO:
+                        return false;
+                    default:
+                        knockedOut();
+                        return true;
+                }
+            }
+            else if (damageTaken)
+            {
+                return processDamageTaken();
+            }
+            else if (backstepPressed)
             {
                 return processBackstepInput();
             }
@@ -526,6 +609,41 @@ namespace Chireiden.Scenes
         {
             setTargetRotationFromDir(vec);
             velocityDir = vec;
+        }
+
+        bool processInstaKO()
+        {
+
+        }
+
+        bool processDamageTaken()
+        {
+            switch (okuuState)
+            {
+                case OkuuState.Uninterruptable:
+                case OkuuState.Attacking:
+                case OkuuState.KO:
+                    // If we're backstepping, we're invulnerable
+                    // We'll let "Uninterruptable" mean immune to hit stuns as well
+                    // We'll let an attack in progress have priority
+                    // And obviously if we're KO'd it doesn't matter
+                    return false;
+                case OkuuState.Backstepping:
+                    // Backstepping makes us invulnerable, but only for the time we're in motion
+                    if (animTime <= backstepEndMove)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        beHurt();
+                        return true;
+                    }
+                default:
+                    // Everywhere else, getting hit matters
+                    beHurt();
+                    return true;
+            }
         }
 
         bool processBackstepInput()
@@ -711,6 +829,22 @@ namespace Chireiden.Scenes
         public void inputCannon()
         {
             cannonPressed = true;
+        }
+
+        public void getHurt(int attackPower)
+        {
+            Console.WriteLine("TODO: compute how much actual damage");
+            damageTaken = true;
+        }
+
+        public void instantKnockout()
+        {
+            instantKO = true;
+        }
+
+        public void medicalMiracle()
+        {
+            miracle = true;
         }
     }
 }

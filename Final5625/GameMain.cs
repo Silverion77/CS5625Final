@@ -144,6 +144,15 @@ namespace Chireiden
                 case Key.R:
                     okuu.toggleReadyIdle();
                     break;
+                case Key.T:
+                    okuu.getHurt(1);
+                    break;
+                case Key.K:
+                    okuu.instantKnockout();
+                    break;
+                case Key.M:
+                    okuu.medicalMiracle();
+                    break;
                 default:
                     break;
             }
