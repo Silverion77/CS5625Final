@@ -54,8 +54,8 @@ namespace Chireiden
         bool paused = false;
 
         public GameMain()
-            : base(1200, 900,
-            new GraphicsMode(), "The Great Game", 0,
+            : base(1600, 900,
+            new GraphicsMode(), "Subterranean Arsonism", 0,
             DisplayDevice.Default, 4, 5,
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
         {
