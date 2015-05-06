@@ -3,8 +3,10 @@
 
 #version 330
 
+#define MAX_LIGHTS 40
+
 in vec2 geom_texCoord;
-in vec3 toLightInTS;
+//in vec3 toLightsInTS[MAX_LIGHTS];
 in vec3 toCameraInTS;
 
 // textures
@@ -13,10 +15,17 @@ uniform sampler2D heightTexture;
 // TODO: What space is this in?
 uniform sampler2D normalTexture;
 
-out vec4 out_frag_color;
+// Light uniforms
+uniform int light_count;
+uniform vec3 light_eyePosition[MAX_LIGHTS];
+uniform float light_falloffDistance[MAX_LIGHTS];
+uniform float light_energy[MAX_LIGHTS];
+uniform vec3 light_color[MAX_LIGHTS];
 
 // scale for size of Parallax Mapping effect
 uniform float parallaxScale;
+
+out vec4 out_frag_color;
 
 vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 {
@@ -67,7 +76,7 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 void main()
 {
 	vec3 V = normalize(toCameraInTS);
-	vec3 L = normalize(toLightInTS);
+	//vec3 L = normalize(toLightInTS);
 	
 	// get texture coordinates from the Parallax Mapping
 	float parallaxHeight;

@@ -59,9 +59,11 @@ namespace Chireiden.Scenes
             // set shader uniforms
             program.setUniformMatrix4("modelMatrix", toWorldMatrix);
             program.setUniformMatrix4("viewMatrix", viewMatrix);
+            program.setUniformMatrix4("inverseViewMatrix", viewMatrix.Inverted());
             program.setUniformMatrix4("projectionMatrix", projectionMatrix);
             program.setUniformMatrix3("normalMatrix", normalMatrix);
             program.setUniformFloat3("camera_position", camera.getWorldSpacePos());
+            camera.setPointLightUniforms(program);
             square.renderMesh(camera, toWorldMatrix, program, 0);
             program.unuse();
             renderChildren(camera);
