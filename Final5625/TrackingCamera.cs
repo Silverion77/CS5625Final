@@ -159,7 +159,7 @@ namespace Chireiden
             y = -y * MouseSensitivity;
 
             pitch = (pitch + x) % ((float)Math.PI * 2.0f);
-            yaw = Math.Max(Math.Min(yaw + y, (float)Math.PI / 2.0f - 0.1f), (float)-Math.PI / 2.0f + 0.1f);
+            yaw = Math.Max(Math.Min(yaw + y, (float)Math.PI / 3.0f - 0.1f), (float)-Math.PI / 2.0f + 0.1f);
         }
 
         /// <summary>

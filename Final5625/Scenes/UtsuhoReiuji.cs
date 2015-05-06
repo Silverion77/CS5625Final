@@ -147,6 +147,7 @@ namespace Chireiden.Scenes
             {
                 throw new Exception("Okuu doesn't have all of her animations.");
             }
+            Console.WriteLine("TODO: make model not clip");
             oldRotation = Quaternion.Identity;
             targetRotation = Quaternion.Identity;
             idle();
@@ -223,6 +224,7 @@ namespace Chireiden.Scenes
 
         void attack()
         {
+            Console.WriteLine("TODO: attack hitboxes");
             okuuState = OkuuState.Attacking;
             // If the player is simultaneously holding movement keys down,
             // we should attack in that direction.
@@ -304,6 +306,7 @@ namespace Chireiden.Scenes
             okuuState = OkuuState.Uninterruptable;
             switchAnimationSmooth("fire");
             transitionState = OkuuState.Aiming;
+            Console.WriteLine("TODO: Fire missile here");
         }
 
         void stopAiming()
