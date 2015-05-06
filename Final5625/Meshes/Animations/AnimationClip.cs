@@ -7,18 +7,21 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Meshes.Animations
 {
-    public class AnimationClip
+    public class AnimationClip : Clip
     {
-        public string Name { get; set; }
         /// <summary>
         /// boneChannels[i] contains all of the animation keyframes for this animation clip
         /// that affect the bone with ID i.
         /// </summary>
         LocRotKeyframes[] boneChannels;
 
-        public double Duration { get; set; }
-
-        public bool Wrap { get; set; }
+        string name;
+        public override string Name { get { return name; } }
+        double duration;
+        public override double Duration { get { return duration; } }
+        public override int NumChannels { get { return boneChannels.Length; } }
+        bool wrap;
+        public override bool Wrap { get { return wrap; } }
 
         public AnimationClip(List<NodeFramesArray> allFrames, AnimationCue cue, int numBones, Dictionary<string, int> boneDict)
         {
@@ -39,17 +42,41 @@ namespace Chireiden.Meshes.Animations
                 boneChannels[boneID] = locRot;
 
             }
-            Name = cue.Name;
-            Wrap = cue.Wrap;
-            Duration = 0;
+            name = cue.Name;
+            wrap = cue.Wrap;
+            duration = 0;
 
             foreach (LocRotKeyframes frames in boneChannels) {
                 if (frames == null) continue;
-                Duration = Math.Max(Duration, frames.Length);
+                duration = Math.Max(Duration, frames.Length);
             }
         }
 
-        public void applyAnimationToSkeleton(ArmatureBone[] bones, double time)
+        /// <summary>
+        /// Gets the location-rotation keyframe for bone i at time t, if it exists.
+        /// Returns true iff. the keyframe channel for the requested bone actually exists.
+        /// </summary>
+        /// <param name="i"></param>
+        /// <param name="t"></param>
+        /// <param name="location"></param>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
+        public override bool getLocRotAtTime(int i, double t, out Vector3 location, out Quaternion rotation)
+        {
+            if (boneChannels[i] != null)
+            {
+                boneChannels[i].getLocRotAtTime(t, out location, out rotation);
+                return true;
+            }
+            else
+            {
+                location = Vector3.Zero;
+                rotation = Quaternion.Identity;
+                return false;
+            }
+        }
+
+        public override void applyAnimationToSkeleton(ArmatureBone[] bones, double time)
         {
             Matrix4 location;
             Matrix4 rotation;

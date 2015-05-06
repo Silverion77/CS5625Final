@@ -100,6 +100,12 @@ namespace Chireiden.Meshes.Animations
             Length = Math.Max(loc.Length, rots.Length);
         }
 
+        public void getLocRotAtTime(double t, out Vector3 location, out Quaternion rotation)
+        {
+            location = translations.getLocationAtTime(t);
+            rotation = rotations.getRotationAtTime(t);
+        }
+
         public void getFrameAtTime(double t, out Matrix4 location, out Matrix4 rotation)
         {
             location = translations.getFrameAtTime(t);
@@ -152,16 +158,16 @@ namespace Chireiden.Meshes.Animations
             Length = times[times.Length - 1];
         }
 
-        public override Matrix4 getFrameAtTime(double t)
+        public Quaternion getRotationAtTime(double t)
         {
             if (keyframes.Length == 1)
             {
-                return Matrix4.CreateFromQuaternion(keyframes[0]);
+                return keyframes[0];
             }
             int frameBefore = findTimeBelow(t, times);
             if (frameBefore >= keyframes.Length - 1)
             {
-                return Matrix4.CreateFromQuaternion(keyframes[frameBefore]);
+                return keyframes[frameBefore];
             }
 
             int frameAfter = frameBefore + 1;
@@ -175,7 +181,12 @@ namespace Chireiden.Meshes.Animations
             Quaternion rotationAfter = keyframes[frameAfter];
 
             Quaternion interpolated = Quaternion.Slerp(rotationBefore, rotationAfter, (float)blendFactor);
-            return Matrix4.CreateFromQuaternion(interpolated);
+            return interpolated;
+        }
+
+        public override Matrix4 getFrameAtTime(double t)
+        {
+            return Matrix4.CreateFromQuaternion(getRotationAtTime(t));
         }
     }
 
@@ -218,17 +229,16 @@ namespace Chireiden.Meshes.Animations
             Length = times[times.Length - 1];
         }
 
-        public override Matrix4 getFrameAtTime(double t)
+        public Vector3 getLocationAtTime(double t)
         {
             if (keyframes.Length == 1)
             {
-                Matrix4 mat = Matrix4.CreateTranslation(keyframes[0]);
-                return mat;
+                return keyframes[0];
             }
             int frameBefore = findTimeBelow(t, times);
             if (frameBefore >= keyframes.Length - 1)
             {
-                return Matrix4.CreateTranslation(keyframes[frameBefore]);
+                return keyframes[frameBefore];
             }
 
             int frameAfter = frameBefore + 1;
@@ -240,7 +250,12 @@ namespace Chireiden.Meshes.Animations
 
             Vector3 interpolated = Vector3.Lerp(keyframes[frameBefore], keyframes[frameAfter], (float)blendFactor);
             // Console.WriteLine("Interpolated \n  {0}\n  {1}\n  with blend factor {2} =\n  {3}", keyframes[frameBefore], keyframes[frameAfter], blendFactor, interpolated);
-            return Matrix4.CreateTranslation(interpolated);
+            return interpolated;
+        }
+
+        public override Matrix4 getFrameAtTime(double t)
+        {
+            return Matrix4.CreateTranslation(getLocationAtTime(t));
         }
     }
 }

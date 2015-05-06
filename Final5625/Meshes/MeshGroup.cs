@@ -57,7 +57,7 @@ namespace Chireiden.Meshes
             program.unuse();
         }
 
-        public void renderMeshes(Camera c, Matrix4 m, AnimationClip clip, double time)
+        public void renderMeshes(Camera c, Matrix4 m, Clip clip, double time)
         {
             renderMeshes(c, m);
         }

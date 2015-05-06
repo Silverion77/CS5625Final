@@ -18,6 +18,8 @@ namespace Chireiden.Meshes
         // Displacement from local origin to parent bone's origin in the rest pose.
         Matrix4 restTranslation;
 
+        public Matrix4 RestTranslation { get { return restTranslation; } }
+
         // Displacement from local origin to world space position in the rest pose.
         Matrix4 restToWorldMatrix;
 

@@ -95,7 +95,7 @@ namespace Chireiden
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
             world.addChild(emitter);
 
-            var light = new PointLight(new Vector3(0.5f, 1f, 4), 1, 3, new Vector3(1, 1, 1));
+            var light = new PointLight(new Vector3(0.5f, 1f, 4), 2, 5, new Vector3(1, 1, 1));
             world.addPointLight(light);
 
             // The camera will now focus on Okuu
@@ -108,6 +108,18 @@ namespace Chireiden
 
             meshOrig.switchAnimation("twist");
             meshCopy.switchAnimation("gyrate");
+        }
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButton.Left:
+                    okuu.inputAttack();
+                    break;
+                default:
+                    break;
+            }
         }
         
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
@@ -122,6 +134,8 @@ namespace Chireiden
                     break;
                 case Key.C:
                     okuu.inputCheer();
+                    break;
+                case Key.Tab:
                     break;
                 default:
                     break;

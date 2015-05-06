@@ -44,7 +44,7 @@ namespace Chireiden.Scenes
             base.update(e, parentToWorldMatrix);
         }
 
-        public float getMoveSpeed()
+        public virtual float getMoveSpeed()
         {
             return moveSpeed;
         }

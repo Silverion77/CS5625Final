@@ -69,5 +69,14 @@ namespace Chireiden.Scenes
             Quaternion toCompose = Quaternion.FromAxisAngle(axis, angle);
             Quaternion.Multiply(ref toCompose, ref rotation, out rotation);
         }
+
+        /// <summary>
+        /// Returns the direction in which this object is facing.
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 getFacingDirection()
+        {
+            return Vector3.Transform(Utils.FORWARD, rotation);
+        }
     }
 }

@@ -103,7 +103,7 @@ namespace Chireiden.Meshes
         /// </summary>
         /// <param name="camera"></param>
         /// <param name="toWorldMatrix"></param>
-        public void renderMeshes(Camera camera, Matrix4 toWorldMatrix, AnimationClip clip, double time)
+        public void renderMeshes(Camera camera, Matrix4 toWorldMatrix, Clip clip, double time)
         {
             ShaderProgram program = ShaderLibrary.AnimationShader;
 

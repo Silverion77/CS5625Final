@@ -33,6 +33,6 @@ namespace Chireiden.Meshes
         /// </summary>
         /// <param name="camera"></param>
         /// <param name="toWorldMatrix"></param>
-        void renderMeshes(Camera camera, Matrix4 toWorldMatrix, AnimationClip clip, double time);
+        void renderMeshes(Camera camera, Matrix4 toWorldMatrix, Clip clip, double time);
     }
 }
