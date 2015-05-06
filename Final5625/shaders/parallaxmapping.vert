@@ -12,7 +12,7 @@ in vec4 vert_tangent;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-// TODO: Normal matrix to preserve orthogonality?
+uniform mat3 normalMatrix;
 uniform vec3 light_position;
 uniform vec3 camera_position;
 
@@ -24,8 +24,8 @@ out vec3 toCameraInTS;
 void main()
 {
 	vec4 worldPos = modelMatrix * vec4(vert_position, 1);
-	vec3 N = normalize((modelMatrix * vec4(vert_normal, 0)).xyz);
-	vec3 T = normalize((modelMatrix * vec4(vert_tangent.xyz, 0)).xyz);
+	vec3 N = normalize(normalMatrix * vert_normal);
+	vec3 T = normalize(normalMatrix * vert_tangent.xyz);
 	vec3 B = normalize(cross(N, T) * vert_tangent.w);
 	
 	// World space direction vectors

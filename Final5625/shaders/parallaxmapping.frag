@@ -4,8 +4,8 @@
 #version 330
 
 in vec2 geom_texCoord;
-in vec2 toLightInTS;
-in vec2 toCameraInTS;
+in vec3 toLightInTS;
+in vec3 toCameraInTS;
 
 // textures
 uniform sampler2D mat_texture;
@@ -76,5 +76,5 @@ void main()
 	// TODO: Shadowing?
 	
 	// Lighting calculation ** ADD shadow here**
-	out_frag_color = normalMapLighting(T, L, V);
+	out_frag_color = vec4(1, 0, 0, 0);
 }

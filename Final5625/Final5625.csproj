@@ -50,8 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AllMeshes.cs" />
-    <Compile Include="AllShaders.cs" />
+    <Compile Include="MeshLibrary.cs" />
+    <Compile Include="ShaderLibrary.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />
     <Compile Include="Meshes\Animations\Clip.cs" />
@@ -86,6 +86,7 @@
     <Compile Include="Scenes\SceneTreeNode.cs" />
     <Compile Include="Scenes\SkeletalMeshNode.cs" />
     <Compile Include="Scenes\UtsuhoReiuji.cs" />
+    <Compile Include="Scenes\SurfaceTile.cs" />
     <Compile Include="ShaderProgram.cs" />
     <Compile Include="TrackingCamera.cs" />
     <Compile Include="Scenes\PlaceableObject.cs" />

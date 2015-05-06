@@ -190,5 +190,10 @@ namespace Chireiden
             distanceBehind += amount * MouseWheelSensitivity;
             distanceBehind = Math.Max(Math.Min(distanceBehind, 100), 1);
         }
+
+        public Vector3 getWorldSpacePos()
+        {
+            return WorldPosition;
+        } 
     }
 }

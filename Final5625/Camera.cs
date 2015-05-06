@@ -43,5 +43,8 @@ namespace Chireiden
         /// </summary>
         void setPointLightUniforms(ShaderProgram program);
 
+        /// <returns>position of camera in world space</returns>
+        Vector3 getWorldSpacePos();
+
     }
 }

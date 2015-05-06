@@ -17,6 +17,7 @@ namespace Chireiden
         public static ShaderProgram BloomXShader;
         public static ShaderProgram BloomYShader;
         public static ShaderProgram ParticleShader;
+        public static ShaderProgram POMShader;
 
         public static void loadShaders() {
             CubeShader = new ShaderProgram("data/Simple_VS.vert", "data/Simple_FS.frag");
@@ -28,6 +29,7 @@ namespace Chireiden
             BloomXShader = new ShaderProgram("shaders/simple2d.vert", "shaders/bloomX.frag");
             BloomYShader = new ShaderProgram("shaders/simple2d.vert", "shaders/bloomY.frag");
             ParticleShader = new ShaderProgram("shaders/particle.vert", "shaders/particle.geom", "shaders/particle.frag");
+            POMShader = new ShaderProgram("shaders/parallaxmapping.vert", "shaders/parallaxmapping.frag");
         }
     }
 }

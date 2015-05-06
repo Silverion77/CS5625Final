@@ -28,6 +28,9 @@ namespace Chireiden.Materials
         Texture heightMap;
         Texture normalMap;
 
+        public POMMaterial()
+        { }
+
         public POMMaterial(Vector4 diffuseColor, Vector3 specularColor,
                             Vector3 ambientColor, float shininess, string TextureDirectory)
         {
@@ -39,12 +42,12 @@ namespace Chireiden.Materials
 
         public int useMaterialParameters(ShaderProgram program, int startTexUnit)
         {
-            return 0;
+            return startTexUnit;
         }
 
         public void unuseMaterialParameters(ShaderProgram program, int startTexUnit)
         {
-
+            
         }
     }
 }
