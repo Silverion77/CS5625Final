@@ -57,6 +57,7 @@
     <Compile Include="Meshes\Animations\Clip.cs" />
     <Compile Include="Meshes\Animations\InterpolationClip.cs" />
     <Compile Include="Meshes\Animations\Pose.cs" />
+    <Compile Include="Materials\POMMaterial.cs" />
     <Compile Include="ParticleSystem.cs" />
     <Compile Include="Meshes\Animations\AnimationClip.cs" />
     <Compile Include="Meshes\Animations\KeyframeSeries.cs" />
@@ -270,9 +271,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\logLuminance.frag">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="shaders\logluminance.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\particle.frag">

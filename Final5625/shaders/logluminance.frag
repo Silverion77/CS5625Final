@@ -1,6 +1,7 @@
 #version 140
 
 uniform sampler2D colorBuffer;
+uniform float alpha;
 
 out vec4 FragColor;
 
@@ -11,5 +12,5 @@ void main()
 	vec3 color = texelFetch(colorBuffer, ivec2(gl_FragCoord.xy), 0).rgb;
 	float luminance = dot(vec3(0.2126, 0.7152, 0.0722), max(color,0));
 
-	FragColor = vec4(log(luminance + 0.001), 0,0,1);
+	FragColor = vec4(log(luminance + 0.001), 0, 0, alpha);
 }
