@@ -101,6 +101,7 @@
     <Content Include="data\model\okuu\animations.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="data\model\okuu\blend_shapes.txt" />
     <Content Include="data\model\okuu\Blouse.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
