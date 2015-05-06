@@ -35,12 +35,35 @@ namespace Chireiden.Scenes
 
     class UtsuhoReiuji : SkeletalMeshNode
     {
+        /// <summary>
+        /// Makes sure that Okuu has all of the animations we expect her to have.
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
         bool allAnimsOK(MeshContainer m)
         {
+            // Great function
             return m.hasAnimation("idle")
                 && m.hasAnimation("walk")
                 && m.hasAnimation("run")
-                && m.hasAnimation("cheer");
+                && m.hasAnimation("cheer")
+                && m.hasAnimation("ready")
+                && m.hasAnimation("attack1_swing")
+                && m.hasAnimation("attack1_recover")
+                && m.hasAnimation("attack2_swing")
+                && m.hasAnimation("attack2_recover")
+                && m.hasAnimation("attack3_swing")
+                && m.hasAnimation("attack3_recover")
+                && m.hasAnimation("backstep")
+                && m.hasAnimation("raise_cannon")
+                && m.hasAnimation("aiming")
+                && m.hasAnimation("fire")
+                && m.hasAnimation("lower_cannon")
+                && m.hasAnimation("idle_hurt")
+                && m.hasAnimation("ready_hurt")
+                && m.hasAnimation("run_hurt")
+                && m.hasAnimation("run_hurt_recover")
+                && m.hasAnimation("ko");
         }
 
         // Recall that we have the following fields from PlaceableObject
@@ -75,7 +98,7 @@ namespace Chireiden.Scenes
 
         BufferAction bufferedAction;
 
-        Vector3 velocityDir;
+        Vector3 velocityDir = Utils.FORWARD;
         float targetSpeed = 0;
         float oldSpeed = 0;
         float speed = 0;
@@ -126,7 +149,6 @@ namespace Chireiden.Scenes
             }
             oldRotation = Quaternion.Identity;
             targetRotation = Quaternion.Identity;
-            velocityDir = Vector3.Zero;
             idle();
         }
 
@@ -532,7 +554,7 @@ namespace Chireiden.Scenes
             {
                 if (okuuState == OkuuState.KO)
                 {
-                    okuuState = OkuuState.Idle;
+                    readyOrIdle();
                     return true;
                 }
                 else return false;
