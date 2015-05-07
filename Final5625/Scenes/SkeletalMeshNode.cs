@@ -15,13 +15,28 @@ namespace Chireiden.Scenes
         protected InterpolationClip interpolator = new InterpolationClip();
         protected bool interpolationActive;
 
+        protected float[] oldMorphWeights = new float[ShaderProgram.MAX_MORPHS];
+        protected float[] targetMorphWeights = new float[ShaderProgram.MAX_MORPHS];
+        protected double[] morphInterpTimes = new double[ShaderProgram.MAX_MORPHS];
+        protected double[] morphAnimTimes = new double[ShaderProgram.MAX_MORPHS];
+
+        SkeletalMeshGroup skeletalMeshes;
+
         public SkeletalMeshNode(MeshContainer m)
             : base(m)
-        { }
+        {
+            skeletalMeshes = m as SkeletalMeshGroup;
+            if (m == null)
+                throw new Exception("SkeletalMeshNode can only accept a SkeletalMeshGroup.");
+        }
 
         public SkeletalMeshNode(MeshContainer m, Vector3 loc)
             : base(m, loc)
-        { }
+        {
+            skeletalMeshes = m as SkeletalMeshGroup;
+            if (m == null)
+                throw new Exception("SkeletalMeshNode can only accept a SkeletalMeshGroup.");
+        }
 
         /// <summary>
         /// Advances the object's current animation by the given amount of time.
@@ -99,6 +114,22 @@ namespace Chireiden.Scenes
             switchAnimationSmooth(animation, DEFAULT_ANIM_INTERP_DURATION);
         }
 
+        public void setMorphSmooth(string animation, float targetWeight, double interpTime)
+        {
+            int id = skeletalMeshes.idOfMorph(animation);
+            if (interpTime == 0)
+            {
+                skeletalMeshes.setMorphWeight(id, targetWeight);
+            }
+            else
+            {
+                oldMorphWeights[id] = skeletalMeshes.getMorphWeight(id);
+                targetMorphWeights[id] = targetWeight;
+                morphInterpTimes[id] = interpTime;
+                morphAnimTimes[id] = 0;
+            }
+        }
+
         /// <summary>
         /// Switches to the requested animation "smoothly", by filling in an interpolation
         /// clip between the current pose and the target animation.
@@ -123,6 +154,21 @@ namespace Chireiden.Scenes
                 interpolationActive = true;
                 currentAnimation = interpolator;
                 animTime = 0;
+            }
+        }
+
+        protected void interpolateMorphs(double delta)
+        {
+            for (int i = 0; i < skeletalMeshes.NumMorphs; i++)
+            {
+                float currentWeight = skeletalMeshes.getMorphWeight(i);
+                if (morphAnimTimes[i] < morphInterpTimes[i])
+                {
+                    morphAnimTimes[i] += delta;
+                    float blendFactor = (float)Math.Min(1, morphAnimTimes[i] / morphInterpTimes[i]);
+                    float interpolated = oldMorphWeights[i] * (1 - blendFactor) + targetMorphWeights[i] * (blendFactor);
+                    skeletalMeshes.setMorphWeight(i, interpolated);
+                }
             }
         }
 

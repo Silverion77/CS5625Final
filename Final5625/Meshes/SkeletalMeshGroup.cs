@@ -13,8 +13,8 @@ namespace Chireiden.Meshes
     /// A group of meshes that share the same skeleton, and therefore deform as a unit,
     /// as well as sharing the same world-space transformations.
     /// </summary>
-    class SkeletalMeshGroup : MeshContainer
-    {
+    class SkeletalMeshGroup : MeshContainer {
+
         List<SkeletalTriMesh> meshes;
         ArmatureBone rootBone;
         ArmatureBone[] bonesByID;
@@ -22,9 +22,14 @@ namespace Chireiden.Meshes
         Matrix4[] boneTransforms;
         MatrixTexture matrixTexture;
 
+        float[] blendShapeWeights;
+
+        Dictionary<string, int> morphLibrary;
         Dictionary<string, AnimationClip> animationLibrary;
 
-        void initialize(List<SkeletalTriMesh> meshes, ArmatureBone root, ArmatureBone[] bones)
+        public int NumMorphs { get { return morphLibrary.Count; } }
+
+        void initialize(List<SkeletalTriMesh> meshes, ArmatureBone root, ArmatureBone[] bones, Dictionary<string, int> morphDictionary)
         {
             this.meshes = meshes;
             rootBone = root;
@@ -34,16 +39,32 @@ namespace Chireiden.Meshes
             boneTransforms = new Matrix4[bonesByID.Length];
 
             matrixTexture = new MatrixTexture(boneTransforms);
+
+            blendShapeWeights = new float[ShaderProgram.MAX_MORPHS];
+
+            if (morphDictionary == null)
+            {
+                morphLibrary = new Dictionary<string, int>();
+                Console.WriteLine("No morphs");
+            }
+            else
+            {
+                morphLibrary = morphDictionary;
+                Console.WriteLine("Registered morphs:");
+                foreach (var name in morphLibrary.Keys) {
+                    Console.WriteLine("  {0}", name);
+                }
+            }
         }
 
-        public SkeletalMeshGroup(ArmatureBone root, ArmatureBone[] bones)
+        public SkeletalMeshGroup(ArmatureBone root, ArmatureBone[] bones, Dictionary<string, int> morphDictionary)
         {
-            initialize(new List<SkeletalTriMesh>(), root, bones);
+            initialize(new List<SkeletalTriMesh>(), root, bones, morphDictionary);
         }
 
-        public SkeletalMeshGroup(List<SkeletalTriMesh> meshes, ArmatureBone root, ArmatureBone[] bones)
+        public SkeletalMeshGroup(List<SkeletalTriMesh> meshes, ArmatureBone root, ArmatureBone[] bones, Dictionary<string, int> morphDictionary)
         {
-            initialize(meshes, root, bones);
+            initialize(meshes, root, bones, morphDictionary);
         }
 
         public void clearPose()
@@ -70,7 +91,6 @@ namespace Chireiden.Meshes
 
         public void addAnimation(AnimationClip c)
         {
-            Console.WriteLine("Added animation {0} to skeletal mesh group, duration {1}", c.Name, c.Duration);
             animationLibrary.Add(c.Name, c);
         }
 
@@ -92,6 +112,25 @@ namespace Chireiden.Meshes
         public void renderMeshes(Camera c, Matrix4 m)
         {
             renderMeshes(c, m, null, 0);
+        }
+
+        public int idOfMorph(string name) {
+            int id;
+            if (!morphLibrary.TryGetValue(name, out id))
+            {
+                throw new Exception("Morph \"" + name + "\" does not exist");
+            }
+            return id;
+        }
+
+        public void setMorphWeight(int id, float weight)
+        {
+            blendShapeWeights[id] = weight;
+        }
+
+        public float getMorphWeight(int id)
+        {
+            return blendShapeWeights[id];
         }
 
         /// <summary>
@@ -137,8 +176,9 @@ namespace Chireiden.Meshes
             program.setUniformMatrix4("viewMatrix", viewMatrix);
             program.setUniformMatrix3("normalMatrix", normalMatrix);
 
-            // Bind bone texture data
-            program.setUniformMat4Texture("bone_matrices", 0, boneTransforms, matrixTexture);
+            program.setUniformMat4Texture("bone_matrices", 1, boneTransforms, matrixTexture);
+            // Bind morph texture data
+            program.setUniformFloatArray("morph_weights", blendShapeWeights);
             program.setUniformInt1("bone_textureWidth", matrixTexture.Width);
             program.setUniformInt1("bone_textureHeight", matrixTexture.Height);
 
@@ -146,10 +186,10 @@ namespace Chireiden.Meshes
 
             foreach (SkeletalTriMesh m in meshes)
             {
-                m.renderMesh(camera, toWorldMatrix, ShaderLibrary.AnimationShader, 1);
+                m.renderMesh(camera, toWorldMatrix, ShaderLibrary.AnimationShader, 2);
             }
 
-            program.unbindTextureRect(0);
+            program.unbindTextureRect(1);
             program.unuse();
         }
     }

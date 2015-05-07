@@ -140,6 +140,11 @@ namespace Chireiden.Scenes
         // The state that we will go to after the current Uninterruptable state ends
         OkuuState transitionState = OkuuState.Idle;
 
+        double currentBlinkTime = 0;
+        double nextBlinkTime = 1;
+        const double halfBlinkDuration = 0.17;
+        bool blinkInProgress = false;
+
         public UtsuhoReiuji(MeshContainer m, Vector3 loc)
             : base(m, loc)
         {
@@ -418,6 +423,26 @@ namespace Chireiden.Scenes
 
             velocity = speed * velocityDir;
 
+            // Make Okuu blink every so often
+            currentBlinkTime += e.Time;
+            if (currentBlinkTime > nextBlinkTime)
+            {
+                if (currentBlinkTime > nextBlinkTime + 1.4 * halfBlinkDuration)
+                {
+                    currentBlinkTime = 0;
+                    nextBlinkTime = Utils.randomDouble(3, 7);
+                    Console.WriteLine("Next blink in {0} sec", nextBlinkTime);
+                    setMorphSmooth("eyes_closed", 0, halfBlinkDuration);
+                    blinkInProgress = false;
+                }
+                else if (!blinkInProgress)
+                {
+                    setMorphSmooth("eyes_closed", 1, halfBlinkDuration);
+                    blinkInProgress = true;
+                }
+            }
+
+            interpolateMorphs(e.Time);
 
             if (toWorldMatrix != null && !velocity.Equals(Vector3.Zero))
             {

@@ -25,7 +25,6 @@ namespace Chireiden.Meshes
         {
             int id = LoadTexture(filename);
             textureID = id;
-            Console.WriteLine("Texture {1} loaded with ID {0}", id, filename);
         }
 
         /// <summary>

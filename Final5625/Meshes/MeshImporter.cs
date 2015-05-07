@@ -69,7 +69,23 @@ namespace Chireiden.Meshes
             //Console.WriteLine("Imported bone hierarchy");
             //rootBone.printBoneTree();
 
+            string blendShapeFile = System.IO.Path.Combine(directory, "blend_shapes.txt");
+            bool hasBlendShapes = System.IO.File.Exists(blendShapeFile);
+            Console.WriteLine("{0} exists = {1}", blendShapeFile, hasBlendShapes);
 
+            BlendShapeInfo[] blendShapeInfo = null;
+            Dictionary<string, int> morphDict = null;
+            if(hasBlendShapes) {
+                blendShapeInfo = readBlendShapes(blendShapeFile);
+                morphDict = new Dictionary<string, int>();
+                for (int i = 0; i < blendShapeInfo.Length; i++)
+                {
+                    BlendShapeInfo bsi = blendShapeInfo[i];
+                    morphDict.Add(bsi.Name, i);
+                }
+            }
+
+            int meshID = 0;
             foreach (Mesh m in model.Meshes)
             {
                 // We should only be interested in meshes with vertices
@@ -79,11 +95,42 @@ namespace Chireiden.Meshes
 
                 Vector3[] vertArr = new Vector3[numVerts];
 
-                int i = 0;
+                Vector3[][] allMorphsDisplacements = null;
+                if (hasBlendShapes)
+                {
+                    // allMorphsDisplacements[m][v] will give the displacement on vertex v
+                    // due to morph m.
+                    allMorphsDisplacements = new Vector3[blendShapeInfo.Length][];
+                }
+
+                int vertID = 0;
                 foreach (Vector3D v in verts)
                 {
-                    vertArr[i] = new Vector3(v.X, v.Y, v.Z);
-                    i++;
+                    vertArr[vertID] = new Vector3(v.X, v.Y, v.Z);
+
+                    // If the mesh has blend shapes, work on filling in the table
+                    // of displacements of vertices by morphs.
+                    if (hasBlendShapes)
+                    {
+                        for (int morphID = 0; morphID < blendShapeInfo.Length; morphID++)
+                        {
+                            BlendShapeInfo bsi = blendShapeInfo[morphID];
+                            if (bsi.meshVertexMatches(meshID, vertID))
+                            {
+                                if (allMorphsDisplacements[morphID] == null)
+                                {
+                                    allMorphsDisplacements[morphID] = new Vector3[numVerts];
+                                    for (int i = 0; i < allMorphsDisplacements[morphID].Length; i++)
+                                    {
+                                        allMorphsDisplacements[morphID][i] = Vector3.Zero;
+                                    }
+                                }
+                                allMorphsDisplacements[morphID][vertID] = bsi.popFirstDisplacement();
+                            }
+                        }
+                    }
+
+                    vertID++;
                 }
 
                 // Import the faces
@@ -92,7 +139,7 @@ namespace Chireiden.Meshes
                 var faces = m.Faces;
                 int numFaces = m.FaceCount;
                 int[] faceArr = new int[numFaces * 3];
-                i = 0;
+                vertID = 0;
                 foreach (Face f in faces)
                 {
                     var indices = f.Indices;
@@ -100,10 +147,10 @@ namespace Chireiden.Meshes
                     {
                         Console.WriteLine("ERROR LOADING MESH: THIS AIN'T NO TRIANGLE");
                     }
-                    faceArr[i] = indices[0];
-                    faceArr[i + 1] = indices[1];
-                    faceArr[i + 2] = indices[2];
-                    i += 3;
+                    faceArr[vertID] = indices[0];
+                    faceArr[vertID + 1] = indices[1];
+                    faceArr[vertID + 2] = indices[2];
+                    vertID += 3;
                 }
 
                 // Import the normals
@@ -113,11 +160,11 @@ namespace Chireiden.Meshes
                     var normals = m.Normals;
                     // One normal per vertex
                     normalArr = new Vector3[numVerts];
-                    i = 0;
+                    vertID = 0;
                     foreach (Vector3D n in normals)
                     {
-                        normalArr[i] = new Vector3(n.X, n.Y, n.Z);
-                        i++;
+                        normalArr[vertID] = new Vector3(n.X, n.Y, n.Z);
+                        vertID++;
                     }
                 }
                 else
@@ -139,14 +186,14 @@ namespace Chireiden.Meshes
                     var texCoords = m.TextureCoordinateChannels[0];
                     // There should be 1 UV coordinate per vertex
                     texCoordArr = new Vector2[numVerts];
-                    i = 0;
+                    vertID = 0;
                     foreach (Vector3D texC in texCoords)
                     {
                         // Since we're assuming UV coords, the Z component is unused
                         // Also, OpenGL has texture coordinate (0,0) in the bottom left,
                         // but I guess Blender has (0,0) in the top left, so we need to flip Y.
-                        texCoordArr[i] = new Vector2(texC.X, 1 - texC.Y);
-                        i++;
+                        texCoordArr[vertID] = new Vector2(texC.X, 1 - texC.Y);
+                        vertID++;
                     }
                 }
                 else
@@ -158,27 +205,27 @@ namespace Chireiden.Meshes
                 if (m.HasNormals && m.HasTangentBasis)
                 {
                     tangentArr = new Vector4[numVerts];
-                    i = 0;
+                    vertID = 0;
                     foreach (Vector3D tan in m.Tangents)
                     {
-                        tangentArr[i] = new Vector4(tan.X, tan.Y, tan.Z, 1);
-                        i++;
+                        tangentArr[vertID] = new Vector4(tan.X, tan.Y, tan.Z, 1);
+                        vertID++;
                     }
                     // Compute handedness of each tangent
-                    i = 0;
+                    vertID = 0;
                     foreach (Vector3D bit in m.BiTangents)
                     {
                         Vector3 b = new Vector3(bit.X, bit.Y, bit.Z);
-                        Vector3 n = normalArr[i];
-                        Vector3 t = tangentArr[i].Xyz;
+                        Vector3 n = normalArr[vertID];
+                        Vector3 t = tangentArr[vertID].Xyz;
                         // Compare bitangent from cross product with stored one
                         Vector3 crossed_b = Vector3.Cross(n, t);
                         // If they point in opposite directions then handedness is negative
                         if (Vector3.Dot(b, crossed_b) < 0)
                         {
-                            tangentArr[i].W = -1;
+                            tangentArr[vertID].W = -1;
                         }
-                        i++;
+                        vertID++;
                     }
                 }
                 else
@@ -200,14 +247,25 @@ namespace Chireiden.Meshes
                     Vector4[] vertexBoneIDs;
                     Vector4[] vertexBoneWeights;
                     collectVertexWeights(m, boneNameDict, out vertexBoneIDs, out vertexBoneWeights);
-                    outMesh = new SkeletalTriMesh(vertArr, faceArr, normalArr, texCoordArr, tangentArr, ourMat,
-                        vertexBoneIDs, vertexBoneWeights);
+                    SkeletalTriMesh skelOutMesh;
+                    if (hasBlendShapes)
+                    {
+                        skelOutMesh = new SkeletalTriMesh(vertArr, faceArr, normalArr, texCoordArr, tangentArr, ourMat,
+                            vertexBoneIDs, vertexBoneWeights, allMorphsDisplacements);
+                    }
+                    else
+                    {
+                        skelOutMesh = new SkeletalTriMesh(vertArr, faceArr, normalArr, texCoordArr, tangentArr, ourMat,
+                            vertexBoneIDs, vertexBoneWeights);
+                    }
+                    outMesh = skelOutMesh;
                 }
                 else
                 {
                     outMesh = new TriMesh(vertArr, faceArr, normalArr, texCoordArr, tangentArr, ourMat);
                 }
                 outMeshes.Add(outMesh);
+                meshID++;
             }
 
             MeshContainer group;
@@ -220,7 +278,7 @@ namespace Chireiden.Meshes
                     SkeletalTriMesh st = t as SkeletalTriMesh;
                     sMeshes.Add(st);
                 }
-                SkeletalMeshGroup skeletalGroup = new SkeletalMeshGroup(sMeshes, rootBone, boneArray);
+                SkeletalMeshGroup skeletalGroup = new SkeletalMeshGroup(sMeshes, rootBone, boneArray, morphDict);
 
                 List<AnimationClip> clips = importAnimations(model, boneNameDict, boneArray.Length, directory);
                 skeletalGroup.addAnimations(clips);

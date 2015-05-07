@@ -20,6 +20,11 @@ namespace Chireiden
         public const int MAX_LIGHTS = 40;
 
         /// <summary>
+        /// The maximum number of blend shape animations that we can have on a mesh.
+        /// </summary>
+        public const int MAX_MORPHS = 20;
+
+        /// <summary>
         /// The maximum number of bones that we can have in a skeleton.
         /// </summary>
         public const int MAX_BONES = 256;
@@ -192,7 +197,8 @@ namespace Chireiden
 
         public int uniformLocation(string uniform)
         {
-            return GL.GetUniformLocation(programHandle, uniform);
+            int loc = GL.GetUniformLocation(programHandle, uniform);
+            return loc;
         }
 
         public void setUniformMatrix3(string name, Matrix3 mat)
@@ -250,7 +256,13 @@ namespace Chireiden
         /// <param name="textureUnit"></param>
         /// <param name="unif"></param>
         /// <param name="tex"></param>
-        unsafe public void setUniformMat4Texture(string name, int textureUnit, Matrix4[] unif, MatrixTexture tex)
+        public void setUniformMat4Texture(string name, int textureUnit, Matrix4[] unif, MatrixTexture tex)
+        {
+            tex.setTextureData(unif);
+            bindTextureRect(name, textureUnit, tex);
+        }
+
+        public void setUniformFloatArrayTexture(string name, int textureUnit, float[] unif, FloatArrayTexture tex)
         {
             tex.setTextureData(unif);
             bindTextureRect(name, textureUnit, tex);
@@ -276,7 +288,7 @@ namespace Chireiden
                 GL.Uniform1(unifLoc, 0);
         }
 
-        public void bindTextureRect(string name, int textureUnit, MatrixTexture tex)
+        public void bindTextureRect(string name, int textureUnit, Texture tex)
         {
             TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
             int unifLoc = uniformLocation(name);

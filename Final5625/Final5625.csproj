@@ -50,6 +50,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Meshes\Animations\BlendShape.cs" />
+    <Compile Include="Meshes\FloatArrayTexture.cs" />
+    <Compile Include="Meshes\Vector4Texture.cs" />
+    <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
     <Compile Include="ShaderLibrary.cs" />
     <Compile Include="Camera.cs" />
@@ -101,7 +105,9 @@
     <Content Include="data\model\okuu\animations.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="data\model\okuu\blend_shapes.txt" />
+    <Content Include="data\model\okuu\blend_shapes.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="data\model\okuu\Blouse.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

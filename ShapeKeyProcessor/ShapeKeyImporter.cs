@@ -109,17 +109,21 @@ namespace ShapeKeyProcessor
 
         static bool findVertexAtPos(Vector3D pos, List<MorphDisplacement> morphDiffs, out MorphDisplacement morph)
         {
+            morph = morphDiffs[0];
+            double minDiff = 1;
+            bool found = false;
             foreach (MorphDisplacement md in morphDiffs)
             {
                 Vector3D diff = md.Vertex - pos;
-                if (diff.Length() < 1e-6)
+                double diffDist = diff.Length();
+                if (diffDist < 1e-4 && diffDist < minDiff)
                 {
                     morph = md;
-                    return true;
+                    minDiff = diffDist;
+                    found = true;
                 }
             }
-            morph = morphDiffs[0];
-            return false;
+            return found;
         }
 
         public static Scene ReadFromFile(string baseModelFile)

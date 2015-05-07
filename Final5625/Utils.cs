@@ -38,5 +38,14 @@ namespace Chireiden
         {
             return xyPlaneRotation(FORWARD, dir);
         }
+
+        static Random random = new Random();
+
+        public static double randomDouble(double lowerBound, double upperBound)
+        {
+            double d = random.NextDouble();
+            double range = upperBound - lowerBound;
+            return lowerBound + range * d;
+        }
     }
 }

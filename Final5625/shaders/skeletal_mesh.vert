@@ -10,16 +10,24 @@
 #version 140
 #extension GL_ARB_texture_rectangle : enable
 
+#define MAX_MORPHS 20
+
 in vec3 vert_position;
 in vec3 vert_normal;
 in vec2 vert_texCoord;
 in vec4 vert_tangent;
 in vec4 vert_boneIDs;
 in vec4 vert_boneWeights;
+in float vert_morphStart;
+in float vert_morphCount;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
+
+uniform float morph_weights[MAX_MORPHS];
+
+uniform sampler2DRect morph_displacements;
 
 uniform sampler2DRect bone_matrices;
 uniform int bone_textureWidth;
@@ -44,6 +52,14 @@ mat4 getBoneXform(int boneIndex) {
 	return result;
 }
 
+float getMorphWeight(float i) {
+	return morph_weights[int(i)];
+}
+
+vec4 getMorphDisplacementInfo(float x) {
+	return texture2DRect(morph_displacements, vec2(x + 0.5, 0.5));
+}
+
 void setBS() {
 	gl_Position = projectionMatrix *
 			(modelViewMatrix * vec4(0,0,0,1));	
@@ -64,6 +80,20 @@ void main()
 	vec3 position = vert_position;
 
 	// TODO: If I can figure out how to get blend shapes in here, it will go here
+	// Loop over all applicable morphs
+	
+	for (int i = 0; i < vert_morphCount; i++) {
+		// Get the actual index of the morph in this vertex's block
+		float index = vert_morphStart + i;
+		// Look up the displacement
+		vec4 disp_info = getMorphDisplacementInfo(index);
+		float morphID = disp_info.w;
+		vec3 displace = disp_info.xyz;
+		// Get the weight of this morph
+		float weight = getMorphWeight(morphID);
+		// Adjust position accordingly
+		position += weight * displace;
+	}
 
 	vec3 N = normalize(vert_normal);
 	vec3 T = normalize(vert_tangent.xyz);
