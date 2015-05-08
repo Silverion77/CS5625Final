@@ -46,5 +46,10 @@ namespace Chireiden
         /// <returns>position of camera in world space</returns>
         Vector3 getWorldSpacePos();
 
+        /// <returns>near plane of the camera in world space coorinates</returns>
+        float getNearPlane();
+
+        /// <returns>far plane of the camera in world space coorinates</returns>
+        float getFarPlane();
     }
 }

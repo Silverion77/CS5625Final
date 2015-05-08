@@ -9,6 +9,7 @@ out VertexData{
 	float reactionCoord;
 	float radius;
 	float angle;
+	int instanceID;
 }vertexOut;
 
 void main(void)
@@ -16,5 +17,6 @@ void main(void)
 	vertexOut.reactionCoord = reactionCoord;
 	vertexOut.radius = radius;
 	vertexOut.angle = rotation;
+	vertexOut.instanceID = gl_InstanceID;
 	gl_Position = vec4(position, 1);
 }
