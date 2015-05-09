@@ -29,9 +29,6 @@ namespace Chireiden.Materials
         Texture normalMap;
         float parallaxScale;
 
-        public POMMaterial()
-        { }
-
         public POMMaterial(Vector4 diffuseColor, Vector3 specularColor,
                             Vector3 ambientColor, float shininess, string TextureDirectory)
         {
@@ -39,7 +36,15 @@ namespace Chireiden.Materials
             this.specularColor = specularColor;
             this.ambientColor = ambientColor;
             this.shininess = shininess;
+            String texturePath = "data/texture/" + TextureDirectory;
+            diffuseTexture = TextureManager.getTexture(texturePath + "/diffuse.png");
+            specularTexture = TextureManager.getTexture(texturePath + "/specular.png");
+            heightMap = TextureManager.getTexture(texturePath + "/height.png");
+            normalMap = TextureManager.getTexture(texturePath + "/normal.png");
         }
+
+        public POMMaterial(string TextureDirectory) :
+            this(Vector4.Zero, Vector3.Zero, Vector3.Zero, 0, TextureDirectory) { }
 
         public bool hasDiffuseTexture()
         {
@@ -58,13 +63,13 @@ namespace Chireiden.Materials
             program.setUniformFloat3("mat_specular", specularColor);
             program.setUniformFloat1("mat_shininess", shininess);
 
-            //program.bindTexture2D("diffuseTexture", startTexUnit, diffuseTexture);
-            //program.bindTexture2D("specularTexture", startTexUnit + 1, specularTexture);
-            //program.bindTexture2D("heightTexture", startTexUnit + 2, heightMap);
-            //program.bindTexture2D("normalTexture", startTexUnit + 3, normalMap);
+            program.bindTexture2D("diffuseTexture", startTexUnit, diffuseTexture);
+            program.bindTexture2D("specularTexture", startTexUnit + 1, specularTexture);
+            program.bindTexture2D("heightTexture", startTexUnit + 2, heightMap);
+            program.bindTexture2D("normalTexture", startTexUnit + 3, normalMap);
             program.setUniformFloat1("parallaxScale", parallaxScale);
 
-            return startTexUnit + 4;
+            return startTexUnit;
         }
 
         public void unuseMaterialParameters(ShaderProgram program, int startTexUnit)

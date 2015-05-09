@@ -39,7 +39,7 @@ namespace Chireiden.Scenes
             Vector2[] tcs = { tc00, tc01, tc10, tc11 };
             Vector4 tan = new Vector4(1, 0, 0, 1);
             Vector4[] tans = { tan, tan, tan, tan };
-            square = new TriMesh(vs, fs, ns, tcs, tans, new POMMaterial());
+            square = new TriMesh(vs, fs, ns, tcs, tans, new POMMaterial("tile"));
         }
         
         public SurfaceTile(Vector3 loc)
