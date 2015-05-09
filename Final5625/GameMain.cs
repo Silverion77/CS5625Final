@@ -105,6 +105,9 @@ namespace Chireiden
             var emitter2 = new ParticleEmitter(new Vector3(4, 10, -2), 100.0f);
             world.addChild(emitter2);
 
+            var tile = new SurfaceTile(new Vector3(1,1,1));
+            world.addChild(tile);
+
             var light = new PointLight(new Vector3(0.5f, 1f, 4), 2, 5, new Vector3(1, 1, 1));
             world.addPointLight(light);
 

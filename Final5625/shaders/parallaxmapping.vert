@@ -3,7 +3,7 @@
 
 #version 330
 
-#define MAX_LIGHTS 40	
+#define MAX_LIGHTS 40
 
 in vec3 vert_position;
 in vec3 vert_normal;
@@ -13,45 +13,30 @@ in vec4 vert_tangent;
 // uniforms
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
-uniform mat4 inverseViewMatrix;
+uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat3 normalMatrix;
-uniform vec3 camera_position;
-uniform int light_count;
-uniform vec3 light_eyePosition[MAX_LIGHTS];
 
 // out
+out vec3 geom_position;
+out vec3 geom_worldPos;
 out vec2 geom_texCoord;
-//out vec3 toLightsInTS[MAX_LIGHTS];
-out vec3 toCameraInTS;
+out vec3 geom_normal;
+out vec3 geom_tangent;
+out vec3 geom_bitangent;
 
 void main()
 {
 	vec4 worldPos = modelMatrix * vec4(vert_position, 1);
-	vec3 N = normalize(normalMatrix * vert_normal);
-	vec3 T = normalize(normalMatrix * vert_tangent.xyz);
+	vec3 N = normalize(vert_normal);
+	vec3 T = normalize(vert_tangent.xyz);
 	vec3 B = normalize(cross(N, T) * vert_tangent.w);
+	geom_normal = normalize(normalMatrix * N);
+	geom_tangent = normalize(modelViewMatrix * vec4(T,0)).xyz;
+	geom_bitangent = normalize(modelViewMatrix * vec4(B,0)).xyz;
 	
-	// World space direction vectors
-	vec3 worldDirToCamera = normalize(camera_position - worldPos.xyz);
-	
-	// Transform directions to Tangent Space (TS)
-	//for (int i = 0; i < light_count; i++) {
-	//	vec3 worldDirToLight = normalize((inverseViewMatrix * vec4(light_eyePosition[i], 1)).xyz - worldPos.xyz);
-	//	toLightsInTS[i] = vec3(
-	//		dot(worldDirToLight, T),
-	//		dot(worldDirToLight, B),
-	//		dot(worldDirToLight, N)
-	//	);
-	//}
-	
-	toCameraInTS = vec3(
-		dot(worldDirToCamera, T),
-		dot(worldDirToCamera, B),
-		dot(worldDirToCamera, N)
-	);
-	
+	geom_worldPos = worldPos.xyz;
 	geom_texCoord = vert_texCoord;
-	
+	geom_position = (viewMatrix * worldPos).xyz;
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
 }
