@@ -174,6 +174,7 @@ namespace Chireiden
             Vector4 right4 = Vector4.Transform(new Vector4(1,0,0,0), invViewProjectionMatrix);
             Vector3 up = new Vector3(up4.X, up4.Y, up4.Z);
             Vector3 right = new Vector3(right4.X, right4.Y, right4.Z);
+            Vector3 forward = Vector3.Cross(up, right);
 
             GL.DepthMask(false);
             GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
@@ -189,10 +190,15 @@ namespace Chireiden
 
             ShaderLibrary.ParticleShader.setUniformMatrix4("viewProjectionMatrix", viewProjectionMatrix);
             ShaderLibrary.ParticleShader.setUniformFloat3("up", up / up.Length);
-            ShaderLibrary.ParticleShader.setUniformFloat3("right", right / right.Length); 
+            ShaderLibrary.ParticleShader.setUniformFloat3("right", right / right.Length);
+            ShaderLibrary.ParticleShader.setUniformFloat3("forward", forward / forward.Length);
+            ShaderLibrary.ParticleShader.setUniformFloat3("eye", camera.getWorldSpacePos());
+            ShaderLibrary.ParticleShader.setUniformFloat1("zNear", camera.getNearPlane());
+            ShaderLibrary.ParticleShader.setUniformFloat1("zFar", camera.getFarPlane());
+            ShaderLibrary.ParticleShader.setUniformFloat1("invInstances", 1.0f / 100);
             GL.BindVertexArray(VAO);
 
-            GL.DrawArrays(PrimitiveType.Points, (int)ringbufferHead * MAX_PARTICLES, particles.Count());
+            GL.DrawArraysInstanced(PrimitiveType.Points, (int)ringbufferHead * MAX_PARTICLES, particles.Count(), 100);
             GL.BindVertexArray(0);
             ShaderLibrary.ParticleShader.unuse();
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);

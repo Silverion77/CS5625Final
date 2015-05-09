@@ -198,6 +198,16 @@ namespace Chireiden
         public Vector3 getWorldSpacePos()
         {
             return WorldPosition;
-        } 
+        }
+
+        public float getNearPlane()
+        {
+            return nearClip;
+        }
+
+        public float getFarPlane()
+        {
+            return farClip;
+        }
     }
 }

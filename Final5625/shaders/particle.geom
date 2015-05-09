@@ -7,6 +7,7 @@ in VertexData{
 	float reactionCoord;
 	float radius;
 	float angle;
+	int instanceID;
 }vertexIn[1];
  
 out VertexData{
@@ -16,10 +17,21 @@ out VertexData{
 
 uniform vec3 up;
 uniform vec3 right;
+uniform vec3 eye;
+uniform vec3 forward;
+uniform float zNear;
+uniform float zFar;
+uniform float invInstances;
 uniform mat4 viewProjectionMatrix;
 
 void main()
 {
+	float depth = dot(gl_in[0].gl_Position.xyz - eye, forward);
+	float sliceNear = zNear + (zFar - zNear) * (1.0 - (vertexIn[0].instanceID+1) * invInstances);
+	float sliceFar =  zNear + (zFar - zNear) * (1.0 - vertexIn[0].instanceID * invInstances);
+	if(sliceFar < depth || sliceNear > depth)
+		return;
+
 	vertexOut.reactionCoord = vertexIn[0].reactionCoord;
 
 	float sAng = sin(vertexIn[0].angle);
