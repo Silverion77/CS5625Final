@@ -39,11 +39,11 @@ namespace Chireiden.Scenes
             Vector2[] tcs = { tc00, tc01, tc10, tc11 };
             Vector4 tan = new Vector4(1, 0, 0, 1);
             Vector4[] tans = { tan, tan, tan, tan };
-            square = new TriMesh(vs, fs, ns, tcs, tans, new POMMaterial());
+            square = new TriMesh(vs, fs, ns, tcs, tans, new POMMaterial("tile"));
         }
         
-        public SurfaceTile()
-            : base (1, new Vector3(0, 0, 0), Quaternion.Identity)
+        public SurfaceTile(Vector3 loc)
+            : this (1, loc, Quaternion.Identity)
         { }
 
         public override void render(Camera camera)
@@ -51,14 +51,15 @@ namespace Chireiden.Scenes
             ShaderProgram program = ShaderLibrary.POMShader;
 
             Matrix4 viewMatrix = camera.getViewMatrix();
+            Matrix4 projectionMatrix = camera.getProjectionMatrix();
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
             Matrix3 normalMatrix = Utils.normalMatrix(modelView);
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
             program.use();
             // set shader uniforms
             program.setUniformMatrix4("modelMatrix", toWorldMatrix);
             program.setUniformMatrix4("viewMatrix", viewMatrix);
+            program.setUniformMatrix4("modelViewMatrix", modelView);
             program.setUniformMatrix4("inverseViewMatrix", viewMatrix.Inverted());
             program.setUniformMatrix4("projectionMatrix", projectionMatrix);
             program.setUniformMatrix3("normalMatrix", normalMatrix);

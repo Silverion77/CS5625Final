@@ -62,5 +62,16 @@ namespace SALevelEditor
         {
             return currentLevel.constructStage();
         }
+
+        public void exportToFile(string filename)
+        {
+            currentLevel.exportToFile(filename);
+        }
+
+        public void importFromFile(string filename)
+        {
+            StageData data = StageImporter.importStageFromFile(filename);
+            currentLevel = new LevelMap(data);
+        }
     }
 }

@@ -23,13 +23,11 @@ namespace Chireiden.Materials
         // Textures
         // For now, we will use 2 textures for Blinn Phong (subject to change)
         Texture diffuseTexture;
-        Texture additiveTexture;
+        Texture specularTexture;
         // Required for POM
         Texture heightMap;
         Texture normalMap;
-
-        public POMMaterial()
-        { }
+        float parallaxScale;
 
         public POMMaterial(Vector4 diffuseColor, Vector3 specularColor,
                             Vector3 ambientColor, float shininess, string TextureDirectory)
@@ -38,16 +36,48 @@ namespace Chireiden.Materials
             this.specularColor = specularColor;
             this.ambientColor = ambientColor;
             this.shininess = shininess;
+            String texturePath = "data/texture/" + TextureDirectory;
+            diffuseTexture = TextureManager.getTexture(texturePath + "/diffuse.png");
+            specularTexture = TextureManager.getTexture(texturePath + "/specular.png");
+            heightMap = TextureManager.getTexture(texturePath + "/height.png");
+            normalMap = TextureManager.getTexture(texturePath + "/normal.png");
+        }
+
+        public POMMaterial(string TextureDirectory) :
+            this(Vector4.Zero, Vector3.Zero, Vector3.Zero, 0, TextureDirectory) { }
+
+        public bool hasDiffuseTexture()
+        {
+            return diffuseTexture != null;
+        }
+
+        public bool hasAdditiveTexture()
+        {
+            return specularTexture != null;
         }
 
         public int useMaterialParameters(ShaderProgram program, int startTexUnit)
         {
+            program.setUniformFloat3("mat_ambient", ambientColor);
+            program.setUniformFloat4("mat_diffuse", diffuseColor);
+            program.setUniformFloat3("mat_specular", specularColor);
+            program.setUniformFloat1("mat_shininess", shininess);
+
+            program.bindTexture2D("diffuseTexture", startTexUnit, diffuseTexture);
+            program.bindTexture2D("specularTexture", startTexUnit + 1, specularTexture);
+            program.bindTexture2D("heightTexture", startTexUnit + 2, heightMap);
+            program.bindTexture2D("normalTexture", startTexUnit + 3, normalMap);
+            program.setUniformFloat1("parallaxScale", parallaxScale);
+
             return startTexUnit;
         }
 
         public void unuseMaterialParameters(ShaderProgram program, int startTexUnit)
         {
-            
+            program.unbindTexture2D(startTexUnit);
+            program.unbindTexture2D(startTexUnit + 1);
+            program.unbindTexture2D(startTexUnit + 2);
+            program.unbindTexture2D(startTexUnit + 3);
         }
     }
 }

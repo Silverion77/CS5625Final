@@ -8,6 +8,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 using Chireiden.Scenes;
+using Chireiden.Scenes.Stages;
 
 namespace Chireiden
 {
@@ -48,6 +49,8 @@ namespace Chireiden
 
         Vector3 worldSpacePos;
 
+        Stage stage;
+
         public Vector3 WorldPosition { get { return worldSpacePos; } }
 
         bool frozen;
@@ -69,6 +72,11 @@ namespace Chireiden
             computeFrame();
 
             frozen = false;
+        }
+
+        public void setStage(Stage s)
+        {
+            stage = s;
         }
 
         public Matrix4 getProjectionMatrix()
@@ -103,6 +111,19 @@ namespace Chireiden
 
             Vector3 rotatedOffset = Vector3.Multiply(forward, distanceBehind);
             worldSpacePos = lookAt - rotatedOffset;
+
+            // Also, let's make the camera not clip through the world
+            if (stage != null)
+            {
+                if (!stage.worldLocInBounds(worldSpacePos) || worldSpacePos.Z < 0)
+                {
+                    // If we're not in bounds, we need to do a projection
+                    Vector3 worldSpaceCorrected = stage.computeCollisionTime(lookAt, worldSpacePos);
+                    worldSpaceCorrected = 1.1f * worldSpaceCorrected - 0.1f * worldSpacePos;
+                    if (!worldSpaceCorrected.Equals(lookAt))
+                        worldSpacePos = worldSpaceCorrected;
+                }
+            }
 
             viewMatrix = Matrix4.LookAt(worldSpacePos, lookAt, up);
         }

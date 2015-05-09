@@ -33,7 +33,7 @@ namespace Chireiden.Scenes
         Backstep
     }
 
-    class UtsuhoReiuji : SkeletalMeshNode
+    public class UtsuhoReiuji : SkeletalMeshNode
     {
         /// <summary>
         /// Makes sure that Okuu has all of the animations we expect her to have.
@@ -157,7 +157,10 @@ namespace Chireiden.Scenes
             oldRotation = Quaternion.Identity;
             targetRotation = Quaternion.Identity;
             idle();
+            wallRepelDistance = 1.5f;
         }
+
+        public UtsuhoReiuji(Vector3 loc) : this(MeshLibrary.Okuu, loc) { }
 
         public void toggleRunWalk(bool newRunning)
         {
@@ -453,15 +456,17 @@ namespace Chireiden.Scenes
 
             interpolateMorphs(e.Time);
 
+            Vector3 origPos = worldPosition;
             if (toWorldMatrix != null && !velocity.Equals(Vector3.Zero))
             {
-                float moveSpeed = getMoveSpeed();
                 Matrix4 worldToLocal = toWorldMatrix.Inverted();
                 Vector4 worldVel = new Vector4((float)e.Time * velocity, 0);
                 // We want to get the velocity in local space, and then rotate it so it goes in the right direction
                 Vector3 localVel = Vector4.Transform(Vector4.Transform(worldVel, worldToLocal), targetRotation).Xyz;
                 translation = Vector3.Add(translation, localVel);
             }
+
+            correctPosition(origPos, parentToWorldMatrix);
 
             updateMatricesAndWorldPos(parentToWorldMatrix);
             

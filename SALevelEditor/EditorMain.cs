@@ -148,7 +148,23 @@ namespace SALevelEditor
             if (file.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 path = file.FileName;
-                Console.WriteLine("export to {0}", path);
+                levelEditor.exportToFile(path);
+            }
+            else
+            {
+                Console.WriteLine("cancelled");
+                return;
+            }
+        }
+
+        void import()
+        {
+            string path;
+            System.Windows.Forms.OpenFileDialog file = new System.Windows.Forms.OpenFileDialog();
+            if (file.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                path = file.FileName;
+                levelEditor.importFromFile(path);
             }
             else
             {
@@ -179,8 +195,13 @@ namespace SALevelEditor
                     case OpenTK.Input.Key.F:
                         objectMode = ObjectType.Finish;
                         break;
-                    case OpenTK.Input.Key.E:
-                        export();
+                    case OpenTK.Input.Key.S:
+                        if (e.Keyboard.IsKeyDown(OpenTK.Input.Key.ControlLeft))
+                            export();
+                        break;
+                    case OpenTK.Input.Key.L:
+                        if (e.Keyboard.IsKeyDown(OpenTK.Input.Key.ControlLeft))
+                            import();
                         break;
                     default:
                         if (objectMode == ObjectType.Material) switchMaterial(key);
@@ -246,10 +267,12 @@ namespace SALevelEditor
                 stage = levelEditor.constructStage();
                 world.addChild(stage);
                 camTarget.setStage(stage);
+                trackingCamera.setStage(stage);
             }
             else
             {
                 camTarget.setStage(null);
+                trackingCamera.setStage(null);
             }
             // Swap modes
             viewingMap = !viewingMap;
@@ -292,15 +315,15 @@ namespace SALevelEditor
             if (viewingMap)
             {
                 levelEditor.render(mapCamera);
+
+                statusText.DrawString(statusString(), font, Brushes.White, PointF.Empty);
+                statusText.drawTextAtLoc(10, 10);
             }
             else
             {
                 trackingCamera.transformPointLights(world.getPointLights());
                 world.render(trackingCamera);
             }
-
-            statusText.DrawString(statusString(), font, Brushes.White, PointF.Empty);
-            statusText.drawTextAtLoc(10, 10);
 
             SwapBuffers();
         }

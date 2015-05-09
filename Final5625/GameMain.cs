@@ -39,6 +39,7 @@ using OpenTK.Input;
 using Chireiden.Meshes;
 using Chireiden.Scenes;
 using Chireiden.UI;
+using Chireiden.Scenes.Stages;
 
 namespace Chireiden
 {
@@ -50,8 +51,11 @@ namespace Chireiden
 
         UtsuhoReiuji okuu;
         TrackingCamera camera;
+        Stage stage;
 
         Stopwatch stopwatch;
+
+        float aspectRatio;
 
         bool paused = false;
 
@@ -64,9 +68,6 @@ namespace Chireiden
             Framebuffer.Init(Width, Height);
             ParticleSystem.Init();
         }
-
-        SkeletalMeshNode meshOrig;
-        SkeletalMeshNode meshCopy;
 
         public static int ScreenWidth { get; set; }
         public static int ScreenHeight { get; set; }
@@ -88,16 +89,11 @@ namespace Chireiden
 
             ScreenWidth = ClientSize.Width;
             ScreenHeight = ClientSize.Height;
-            float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
+            aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
 
-            meshOrig = new SkeletalMeshNode(MeshLibrary.TextCube);
-            world.addChild(meshOrig);
-
+            /*
             MeshNode happyNode = new MeshNode(MeshLibrary.HappySphere, new Vector3(0, 0, 5));
             world.addChild(happyNode);
-
-            meshCopy = new SkeletalMeshNode(MeshLibrary.TextCube, new Vector3(0, -4, 0));
-            world.addChild(meshCopy);
 
             var emitter = new ParticleEmitter(new Vector3(-2,10,0), 100.0f);
             world.addChild(emitter);
@@ -105,19 +101,25 @@ namespace Chireiden
             var emitter2 = new ParticleEmitter(new Vector3(4, 10, -2), 100.0f);
             world.addChild(emitter2);
 
+            var tile = new SurfaceTile(new Vector3(1,1,1));
+            world.addChild(tile);
+
             var light = new PointLight(new Vector3(0.5f, 1f, 4), 2, 5, new Vector3(1, 1, 1));
-            world.addPointLight(light);
+            world.addPointLight(light); */
 
-            // The camera will now focus on Okuu
-            okuu = new UtsuhoReiuji(MeshLibrary.Okuu, new Vector3(2, 2, 0));
-            world.addChild(okuu);
+            loadStage("data/stage/testlevel");
 
-            camera = new TrackingCamera(okuu, (float)Math.PI / 4, aspectRatio, 0.1f, 100);
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
+        }
 
-            meshOrig.switchAnimation("twist");
-            meshCopy.switchAnimation("gyrate");
+        void loadStage(string stageFile)
+        {
+            StageData stageData = StageImporter.importStageFromFile(stageFile);
+            world = StageImporter.makeStageWorld(stageData, out stage, out okuu);
+
+            camera = new TrackingCamera(okuu, (float)Math.PI / 4, aspectRatio, 0.1f, 100);
+            camera.setStage(stage);
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -232,9 +234,6 @@ namespace Chireiden
                 okuu.inputMove(worldMovementVector);
             }
 
-            meshCopy.advanceAnimation(e.Time);
-            meshOrig.advanceAnimation(e.Time);
-
             // TODO: handle enemy movement here, once enemies are implemented
 
             // Update then adds velocity to position, and also updates modeling transformations.
@@ -252,7 +251,7 @@ namespace Chireiden
             stopwatch.Restart();
 
             GL.Viewport(0, 0, Width, Height);
-            GL.ClearColor(System.Drawing.Color.MidnightBlue);
+            GL.ClearColor(System.Drawing.Color.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             camera.transformPointLights(world.getPointLights());

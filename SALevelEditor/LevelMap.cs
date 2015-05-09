@@ -17,8 +17,8 @@ namespace SALevelEditor
         int[,] tiles;
         MapTexture texture;
 
-        public const int tileSideLength = 20;
-        public const int wallHeight = 50;
+        int tileSideLength = 20;
+        int wallHeight = 50;
 
         static Texture radioactive = new Texture("textures/radioactive.png");
         static Texture okuu = new Texture("textures/okuu.png");
@@ -35,9 +35,22 @@ namespace SALevelEditor
             dimensions = new Vector2(width, height);
             texture = new MapTexture(tiles);
             tiles[0, 1] = 1;
+            tiles[0, 0] = 1;
             zombieFairies = new List<Vector2>();
             okuuPosition = new Vector2(0, 0);
             goalPosition = new Vector2(1, 1);
+        }
+
+        public LevelMap(StageData data)
+        {
+            dimensions = new Vector2(data.Width, data.Height);
+            tiles = data.Tiles;
+            texture = new MapTexture(tiles);
+            okuuPosition = data.OkuuPosition;
+            goalPosition = data.GoalPosition;
+            zombieFairies = data.ZombiePositions;
+            tileSideLength = data.TileSideLength;
+            wallHeight = data.WallHeight;
         }
 
         static Random rand = new Random();
@@ -57,6 +70,10 @@ namespace SALevelEditor
         {
             if (x >= 0 && x < dimensions.X && y >= 0 && y < dimensions.Y)
                 tiles[x, y] = newVal;
+            if (newVal == 0)
+            {
+                removeZombiesInSquare(x, y);
+            }
         }
 
         public void setOkuuPosition(int x, int y)
@@ -71,9 +88,35 @@ namespace SALevelEditor
             goalPosition.Y = y;
         }
 
+        bool isTileEmpty(float x, float y)
+        {
+            int xInt = (int)Math.Floor(x);
+            int yInt = (int)Math.Floor(y);
+            if (xInt < 0 || xInt >= dimensions.X || yInt < 0 || yInt > dimensions.Y)
+                return true;
+            return tiles[xInt, yInt] == 0;
+        }
+
         public void addZombieFairy(float x, float y)
         {
-            zombieFairies.Add(new Vector2(x, y));
+            if (!isTileEmpty(x, y))
+                zombieFairies.Add(new Vector2(x, y));
+        }
+
+        public void removeZombiesInSquare(int x, int y)
+        {
+            List<Vector2> toRemove = new List<Vector2>();
+            foreach (Vector2 v in zombieFairies)
+            {
+                int zombieX = (int)Math.Floor(v.X);
+                int zombieY = (int)Math.Floor(v.Y);
+                if (x == zombieX && y == zombieY)
+                    toRemove.Add(v);
+            }
+            foreach (Vector2 v in toRemove)
+            {
+                zombieFairies.Remove(v);
+            }
         }
 
         public void removeZombieFairy(float x, float y)

@@ -6,10 +6,25 @@ using OpenTK;
 
 namespace Chireiden.Scenes.Stages
 {
-    class StageImporter
+
+    public struct StageData
     {
-        public static Stage importStageFromFile(string filename)
+        public int Width;
+        public int Height;
+        public int TileSideLength;
+        public int WallHeight;
+        public int[,] Tiles;
+        public Vector2 OkuuPosition;
+        public Vector2 GoalPosition;
+        public List<Vector2> ZombiePositions;
+    }
+
+    public class StageImporter
+    {
+        public static StageData importStageFromFile(string filename)
         {
+            StageData data = new StageData();
+
             using (StreamReader sr = new StreamReader(filename))
             {
                 // Read width
@@ -17,21 +32,26 @@ namespace Chireiden.Scenes.Stages
                 int width;
                 if (!widthLine[0].Equals("width") || !Int32.TryParse(widthLine[1], out width))
                     throw new FormatException("Error reading width from level file");
+                data.Width = width;
+
                 string[] heightLine = sr.ReadLine().Split(' ');
                 int height;
                 if (!heightLine[0].Equals("height") || !Int32.TryParse(heightLine[1], out height))
                     throw new FormatException("Error reading height from level file");
+                data.Height = height;
 
 
                 string[] tileSideLine = sr.ReadLine().Split(' ');
                 int tileSideLength;
-                if (!heightLine[0].Equals("tileSideLength") || !Int32.TryParse(heightLine[1], out tileSideLength))
+                if (!tileSideLine[0].Equals("tileSideLength") || !Int32.TryParse(tileSideLine[1], out tileSideLength))
                     throw new FormatException("Error reading tileSideLength from level file");
+                data.TileSideLength = tileSideLength;
 
                 string[] wallHeightLine = sr.ReadLine().Split(' ');
                 int wallHeight;
-                if (!heightLine[0].Equals("wallHeight") || !Int32.TryParse(heightLine[1], out wallHeight))
+                if (!wallHeightLine[0].Equals("wallHeight") || !Int32.TryParse(wallHeightLine[1], out wallHeight))
                     throw new FormatException("Error reading wallHeight from level file");
+                data.WallHeight = wallHeight;
 
                 int[,] tiles = new int[width, height];
 
@@ -47,19 +67,23 @@ namespace Chireiden.Scenes.Stages
                     }
                 }
 
+                data.Tiles = tiles;
+
                 string[] okuuLine = sr.ReadLine().Split(' ');
                 int okuuX, okuuY;
                 if (!okuuLine[0].Equals("okuu") || !Int32.TryParse(okuuLine[1], out okuuX) || !Int32.TryParse(okuuLine[2], out okuuY))
                     throw new FormatException("Error reading Okuu's position from level file");
 
                 Vector2 okuuPosCoords = new Vector2(okuuX, okuuY);
+                data.OkuuPosition = okuuPosCoords;
 
                 string[] goalLine = sr.ReadLine().Split(' ');
                 int goalX, goalY;
                 if (!goalLine[0].Equals("goal") || !Int32.TryParse(goalLine[1], out goalX) || !Int32.TryParse(goalLine[2], out goalY))
                     throw new FormatException("Error reading goal position from level file");
-                
+
                 Vector2 goalPosCoords = new Vector2(goalX, goalY);
+                data.GoalPosition = goalPosCoords;
 
                 List<Vector2> zombieFairyLocs = new List<Vector2>();
                 string line;
@@ -74,8 +98,39 @@ namespace Chireiden.Scenes.Stages
                     zombieFairyLocs.Add(new Vector2(zombieX, zombieY));
                 }
 
-                return new Stage(tiles, tileSideLength, wallHeight);
+                data.ZombiePositions = zombieFairyLocs;
+
+                return data;
             }
+        }
+
+        public static World makeStageWorld(StageData data, out Stage stage, out UtsuhoReiuji okuu)
+        {
+            World world = new World();
+            stage = new Stage(data);
+            world.addChild(stage);
+
+            Vector3 okuuWorldPos = new Vector3(data.TileSideLength * (data.OkuuPosition.X + 0.5f),
+                data.TileSideLength * (data.OkuuPosition.X + 0.5f), 0);
+
+            okuu = new UtsuhoReiuji(okuuWorldPos);
+            world.addChild(okuu);
+
+            // This is just for debugging, so that we can see
+            PointLight light = new PointLight(new Vector3(0, -2f, 4.3f), 2, 20, new Vector3(1, 1, 1));
+            okuu.addChild(light);
+            world.registerPointLight(light);
+
+            okuu.setStage(stage);
+
+            Vector3 goalWorldPos = new Vector3(data.TileSideLength * (data.GoalPosition.X + 0.5f),
+                data.TileSideLength * (data.GoalPosition.Y + 0.5f), 0);
+
+            Console.WriteLine("TODO: Handle goal checking");
+
+            Console.WriteLine("TODO: Handle zombie fairies");
+
+            return world;
         }
     }
 }

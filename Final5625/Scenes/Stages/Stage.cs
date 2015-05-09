@@ -37,6 +37,21 @@ namespace Chireiden.Scenes.Stages
             toParentMatrix = Matrix4.Identity;
         }
 
+        public Stage(StageData data)
+        {
+            this.tiles = data.Tiles;
+            this.tileSideLength = data.TileSideLength;
+            this.wallHeight = data.WallHeight;
+            this.width = data.Width;
+            this.height = data.Height;
+
+            stageElements = new List<StageTilesNode>();
+            setUpStage(tiles, tileSideLength, wallHeight);
+
+            toWorldMatrix = Matrix4.Identity;
+            toParentMatrix = Matrix4.Identity;
+        }
+
         static StageTilesNode stageMaterialOfID(int id, MaterialTileCollection matTiles)
         {
             switch (id)
@@ -120,12 +135,6 @@ namespace Chireiden.Scenes.Stages
             float timeX = (borderX - baseLoc.X) / moveVec.X;
             float timeY = (borderY - baseLoc.Y) / moveVec.Y;
 
-            Console.WriteLine("borderX = {0}, borderY = {1}", borderX, borderY);
-            Console.WriteLine("baseLoc = {0}, moveVec = {1}", baseLoc, moveVec);
-
-            Console.WriteLine("timeX = {0}, timeY = {1}", timeX, timeY);
-
-
             bool xOK = false, yOK = false;
 
             // First check if, when the object entered the X-coordinate range,
@@ -133,10 +142,8 @@ namespace Chireiden.Scenes.Stages
             if (moveVec.X != 0 && timeX >= 0)
             {
                 Vector2 crossingPoint = baseLoc + (timeX * moveVec);
-                Console.WriteLine("Cross point X = {0}", crossingPoint);
                 if (tileY < crossingPoint.Y && crossingPoint.Y < tileY + 1)
                 {
-                    Console.WriteLine("xOK = true");
                     xOK = true;
                 }
             }
@@ -144,10 +151,8 @@ namespace Chireiden.Scenes.Stages
             if (moveVec.Y != 0 && timeY >= 0)
             {
                 Vector2 crossingPoint = baseLoc + (timeY * moveVec);
-                Console.WriteLine("Cross point Y = {0}", crossingPoint);
                 if (tileX < crossingPoint.X && crossingPoint.X < tileX + 1)
                 {
-                    Console.WriteLine("yOK = true");
                     yOK = true;
                 }
             }
@@ -181,12 +186,26 @@ namespace Chireiden.Scenes.Stages
             return tileInBounds(mapX, mapY);
         }
 
+        bool computeFloorCrossed(float origZ, float newZ, out float time)
+        {
+            float zDiff = newZ - origZ;
+            Console.WriteLine("origZ = {0}, newZ = {1}, zDiff = {2}", origZ, newZ, zDiff);
+            if (zDiff == 0 || newZ > 0)
+            {
+                time = 0;
+                return false;
+            }
+            time = -origZ / zDiff;
+            if (time < 0 || time > 1) return false;
+            return true;
+        }
+
         /// <summary>
-        /// Finds the nearest in-bounds location to the given position.
+        /// Finds the nearest in-bounds location on the ray from oldPos to pos.
         /// </summary>
         /// <param name="pos"></param>
         /// <returns></returns>
-        public Vector3 projectInBounds(Vector3 oldPos, Vector3 pos)
+        public Vector3 computeCollisionTime(Vector3 oldPos, Vector3 pos)
         {
             Console.WriteLine("oldPos = {0}, pos = {1}", oldPos, pos);
             Vector2 oldMapCoords = new Vector2(oldPos.X / tileSideLength, oldPos.Y / tileSideLength);
@@ -222,12 +241,64 @@ namespace Chireiden.Scenes.Stages
                 }
             }
 
+            float zTime;
+            if (computeFloorCrossed(oldPos.Z, pos.Z, out zTime))
+            {
+                minTime = Math.Min(minTime, zTime);
+            }
+
             if (minTime < 1)
             {
                 Vector3 worldMoveVec = pos - oldPos;
                 return oldPos + (minTime * worldMoveVec);
             }
             else return pos;
+        }
+
+        /// <summary>
+        /// Moves the given position so that it is at least worldSpaceDistance
+        /// away from each wall in its room.
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="worldSpaceDistance"></param>
+        /// <returns></returns>
+        public Vector3 repelFromWall(Vector3 pos, float worldSpaceDistance)
+        {
+            float mapX = pos.X / tileSideLength;
+            float mapY = pos.Y / tileSideLength;
+            float distance = worldSpaceDistance / tileSideLength;
+
+            int baseX = (int)Math.Floor(mapX);
+            int baseY = (int)Math.Floor(mapY);
+
+            float fractX = mapX - baseX;
+            float fractY = mapY - baseY;
+
+            if (distance < fractX && fractX < 1 - distance && distance < fractY && fractY < 1 - distance)
+                return pos;
+
+            if (fractX < distance && !tileInBounds(mapX - 1, mapY))
+            {
+                // If we're too close to a wall on the west side
+                mapX = baseX + distance;
+            }
+            else if (fractX > 1 - distance && !tileInBounds(mapX + 1, mapY))
+            {
+                // If we're too close to a wall on the east side
+                mapX = baseX + 1 - distance;
+            }
+            if (fractY < distance && !tileInBounds(mapX, mapY - 1))
+            {
+                // If we're too close to a wall on the south side
+                mapY = baseY + distance;
+            }
+            else if (fractY > 1 - distance && !tileInBounds(mapX, mapY + 1))
+            {
+                // Wall on north side
+                mapY = baseY + 1 - distance;
+            }
+
+            return new Vector3(mapX * tileSideLength, mapY * tileSideLength, pos.Z);
         }
     }
 }
