@@ -28,6 +28,8 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.IO;
+using System.Drawing;
+using System.Drawing.Text;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -36,12 +38,12 @@ using OpenTK.Input;
 
 using Chireiden.Meshes;
 using Chireiden.Scenes;
+using Chireiden.UI;
 
 namespace Chireiden
 {
     public class GameMain : GameWindow
     {
-
         World world;
 
         MouseState previous;
@@ -66,6 +68,9 @@ namespace Chireiden
         SkeletalMeshNode meshOrig;
         SkeletalMeshNode meshCopy;
 
+        public static int ScreenWidth { get; set; }
+        public static int ScreenHeight { get; set; }
+
         protected override void OnLoad(System.EventArgs e)
         {
             VSync = VSyncMode.Off;
@@ -81,6 +86,8 @@ namespace Chireiden
             // Make the world
             world = new World();
 
+            ScreenWidth = ClientSize.Width;
+            ScreenHeight = ClientSize.Height;
             float aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
 
             meshOrig = new SkeletalMeshNode(MeshLibrary.TextCube);

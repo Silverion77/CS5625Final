@@ -50,11 +50,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Materials\LambertianMaterial.cs" />
+    <Compile Include="Materials\NullMaterial.cs" />
     <Compile Include="Meshes\Animations\BlendShape.cs" />
     <Compile Include="Meshes\FloatArrayTexture.cs" />
     <Compile Include="Meshes\Vector4Texture.cs" />
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
+    <Compile Include="Scenes\Stages\Stage.cs" />
+    <Compile Include="Scenes\Stages\StageTilesNode.cs" />
+    <Compile Include="Scenes\Stages\Stage_Constructor.cs" />
     <Compile Include="ShaderLibrary.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />
@@ -92,6 +97,7 @@
     <Compile Include="Scenes\UtsuhoReiuji.cs" />
     <Compile Include="Scenes\SurfaceTile.cs" />
     <Compile Include="ShaderProgram.cs" />
+    <Compile Include="UI\TextRenderer.cs" />
     <Compile Include="TrackingCamera.cs" />
     <Compile Include="Scenes\PlaceableObject.cs" />
     <Compile Include="Scenes\World.cs" />
@@ -256,6 +262,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <Content Include="data\texture\edv.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="data\texture\particle\0.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -303,6 +312,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="shaders\bloomY.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\fsq.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\fsq.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\on_screen_quad.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="shaders\lambertian.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

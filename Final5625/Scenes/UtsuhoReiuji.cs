@@ -144,6 +144,7 @@ namespace Chireiden.Scenes
         double nextBlinkTime = 1;
         const double halfBlinkDuration = 0.17;
         bool blinkInProgress = false;
+        bool blinkEnabled = true;
 
         public UtsuhoReiuji(MeshContainer m, Vector3 loc)
             : base(m, loc)
@@ -351,6 +352,11 @@ namespace Chireiden.Scenes
 
         void knockedOut()
         {
+            setMorphSmooth("eyes_closed", 0, 0);
+            setMorphSmooth("><_eyes", 1, 0);
+            setMorphSmooth("sad_brow", 1, 1);
+            blinkEnabled = false;
+            currentBlinkTime = 0;
             okuuState = OkuuState.KO;
             switchAnimationSmooth("ko");
         }
@@ -424,7 +430,10 @@ namespace Chireiden.Scenes
             velocity = speed * velocityDir;
 
             // Make Okuu blink every so often
-            currentBlinkTime += e.Time;
+            if (blinkEnabled)
+            {
+                currentBlinkTime += e.Time;
+            }
             if (currentBlinkTime > nextBlinkTime)
             {
                 if (currentBlinkTime > nextBlinkTime + 1.4 * halfBlinkDuration)
@@ -582,6 +591,9 @@ namespace Chireiden.Scenes
             {
                 if (okuuState == OkuuState.KO)
                 {
+                    blinkEnabled = true;
+                    setMorphSmooth("sad_brow", 0, 1);
+                    setMorphSmooth("><_eyes", 0, 0);
                     readyOrIdle();
                     return true;
                 }

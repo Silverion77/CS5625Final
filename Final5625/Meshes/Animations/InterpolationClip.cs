@@ -15,7 +15,7 @@ namespace Chireiden.Meshes.Animations
     /// I like to think of this as describing a homotopy from the constant "path" defined by the source pose,
     /// to the "path" defined by the target animation.
     /// </summary>
-    class InterpolationClip : Clip
+    public class InterpolationClip : Clip
     {
         Pose sourcePose;
         Clip target;

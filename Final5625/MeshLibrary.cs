@@ -8,7 +8,7 @@ using Chireiden.Meshes;
 
 namespace Chireiden
 {
-    class MeshLibrary
+    public class MeshLibrary
     {
         public static MeshContainer TextCube;
         public static MeshContainer Okuu;

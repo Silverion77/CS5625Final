@@ -40,10 +40,20 @@ namespace Chireiden.Scenes
             addChild(p);
         }
 
+        public void registerPointLight(PointLight p)
+        {
+            pointLights.Add(p);
+        }
+
         public void removePointLight(PointLight p)
         {
             pointLights.Remove(p);
             removeChild(p);
+        }
+
+        public void unregisterPointLight(PointLight p)
+        {
+            pointLights.Remove(p);
         }
 
         public List<PointLight> getPointLights()

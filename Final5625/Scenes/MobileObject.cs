@@ -19,7 +19,7 @@ namespace Chireiden.Scenes
         /// The world space velocity of this object.
         /// </summary>
         protected Vector3 velocity;
-        float moveSpeed = 3;
+        float moveSpeed = 8;
 
         public MobileObject(float s, Vector3 t, Quaternion r, Vector3 v) : base(s, t, r)
         {

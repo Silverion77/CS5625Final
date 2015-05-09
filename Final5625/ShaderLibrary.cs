@@ -18,6 +18,8 @@ namespace Chireiden
         public static ShaderProgram BloomYShader;
         public static ShaderProgram ParticleShader;
         public static ShaderProgram POMShader;
+        public static ShaderProgram TextShader;
+        public static ShaderProgram LambertianShader;
 
         public static void loadShaders() {
             CubeShader = new ShaderProgram("data/Simple_VS.vert", "data/Simple_FS.frag");
@@ -30,6 +32,8 @@ namespace Chireiden
             BloomYShader = new ShaderProgram("shaders/simple2d.vert", "shaders/bloomY.frag");
             ParticleShader = new ShaderProgram("shaders/particle.vert", "shaders/particle.geom", "shaders/particle.frag");
             POMShader = new ShaderProgram("shaders/parallaxmapping.vert", "shaders/parallaxmapping.frag");
+            TextShader = new ShaderProgram("shaders/on_screen_quad.vert", "shaders/fsq.frag");
+            LambertianShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/lambertian.frag");
         }
     }
 }

@@ -6,7 +6,7 @@ using Chireiden.Meshes.Animations;
 
 namespace Chireiden.Scenes
 {
-    class SkeletalMeshNode : MeshNode
+    public class SkeletalMeshNode : MeshNode
     {
         public const double DEFAULT_ANIM_INTERP_DURATION = 0.2;
 

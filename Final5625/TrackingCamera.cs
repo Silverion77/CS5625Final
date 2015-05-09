@@ -17,7 +17,7 @@ namespace Chireiden
     /// while its eye position is always some configurable distance behind it.
     /// The eye position swings around the target following the mouse.
     /// </summary>
-    class TrackingCamera : Camera
+    public class TrackingCamera : Camera
     {
         public float MouseSensitivity = 0.01f;
         public float distanceBehind = 5;
@@ -103,6 +103,7 @@ namespace Chireiden
 
             Vector3 rotatedOffset = Vector3.Multiply(forward, distanceBehind);
             worldSpacePos = lookAt - rotatedOffset;
+
             viewMatrix = Matrix4.LookAt(worldSpacePos, lookAt, up);
         }
 
@@ -181,6 +182,9 @@ namespace Chireiden
 
             offset = offset + x * rightProj;
             offset = offset + y * forwardProj;
+
+            if (offset.Equals(Vector3.Zero)) return offset;
+
             offset.Normalize();
             return offset;
         }
