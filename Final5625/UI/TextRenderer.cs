@@ -21,6 +21,9 @@ namespace Chireiden.UI
         int pixelWidth;
         int pixelHeight;
 
+        int screenWidth;
+        int screenHeight;
+
         float normalizedScreenWidth;
         float normalizedScreenHeight;
 
@@ -31,7 +34,7 @@ namespace Chireiden.UI
         /// </summary>
         /// <param name="width">The width of the backing store in pixels.</param>
         /// <param name="height">The height of the backing store in pixels.</param>
-        public TextRenderer(int width, int height)
+        public TextRenderer(int width, int height, int screenWidth, int screenHeight)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width");
@@ -39,6 +42,9 @@ namespace Chireiden.UI
                 throw new ArgumentOutOfRangeException("height ");
             if (GraphicsContext.CurrentContext == null)
                 throw new InvalidOperationException("No GraphicsContext is current on the calling thread.");
+
+            this.screenWidth = screenWidth;
+            this.screenHeight = screenHeight;
 
             bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             gfx = Graphics.FromImage(bmp);
@@ -54,10 +60,10 @@ namespace Chireiden.UI
             pixelWidth = width;
             pixelHeight = height;
 
-            normalizedScreenWidth = 2 * (float)pixelWidth / GameMain.ScreenWidth;
+            normalizedScreenWidth = 2 * (float)pixelWidth / screenWidth;
             // I want the texture to extend down from the top-left corner of the box,
             // rather than up from the bottom-left, so this is negated.
-            normalizedScreenHeight = -2 * (float)pixelHeight / GameMain.ScreenHeight;
+            normalizedScreenHeight = -2 * (float)pixelHeight / screenHeight;
 
             // Start it off as transparency
             Clear();
@@ -92,6 +98,7 @@ namespace Chireiden.UI
         /// The origin (0, 0) lies at the top-left corner of the backing store.</param>
         public void DrawString(string text, Font font, Brush brush, PointF point)
         {
+            Clear();
             gfx.DrawString(text, font, brush, point);
 
             SizeF size = gfx.MeasureString(text, font);
@@ -141,14 +148,12 @@ namespace Chireiden.UI
         {
             Chireiden.ShaderProgram program = ShaderLibrary.TextShader;
 
-            float normalizedScreenX = 2 * (float)x / GameMain.ScreenWidth - 1;
+            float normalizedScreenX = 2 * (float)x / screenWidth - 1;
             // I want (x,y) to start at the top-left, rather than the bottom-left,
             // hence the negation of the Y coordinate here
-            float normalizedScreenY = 1 - 2 * (float)y / GameMain.ScreenHeight;
+            float normalizedScreenY = 1 - 2 * (float)y / screenHeight;
 
             Vector4 locDims = new Vector4(normalizedScreenX, normalizedScreenY, normalizedScreenWidth, normalizedScreenHeight);
-
-            Console.WriteLine("Drawing text at {0} with dimensions {1}", locDims.Xy, locDims.Zw);
 
             // Bind the stuff we need for this object (VAO, index buffer, program)
             GL.BindVertexArray(Utils.QuadVAO);

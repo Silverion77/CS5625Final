@@ -22,6 +22,32 @@ namespace SALevelEditor
             currentLevel = new LevelMap(30, 20);
         }
 
+        public void makeEdit(float realX, float realY, ObjectType type, int matID)
+        {
+            int coordX = (int)Math.Floor(realX);
+            int coordY = (int)Math.Floor(realY);
+            switch (type)
+            {
+                case ObjectType.Material:
+                    currentLevel.setTile(coordX, coordY, matID);
+                    break;
+                case ObjectType.Okuu:
+                    currentLevel.setOkuuPosition(coordX, coordY);
+                    break;
+                case ObjectType.Finish:
+                    currentLevel.setGoalPosition(coordX, coordY);
+                    break;
+                case ObjectType.ZombieFairy:
+                    if (matID == 0)
+                        currentLevel.removeZombieFairy(realX, realY);
+                    else
+                        currentLevel.addZombieFairy(realX, realY);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public void editSquare(int x, int y, int newValue)
         {
             currentLevel.setTile(x, y, newValue);

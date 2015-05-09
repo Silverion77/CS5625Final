@@ -37,6 +37,17 @@ namespace SALevelEditor
             return projectionMatrix;
         }
 
+        public float getFarPlane()
+        {
+            return farClip;
+
+        }
+
+        public float getNearPlane()
+        {
+            return nearClip;
+        }
+
         public void computeFrame()
         {
             projectionMatrix = Matrix4.CreateOrthographic(Width, Height, nearClip, farClip);

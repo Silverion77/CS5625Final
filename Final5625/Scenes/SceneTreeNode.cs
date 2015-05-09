@@ -79,8 +79,6 @@ namespace Chireiden.Scenes
         }
 
         /// <summary>
-        /// Timestep all of the contents of this scene tree node, updating
-        /// position, rotation, scale, and any other attributes.
         /// Updates the modeling transformations of this object to reflect the changes.
         /// </summary>
         /// <param name="e">Data describing what's happened between now and the previous frame.</param>

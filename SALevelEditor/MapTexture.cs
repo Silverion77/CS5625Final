@@ -33,7 +33,7 @@ namespace SALevelEditor
                 {
                     // Rectangular arrays address things as (row, column), but we want our
                     // 2D map to be addressed as (x, y) = (column, row).
-                    data[j, i] = new Vector4(tiles[i, j] * 0.2f, tiles[i, j] * 0.9f, 0, 1);
+                    data[j, i] = new Vector4(tiles[i, j] * 0.2f, tiles[i, j], 0, 1);
                 }
             }
         }

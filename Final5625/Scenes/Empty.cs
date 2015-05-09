@@ -19,5 +19,10 @@ namespace Chireiden.Scenes
         {
             renderChildren(camera);
         }
+
+        public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
+        {
+            base.update(e, parentToWorldMatrix);
+        }
     }
 }
