@@ -13,18 +13,24 @@ namespace Chireiden.Scenes
         Idle,
         Moving,
         Attacking,
+        Shooting,
         Staggering,
         KO
     }
 
-    class ZombieFairy : SkeletalMeshNode
+    public class ZombieFairy : SkeletalMeshNode
     {
-
         ZombieState zombieState;
 
         Vector3 targetLoc;
         Vector3 velocityDir;
         Vector3 leashLocation;
+
+        // Every step, the zombie fairy should be given Okuu's location at the previous timestep
+        Vector3 okuuLocation;
+
+        // Becomes true once we see her; doesn't become false until she runs far enough away
+        bool awareOfOkuu = false;
 
         Quaternion targetRotation;
 
@@ -32,8 +38,15 @@ namespace Chireiden.Scenes
         double moveDistanceGoal = 0.5;
         double wanderDistance = 5;
 
+        const float visionDistance = 20;
+        const float leashDistance = 50;
+
         const float moveSpeed = 3f;
         const float staggerSpeed = -2f;
+
+        const float projectileDistance = 10;
+        const float meleeMoveDistance = 5;
+        const float meleeDistance = 2;
 
         public ZombieFairy(MeshContainer m, Vector3 loc) : base(m, loc)
         {
@@ -80,14 +93,17 @@ namespace Chireiden.Scenes
 
         void attack()
         {
+            if (zombieState == ZombieState.Attacking) animTime = 0;
             zombieState = ZombieState.Attacking;
             switchAnimationSmooth("attack");
         }
 
-        void shoot()
+        void shoot(Vector3 target)
         {
-            zombieState = ZombieState.Attacking;
+            if (zombieState == ZombieState.Shooting) animTime = 0;
+            zombieState = ZombieState.Shooting;
             switchAnimationSmooth("shoot");
+            targetLoc = target;
         }
 
         void beHurt()
@@ -102,12 +118,28 @@ namespace Chireiden.Scenes
             switchAnimationSmooth("ko");
         }
 
+        public void updateOkuuLocation(Vector3 loc)
+        {
+            okuuLocation = loc;
+        }
+
+        bool outOfLeashRange()
+        {
+            Vector3 diff = worldPosition - leashLocation;
+            return diff.Length > leashDistance;
+        }
+
         /// <summary>
         /// Returns whether or not this fairy can "see" Okuu.
         /// </summary>
-        public bool canSeeOkuu()
+        bool canSeeOkuu()
         {
-            return false;
+            if (awareOfOkuu) return true;
+            Vector3 diff = okuuLocation - worldPosition;
+            float dist = diff.Length;
+            Vector3 facing = getFacingDirection();
+            // We can see her if she's in vision distance, and also in front of us
+            return (dist < visionDistance) && (Vector3.Dot(diff, facing) > 0);
         }
 
         public override float getMoveSpeed()
@@ -158,10 +190,17 @@ namespace Chireiden.Scenes
         /// <param name="parentToWorldMatrix"></param>
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
+            if (outOfLeashRange())
+            {
+                move(leashLocation);
+                awareOfOkuu = false;
+                idleTimer = 20;
+            }
             // TODO: if we got hurt this timestep, don't do the following
             // Advance whatever we were doing before
-            if (canSeeOkuu())
+            else if (awareOfOkuu || canSeeOkuu())
             {
+                awareOfOkuu = true;
                 advanceStateActive(e.Time);
             }
             else
@@ -208,6 +247,33 @@ namespace Chireiden.Scenes
             }
         }
 
+        void goAfterOkuu()
+        {
+            Vector3 diff = okuuLocation - worldPosition;
+            float distance = diff.Length;
+
+            // If she's not close enough to shoot, move closer
+            if (distance > projectileDistance)
+            {
+                move(okuuLocation);
+            }
+            // If she's in projectile range, shoot
+            else if (distance > meleeMoveDistance)
+            {
+                shoot(okuuLocation);
+            }
+            // If she's close enough to melee, close in for that
+            else if (distance > meleeDistance)
+            {
+                move(okuuLocation);
+            }
+            // If she's in melee range, swing
+            else
+            {
+                attack();
+            }
+        }
+
         /// <summary>
         /// Advances the state assuming that we can see Okuu.
         /// </summary>
@@ -215,7 +281,30 @@ namespace Chireiden.Scenes
         /// <returns></returns>
         bool advanceStateActive(double delta)
         {
-            return advanceStateIdle(delta);
+            bool animationEnded = advanceAnimation(delta);
+            switch (zombieState)
+            {
+                case ZombieState.Idle:
+                    goAfterOkuu();
+                    return true;
+                case ZombieState.Moving:
+                    goAfterOkuu();
+                    // If we were already moving then this isn't a state change
+                    if (zombieState == ZombieState.Moving) return false;
+                    return true;
+                case ZombieState.KO:
+                    return false;
+                default:
+                    // If we're in the middle of something else, let it finish
+                    // Otherwise, continue going after Okuu.
+                    if (animationEnded)
+                    {
+                        Console.WriteLine("Animation ended");
+                        goAfterOkuu();
+                        return true;
+                    }
+                    return false;
+            }
         }
 
         /// <summary>
