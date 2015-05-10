@@ -129,6 +129,10 @@ namespace Chireiden.Scenes
         const double backstepStartMove = 2.0 / 24;
         const double backstepEndMove = 17.0 / 24;
 
+        // Outgoing projectile for aimed attacks. Created during fire.
+        // Reset to NULL when gamestate retrieves value.
+        private FieryProjectile outgoingProjectile = null;
+
         bool running = true;
         bool readyForAction = false;
 
@@ -321,7 +325,7 @@ namespace Chireiden.Scenes
             okuuState = OkuuState.Uninterruptable;
             switchAnimationSmooth("fire");
             transitionState = OkuuState.Aiming;
-            Console.WriteLine("TODO: Fire missile here");
+            outgoingProjectile = new FieryProjectile(.5f, new Vector3(0f,0f,0f), getFacingDirection());
         }
 
         void stopAiming()
@@ -972,6 +976,17 @@ namespace Chireiden.Scenes
                 if (hit)
                     fairy.registerHit(attackStage);
             }
+        }
+
+        public bool getProjectile(out FieryProjectile proj)
+        {
+            proj = outgoingProjectile;
+            if (outgoingProjectile != null)
+            {
+                outgoingProjectile = null;
+                return true;
+            }
+            return false;
         }
     }
 }
