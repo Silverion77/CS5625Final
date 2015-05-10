@@ -469,9 +469,27 @@ namespace Chireiden.Scenes
             correctPosition(origPos, parentToWorldMatrix);
 
             updateMatricesAndWorldPos(parentToWorldMatrix);
+
+            Matrix4 transformMatrix = getBoneTransform("cannon_end");
+            transformMatrix = transformMatrix * toWorldMatrix;
+            // Move the collision box
+            foreach (MeshNode collisionBox in collisionBoxes)
+            {
+                collisionBox.update(e, transformMatrix);
+                Console.WriteLine("collision box's world position = {0}", collisionBox.worldPosition);
+            }
             
             // Okuu has kids? News to me
             updateChildren(e, toWorldMatrix);
+        }
+
+        public override void render(Camera camera)
+        {
+            base.render(camera);
+            foreach (MeshNode collisionBox in collisionBoxes)
+            {
+                collisionBox.render(camera);
+            }
         }
 
         /// <summary>
@@ -899,6 +917,13 @@ namespace Chireiden.Scenes
         public void medicalMiracle()
         {
             miracle = true;
+        }
+
+        List<MeshNode> collisionBoxes = new List<MeshNode>();
+
+        public void addCollisionHitbox(MeshNode box)
+        {
+            collisionBoxes.Add(box);
         }
     }
 }

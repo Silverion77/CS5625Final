@@ -77,6 +77,11 @@ namespace Chireiden.Scenes
             return false;
         }
 
+        public Matrix4 getBoneTransform(string name)
+        {
+            return skeletalMeshes.getBoneTransform(name);
+        }
+
         public void clearAnimation()
         {
             currentAnimation = null;

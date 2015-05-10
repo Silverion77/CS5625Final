@@ -130,6 +130,15 @@ namespace Chireiden.Scenes.Stages
             PointLight goalLight2 = new PointLight(new Vector3(0, 1f, 6), 2, 20, new Vector3(1, 1, 1));
             ParticleEmitter pe = new ParticleEmitter(new Vector3(0, 0, 8), 100f);
 
+            Vector3 armBegin = new Vector3(-0.96f, 0, 2.97f);
+            Vector3 armEnd = new Vector3(-2.44f, 0, 1.96f);
+
+            for (int i = 0; i <= 5; i++)
+            {
+                MeshNode box = new MeshNode(MeshLibrary.HappySphere, Vector3.Lerp(armBegin, armEnd, i / 5f));
+                okuu.addCollisionHitbox(box);
+            }
+
             world.addChild(goalFlagMesh);
             goalFlagMesh.addChild(goalLight);
             goalFlagMesh.addChild(goalLight2);

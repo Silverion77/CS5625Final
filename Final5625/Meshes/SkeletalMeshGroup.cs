@@ -19,6 +19,8 @@ namespace Chireiden.Meshes
         ArmatureBone rootBone;
         ArmatureBone[] bonesByID;
 
+        Dictionary<string, int> boneNamesToIDs;
+
         Matrix4[] boneTransforms;
         MatrixTexture matrixTexture;
 
@@ -37,6 +39,13 @@ namespace Chireiden.Meshes
             rootBone.computeAllRestTransforms();
             animationLibrary = new Dictionary<string, AnimationClip>();
             boneTransforms = new Matrix4[bonesByID.Length];
+
+            boneNamesToIDs = new Dictionary<string, int>();
+            for (int i = 0; i < bonesByID.Length; i++)
+            {
+                boneNamesToIDs.Add(bonesByID[i].Name, i);
+                Console.WriteLine("added {0}", bonesByID[i].Name);
+            }
 
             matrixTexture = new MatrixTexture(boneTransforms);
 
@@ -133,6 +142,28 @@ namespace Chireiden.Meshes
             return blendShapeWeights[id];
         }
 
+        public Matrix4 getBoneTransform(string name)
+        {
+            int id;
+            if (!boneNamesToIDs.TryGetValue(name, out id))
+            {
+                throw new Exception("Bone " + name + " not found");
+            }
+            return bonesByID[id].getBoneMatrix();
+        }
+
+        public void computeBoneTransforms(Clip clip, double time)
+        {
+            // Apply animated pose if supplied
+            if (clip != null)
+                clip.applyAnimationToSkeleton(bonesByID, time);
+            else
+                clearPose();
+
+            // Compute bone transformations
+            rootBone.computeAllTransforms();
+        }
+
         /// <summary>
         /// Renders all the meshes in this group.
         /// 
@@ -153,14 +184,8 @@ namespace Chireiden.Meshes
             Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
             Matrix3 normalMatrix = Utils.normalMatrix(modelView);
 
-            // Apply animated pose if supplied
-            if (clip != null)
-                clip.applyAnimationToSkeleton(bonesByID, time);
-            else
-                clearPose();
+            computeBoneTransforms(clip, time);
 
-            // Compute bone transformations
-            rootBone.computeAllTransforms();
             // Copy bone matrices into our array, which will be bound as a uniform
             for (int i = 0; i < bonesByID.Length; i++)
             {

@@ -10,7 +10,7 @@ namespace ShapeKeyProcessor
     {
         static void Main(string[] args)
         {
-            string[] morphNames = new string[] {
+            string[] okuuMorphNames = new string[] {
                                       "basis",
                                       "eyes_closed",
                                       "smile_eyes",
@@ -25,18 +25,31 @@ namespace ShapeKeyProcessor
                                       "sad_brow"
                                   };
 
-            List<MorphDisplacement>[] allMorphs = new List<MorphDisplacement>[morphNames.Length];
-            Vector3D[] basis = ShapeKeyImporter.VerticesFromFile("../../frames/okuu_000000.obj");
+            string[] fairyMorphNames = new string[] {
+                "basis",
+                "eyes_closed",
+                "smile_eyes",
+                "><_eyes",
+                "oo",
+                "aa",
+                "angry_brow",
+                "sad_brow",
+                "blue_shadow",
+                "tears"
+            };
 
-            List<IDDisplacement>[] allMorphsByID = new List<IDDisplacement>[morphNames.Length];
+            List<MorphDisplacement>[] allMorphs = new List<MorphDisplacement>[fairyMorphNames.Length];
+            Vector3D[] basis = ShapeKeyImporter.VerticesFromFile("../../frames_zombie/zombie_fairy_000000.obj");
 
-            Scene baseModel = ShapeKeyImporter.ReadFromFile("../../okuu.dae");
+            List<IDDisplacement>[] allMorphsByID = new List<IDDisplacement>[fairyMorphNames.Length];
 
-            for (int i = 1; i <= 11; i++)
+            Scene baseModel = ShapeKeyImporter.ReadFromFile("../../zombie_fairy.dae");
+
+            for (int i = 1; i <= allMorphs.Length - 1; i++)
             {
                 string num = i.ToString("D6");
-                string morphName = morphNames[i];
-                string filename = "../../frames/okuu_" + num + ".obj";
+                string morphName = fairyMorphNames[i];
+                string filename = "../../frames_zombie/zombie_fairy_" + num + ".obj";
                 Console.WriteLine("{0} contains {1}", filename, morphName);
                 Vector3D[] morphPos = ShapeKeyImporter.VerticesFromFile(filename);
                 List<MorphDisplacement> morphDiffs = ShapeKeyImporter.differences(basis, morphPos);
@@ -47,9 +60,9 @@ namespace ShapeKeyProcessor
 
             using (StreamWriter sw = new StreamWriter("../../blend_shapes.txt"))
             {
-                for (int i = 1; i <= 11; i++)
+                for (int i = 1; i <= allMorphs.Length - 1; i++)
                 {
-                    string morphName = morphNames[i];
+                    string morphName = fairyMorphNames[i];
                     List<IDDisplacement> morphDiffs = allMorphsByID[i];
                     sw.WriteLine("morph {0}", morphName);
                     foreach (IDDisplacement md in morphDiffs) {
