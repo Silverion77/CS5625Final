@@ -135,8 +135,8 @@ namespace Chireiden.Scenes.Stages
                 okuu.addCollisionHitbox(box);
             }
 
-            PointLight light = new PointLight(armEnd + new Vector3(0, 0, 0.2f), 2, 20, new Vector3(1, 1, 1));
-            ParticleEmitter emitter = new ParticleEmitter(armEnd + new Vector3(0, 0, 0.2f), 100f, 0.1f);
+            PointLight light = new PointLight(armEnd + new Vector3(0, 0, 0.2f), 2, 20, new Vector3(1, 0.5f, 0.2f));
+            Scatterer emitter = new Scatterer(armEnd + new Vector3(0, 0, 0.2f), 100f, 0.1f);
             okuu.addCannonAttachment(light);
             okuu.addCannonAttachment(emitter);
 

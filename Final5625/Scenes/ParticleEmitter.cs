@@ -10,7 +10,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Scenes
 {
-    class ParticleEmitter: MobileObject
+    public class ParticleEmitter: MobileObject
     {
         // The rate that particles are emitted in particles/frame
         float rate;
@@ -18,7 +18,15 @@ namespace Chireiden.Scenes
         // The (fractional) number of additional particles we weren't able to emit this frame
         float excessParticles = 0;
 
-        float scale = 1;
+        float scaleFactor = 1;
+
+        public virtual float ParticleZVelocity
+        {
+            get
+            {
+                return 2.0f;
+            }
+        }
 
         Random rand = new Random();
 
@@ -26,7 +34,7 @@ namespace Chireiden.Scenes
             : base(position)
         {
             rate = particlesPerSecond;
-            this.scale = scale;
+            this.scaleFactor = scale;
         }
 
         public ParticleEmitter(Vector3 position, float particlesPerSecond) : base(position) 
@@ -60,16 +68,16 @@ namespace Chireiden.Scenes
                 excessParticles -= 1.0f;
                 ParticleSystem.Particle p = new ParticleSystem.Particle();
 
-                var r = randomVector() * scale;
+                var r = randomVector() * scaleFactor;
                 var pos = Vector4.Transform(new Vector4(r.X, r.Y, r.Z, 1), toWorldMatrix);
 
                 p.position = new Vector3(pos.X / pos.W, pos.Y / pos.W, pos.Z / pos.W);
-                p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() * 2.0f);
+                p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, ParticleZVelocity);
                 p.rotation = randomAngle();
                 p.angularVelocity = 0;
                 
                 p.gravity = 0.0f;
-                p.radius = 1.0f * (Math.Min(1, scale * 5));
+                p.radius = 1.0f * (Math.Min(1, scaleFactor * 5));
                 p.life = 3.0f;
                 p.invTotalLife = 1.0f / p.life;
                 p.texture = 0;
