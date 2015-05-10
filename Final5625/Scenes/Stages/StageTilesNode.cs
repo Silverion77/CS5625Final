@@ -44,6 +44,7 @@ namespace Chireiden.Scenes.Stages
             // set shader uniforms, incl. modelview and projection matrices
             program.setUniformMatrix4("projectionMatrix", projectionMatrix);
             program.setUniformMatrix4("modelViewMatrix", modelView);
+            program.setUniformMatrix4("inverseModelView", modelView.Inverted());
             program.setUniformMatrix3("normalMatrix", normalMatrix);
 
             camera.setPointLightUniforms(program);

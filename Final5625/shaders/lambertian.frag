@@ -15,6 +15,8 @@ in vec3 geom_position;
 in vec3 geom_normal;
 in vec2 geom_texCoord;
 
+uniform mat4 inverseModelView;
+
 uniform vec4 mat_diffuseColor;
 uniform bool mat_hasTexture;
 uniform sampler2D texture;
@@ -53,6 +55,12 @@ void main()
 		float dotProd = max(dot(n,l), 0);
 		result.xyz += diffuse.xyz * dotProd * light_color[i] * intensity;
 	}
+
+	vec3 world_position = (inverseModelView * vec4(geom_position, 1)).xyz;
+
+	// Make it fade to black as we go higher
+	float scalingFactor = min(1, pow(1.5, -(world_position.z - 10)));
+	result.xyz *= scalingFactor;
 	
 	out_frag_color = result;
 }
