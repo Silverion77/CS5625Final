@@ -27,7 +27,7 @@ namespace Chireiden.Materials
         // Required for POM
         Texture heightMap;
         Texture normalMap;
-        float parallaxScale;
+        float parallaxScale = .07f;
 
         public POMMaterial(Vector4 diffuseColor, Vector3 specularColor,
                             Vector3 ambientColor, float shininess, string TextureDirectory)
@@ -58,11 +58,6 @@ namespace Chireiden.Materials
 
         public int useMaterialParameters(ShaderProgram program, int startTexUnit)
         {
-            program.setUniformFloat3("mat_ambient", ambientColor);
-            program.setUniformFloat4("mat_diffuse", diffuseColor);
-            program.setUniformFloat3("mat_specular", specularColor);
-            program.setUniformFloat1("mat_shininess", shininess);
-
             program.bindTexture2D("diffuseTexture", startTexUnit, diffuseTexture);
             program.bindTexture2D("specularTexture", startTexUnit + 1, specularTexture);
             program.bindTexture2D("heightTexture", startTexUnit + 2, heightMap);
