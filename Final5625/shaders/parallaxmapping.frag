@@ -1,5 +1,4 @@
 // basic fragment shader for Parallax Mapping
-// Code adapted from http://sunandblackcat.com/tipFullView.php?l=eng&topicid=28
 
 #version 330
 
@@ -12,18 +11,10 @@ in vec3 geom_normal;
 in vec3 geom_tangent;
 in vec3 geom_bitangent;
 
-// Phong shading base colors
-// TODO: Required later?
-uniform vec3 mat_ambient;
-uniform vec4 mat_diffuse;
-uniform vec3 mat_specular;
-uniform float mat_shininess;
-
 // textures
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D heightTexture;
-// TODO: What space is this in?
 uniform sampler2D normalTexture;
 // scale for size of Parallax Mapping effect
 uniform float parallaxScale;
@@ -45,9 +36,9 @@ out vec4 out_frag_color;
 
 vec4 normalMapLighting(in vec2 T, in vec3 V)
 {
-	vec3 N = normalize(texture(normalTexture, T).xyz * 2 - 1);
+	vec3 N = normalize(texture(normalTexture, T).xyz);
+	vec3 D = texture(heightTexture, T).rgb;
 
-	vec3 D = texture(diffuseTexture, T).rgb;
 	vec4 result;
 	for (int i = 0; i < light_count; i++) {
 		vec3 L = normalize(toLightsInTS[i]);
@@ -65,9 +56,10 @@ vec4 normalMapLighting(in vec2 T, in vec3 V)
 		//  * pow(shadowMultiplier, 4)
 	}
 	result.a = 1;
-	return result;
+	return vec4(N, 1);
 }
 
+// Code adapted from http://sunandblackcat.com/tipFullView.php?l=eng&topicid=28
 vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 {
 	// determine optimal number of layers
@@ -87,7 +79,7 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 	
 	vec2 currentTexCoord = T;
 	
-	float heightFromTexture = texture2D(heightTexture, currentTexCoord).r;
+	float heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord).r;
 	// while the current texture height is above the surface
 	// extend along V until the layer is below the heightMap
 	while(heightFromTexture > curLayerHeight)
@@ -96,14 +88,14 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 		// offset texture coordinate
 		currentTexCoord -= deltaTex;
 		// new depth from heightmap
-		heightFromTexture = texture2D(heightTexture, currentTexCoord).r;
+		heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord).r;
 	}
 	
 	// Recalculate step above to use for interpolation
 	vec2 prevTexCoord = currentTexCoord + deltaTex;
 	
 	float distanceToNextH = heightFromTexture - curLayerHeight;
-	float distanceToPrevH = texture2D(heightTexture, prevTexCoord).r
+	float distanceToPrevH = 1 - texture2D(heightTexture, prevTexCoord).r
 								- curLayerHeight + layerHeight;
 	
 	// Linear interpolation
@@ -130,7 +122,7 @@ void main()
 	}
 	
 	// World space direction vectors
-	vec3 worldDirToCamera = normalize(camera_position - geom_worldPos);
+	vec3 worldDirToCamera = normalize(geom_worldPos - camera_position);
 	
 	// Transform directions to Tangent Space (TS)
 	for (int i = 0; i < light_count; i++) {
@@ -152,10 +144,10 @@ void main()
 	
 	// get texture coordinates from the Parallax Mapping
 	float parallaxHeight;
-	vec2 Tex = parallaxMapping(V, geom_texCoord, parallaxHeight);
+	vec2 tex = parallaxMapping(V, geom_texCoord, parallaxHeight);
 	
 	// TODO: Shadowing?
 	
 	// Lighting calculation ** ADD shadow here**
-	out_frag_color = vec4(1, 0, 0, 1);
+	out_frag_color = normalMapLighting(tex, V);
 }

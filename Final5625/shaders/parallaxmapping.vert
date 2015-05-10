@@ -1,14 +1,14 @@
 // Simple vert shader for Parallax Mapping
-// Code adapted from http://sunandblackcat.com/tipFullView.php?l=eng&topicid=28
 
 #version 330
 
 #define MAX_LIGHTS 40
+#extension GL_ARB_explicit_attrib_location : enable
 
-in vec3 vert_position;
-in vec3 vert_normal;
-in vec2 vert_texCoord;
-in vec4 vert_tangent;
+layout(location = 0) in vec3 vert_position;
+layout(location = 1) in vec3 vert_normal;
+layout(location = 2) in vec2 vert_texCoord;
+layout(location = 3) in vec4 vert_tangent;
 
 // uniforms
 uniform mat4 modelMatrix;
@@ -31,9 +31,9 @@ void main()
 	vec3 N = normalize(vert_normal);
 	vec3 T = normalize(vert_tangent.xyz);
 	vec3 B = normalize(cross(N, T) * vert_tangent.w);
-	geom_normal = normalize(normalMatrix * N);
-	geom_tangent = normalize(modelViewMatrix * vec4(T,0)).xyz;
-	geom_bitangent = normalize(modelViewMatrix * vec4(B,0)).xyz;
+	geom_normal = normalize(modelMatrix * vec4(N,0)).xyz;
+	geom_tangent = normalize(modelMatrix * vec4(T,0)).xyz;
+	geom_bitangent = normalize(modelMatrix * vec4(B,0)).xyz;
 	
 	geom_worldPos = worldPos.xyz;
 	geom_texCoord = vert_texCoord;
