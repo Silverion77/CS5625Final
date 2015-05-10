@@ -69,7 +69,7 @@ namespace Chireiden.Materials
             program.bindTexture2D("normalTexture", startTexUnit + 3, normalMap);
             program.setUniformFloat1("parallaxScale", parallaxScale);
 
-            return startTexUnit;
+            return startTexUnit + 4;
         }
 
         public void unuseMaterialParameters(ShaderProgram program, int startTexUnit)
