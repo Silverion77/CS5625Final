@@ -58,6 +58,7 @@
     <Compile Include="Meshes\Vector4Texture.cs" />
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
+    <Compile Include="Scenes\FieryProjectile.cs" />
     <Compile Include="Scenes\Stages\Stage.cs" />
     <Compile Include="Scenes\Stages\StageImporter.cs" />
     <Compile Include="Scenes\Stages\StageTilesNode.cs" />
@@ -270,7 +271,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="data\texture\noise.jpg">
-	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\model\zombie_fairy\animations.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
