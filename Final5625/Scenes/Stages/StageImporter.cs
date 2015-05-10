@@ -116,10 +116,6 @@ namespace Chireiden.Scenes.Stages
             okuu = new UtsuhoReiuji(okuuWorldPos);
             world.addChild(okuu);
 
-            // This is just for debugging, so that we can see
-            PointLight light = new PointLight(new Vector3(0, -2f, 4.3f), 2, 20, new Vector3(1, 1, 1));
-            okuu.addChild(light);
-
             okuu.setStage(stage);
 
             Vector3 goalWorldPos = new Vector3(data.TileSideLength * (data.GoalPosition.X + 0.5f),
@@ -135,9 +131,14 @@ namespace Chireiden.Scenes.Stages
 
             for (int i = 0; i <= 5; i++)
             {
-                MeshNode box = new MeshNode(MeshLibrary.Sphere, Vector3.Lerp(armBegin, armEnd, i / 5f));
+                MeshNode box = new MeshNode(MeshLibrary.HappySphere, Vector3.Lerp(armBegin, armEnd, i / 5f));
                 okuu.addCollisionHitbox(box);
             }
+
+            PointLight light = new PointLight(armEnd + new Vector3(0, 0, 0.2f), 2, 20, new Vector3(1, 1, 1));
+            ParticleEmitter emitter = new ParticleEmitter(armEnd + new Vector3(0, 0, 0.2f), 100f, 0.1f);
+            okuu.addCannonAttachment(light);
+            okuu.addCannonAttachment(emitter);
 
             world.addChild(goalFlagMesh);
             goalFlagMesh.addChild(goalLight);

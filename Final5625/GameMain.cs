@@ -246,6 +246,8 @@ namespace Chireiden
                 fairy.updateOkuuLocation(okuu.worldPosition);
             }
 
+            okuu.checkAttackHit(zombies);
+
             // TODO: handle enemy movement here, once enemies are implemented
 
             // Update then adds velocity to position, and also updates modeling transformations.

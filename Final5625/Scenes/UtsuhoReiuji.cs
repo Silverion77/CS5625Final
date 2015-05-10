@@ -86,6 +86,8 @@ namespace Chireiden.Scenes
         // Which attack of the 1-2-3 combo we're at; default is 0 = not attacking
         int attackStage = 0;
 
+        public const float AttackHitSphereRadius = 0.5f;
+
         // The direction that the player has attempted to move in this step.
         Vector3 inputMovement = Vector3.Zero;
         bool cheerPressed = false;
@@ -145,6 +147,10 @@ namespace Chireiden.Scenes
         const double halfBlinkDuration = 0.17;
         bool blinkInProgress = false;
         bool blinkEnabled = true;
+
+        Matrix4 cannonEndMatrix;
+
+        MorphState morphState = new MorphState(ShaderProgram.MAX_MORPHS);
 
         UtsuhoReiuji(MeshContainer m, Vector3 loc)
             : base(m, loc)
@@ -355,9 +361,9 @@ namespace Chireiden.Scenes
 
         void knockedOut()
         {
-            setMorphSmooth("eyes_closed", 0, 0);
-            setMorphSmooth("><_eyes", 1, 0);
-            setMorphSmooth("sad_brow", 1, 1);
+            setMorphSmooth(morphState, "eyes_closed", 0, 0);
+            setMorphSmooth(morphState, "><_eyes", 1, 0);
+            setMorphSmooth(morphState, "sad_brow", 1, 1);
             blinkEnabled = false;
             currentBlinkTime = 0;
             okuuState = OkuuState.KO;
@@ -404,6 +410,9 @@ namespace Chireiden.Scenes
 
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
+            cannonEndMatrix = getBoneTransform("cannon_end");
+            cannonEndMatrix = cannonEndMatrix * toWorldMatrix;
+
             bool stateChangedFromInput = setNextState();
             if (!stateChangedFromInput)
             {
@@ -444,17 +453,17 @@ namespace Chireiden.Scenes
                     currentBlinkTime = 0;
                     nextBlinkTime = Utils.randomDouble(3, 7);
                     Console.WriteLine("Next blink in {0} sec", nextBlinkTime);
-                    setMorphSmooth("eyes_closed", 0, halfBlinkDuration);
+                    setMorphSmooth(morphState, "eyes_closed", 0, halfBlinkDuration);
                     blinkInProgress = false;
                 }
                 else if (!blinkInProgress)
                 {
-                    setMorphSmooth("eyes_closed", 1, halfBlinkDuration);
+                    setMorphSmooth(morphState, "eyes_closed", 1, halfBlinkDuration);
                     blinkInProgress = true;
                 }
             }
 
-            interpolateMorphs(e.Time);
+            interpolateMorphs(morphState, e.Time);
 
             Vector3 origPos = worldPosition;
             if (toWorldMatrix != null && !velocity.Equals(Vector3.Zero))
@@ -470,13 +479,14 @@ namespace Chireiden.Scenes
 
             updateMatricesAndWorldPos(parentToWorldMatrix);
 
-            Matrix4 transformMatrix = getBoneTransform("cannon_end");
-            transformMatrix = transformMatrix * toWorldMatrix;
             // Move the collision box
-            foreach (MeshNode collisionBox in collisionBoxes)
+            foreach (SceneTreeNode collisionBox in collisionBoxes)
             {
-                collisionBox.update(e, transformMatrix);
-                Console.WriteLine("collision box's world position = {0}", collisionBox.worldPosition);
+                collisionBox.update(e, cannonEndMatrix);
+            }
+            foreach (SceneTreeNode attachment in cannonAttachments)
+            {
+                attachment.update(e, cannonEndMatrix);
             }
             
             // Okuu has kids? News to me
@@ -485,11 +495,16 @@ namespace Chireiden.Scenes
 
         public override void render(Camera camera)
         {
+            setMorphWeights(morphState);
             base.render(camera);
-            foreach (MeshNode collisionBox in collisionBoxes)
+            foreach (SceneTreeNode attachment in cannonAttachments)
+            {
+                attachment.render(camera);
+            }
+            /*foreach (MeshNode collisionBox in collisionBoxes)
             {
                 collisionBox.render(camera);
-            }
+            }*/
         }
 
         /// <summary>
@@ -615,8 +630,8 @@ namespace Chireiden.Scenes
                 if (okuuState == OkuuState.KO)
                 {
                     blinkEnabled = true;
-                    setMorphSmooth("sad_brow", 0, 1);
-                    setMorphSmooth("><_eyes", 0, 0);
+                    setMorphSmooth(morphState, "sad_brow", 0, 1);
+                    setMorphSmooth(morphState, "><_eyes", 0, 0);
                     readyOrIdle();
                     return true;
                 }
@@ -919,11 +934,44 @@ namespace Chireiden.Scenes
             miracle = true;
         }
 
-        List<MeshNode> collisionBoxes = new List<MeshNode>();
+        List<SceneTreeNode> collisionBoxes = new List<SceneTreeNode>();
+        List<SceneTreeNode> cannonAttachments = new List<SceneTreeNode>();
 
-        public void addCollisionHitbox(MeshNode box)
+        public void addCannonAttachment(SceneTreeNode attach)
+        {
+            cannonAttachments.Add(attach);
+        }
+
+        public void addCollisionHitbox(SceneTreeNode box)
         {
             collisionBoxes.Add(box);
+        }
+
+        public void checkAttackHit(List<ZombieFairy> zombies)
+        {
+            if (okuuState != OkuuState.Attacking) return;
+            foreach (ZombieFairy fairy in zombies)
+            {
+                Vector3 collisionPos = fairy.worldPosition;
+                if (Math.Abs(collisionPos.X - worldPosition.X) > 5
+                    || Math.Abs(collisionPos.Y - worldPosition.Y) > 5
+                    || fairy.lastHitStage() == attackStage) continue;
+                float distRequired = AttackHitSphereRadius + ZombieFairy.hitCylinderRadius;
+                bool hit = false;
+                foreach (MeshNode collisionBox in collisionBoxes)
+                {
+                    Vector3 hitSpherePos = collisionBox.worldPosition;
+                    float dist = (collisionPos.Xy - hitSpherePos.Xy).Length;
+                    Console.WriteLine("Checking {0} against {1}; dist = {2}, distRequired = {3}", hitSpherePos, collisionPos, dist, distRequired);
+                    if (dist <= distRequired && hitSpherePos.Z > 0 && hitSpherePos.Z < ZombieFairy.hitCylinderHeight)
+                    {
+                        hit = true;
+                        break;
+                    }
+                }
+                if (hit)
+                    fairy.registerHit(attackStage);
+            }
         }
     }
 }

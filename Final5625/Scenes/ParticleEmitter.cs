@@ -18,7 +18,16 @@ namespace Chireiden.Scenes
         // The (fractional) number of additional particles we weren't able to emit this frame
         float excessParticles = 0;
 
+        float scale = 1;
+
         Random rand = new Random();
+
+        public ParticleEmitter(Vector3 position, float particlesPerSecond, float scale)
+            : base(position)
+        {
+            rate = particlesPerSecond;
+            this.scale = scale;
+        }
 
         public ParticleEmitter(Vector3 position, float particlesPerSecond) : base(position) 
         {
@@ -51,16 +60,16 @@ namespace Chireiden.Scenes
                 excessParticles -= 1.0f;
                 ParticleSystem.Particle p = new ParticleSystem.Particle();
 
-                var r = randomVector();
+                var r = randomVector() * scale;
                 var pos = Vector4.Transform(new Vector4(r.X, r.Y, r.Z, 1), toWorldMatrix);
 
                 p.position = new Vector3(pos.X / pos.W, pos.Y / pos.W, pos.Z / pos.W);
-                p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, 2.0f);
+                p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() * 2.0f);
                 p.rotation = randomAngle();
                 p.angularVelocity = 0;
                 
                 p.gravity = 0.0f;
-                p.radius = 1.0f;
+                p.radius = 1.0f * (Math.Min(1, scale * 5));
                 p.life = 3.0f;
                 p.invTotalLife = 1.0f / p.life;
                 p.texture = 0;

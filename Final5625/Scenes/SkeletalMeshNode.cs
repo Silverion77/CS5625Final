@@ -15,11 +15,6 @@ namespace Chireiden.Scenes
         protected InterpolationClip interpolator = new InterpolationClip();
         protected bool interpolationActive;
 
-        protected float[] oldMorphWeights = new float[ShaderProgram.MAX_MORPHS];
-        protected float[] targetMorphWeights = new float[ShaderProgram.MAX_MORPHS];
-        protected double[] morphInterpTimes = new double[ShaderProgram.MAX_MORPHS];
-        protected double[] morphAnimTimes = new double[ShaderProgram.MAX_MORPHS];
-
         SkeletalMeshGroup skeletalMeshes;
 
         public SkeletalMeshNode(MeshContainer m)
@@ -119,7 +114,7 @@ namespace Chireiden.Scenes
             switchAnimationSmooth(animation, DEFAULT_ANIM_INTERP_DURATION);
         }
 
-        public void setMorphSmooth(string animation, float targetWeight, double interpTime)
+        public void setMorphSmooth(MorphState state, string animation, float targetWeight, double interpTime)
         {
             int id = skeletalMeshes.idOfMorph(animation);
             if (interpTime == 0)
@@ -128,10 +123,10 @@ namespace Chireiden.Scenes
             }
             else
             {
-                oldMorphWeights[id] = skeletalMeshes.getMorphWeight(id);
-                targetMorphWeights[id] = targetWeight;
-                morphInterpTimes[id] = interpTime;
-                morphAnimTimes[id] = 0;
+                state.oldMorphWeights[id] = skeletalMeshes.getMorphWeight(id);
+                state.targetMorphWeights[id] = targetWeight;
+                state.morphInterpTimes[id] = interpTime;
+                state.morphAnimTimes[id] = 0;
             }
         }
 
@@ -162,18 +157,26 @@ namespace Chireiden.Scenes
             }
         }
 
-        protected void interpolateMorphs(double delta)
+        protected void interpolateMorphs(MorphState state, double delta)
         {
             for (int i = 0; i < skeletalMeshes.NumMorphs; i++)
             {
-                float currentWeight = skeletalMeshes.getMorphWeight(i);
-                if (morphAnimTimes[i] < morphInterpTimes[i])
+                float currentWeight = state.morphWeights[i];
+                if (state.morphAnimTimes[i] < state.morphInterpTimes[i])
                 {
-                    morphAnimTimes[i] += delta;
-                    float blendFactor = (float)Math.Min(1, morphAnimTimes[i] / morphInterpTimes[i]);
-                    float interpolated = oldMorphWeights[i] * (1 - blendFactor) + targetMorphWeights[i] * (blendFactor);
-                    skeletalMeshes.setMorphWeight(i, interpolated);
+                    state.morphAnimTimes[i] += delta;
+                    float blendFactor = (float)Math.Min(1, state.morphAnimTimes[i] / state.morphInterpTimes[i]);
+                    float interpolated = state.oldMorphWeights[i] * (1 - blendFactor) + state.targetMorphWeights[i] * (blendFactor);
+                    state.morphWeights[i] = interpolated;
                 }
+            }
+        }
+
+        protected void setMorphWeights(MorphState state)
+        {
+            for (int i = 0; i < skeletalMeshes.NumMorphs; i++)
+            {
+                skeletalMeshes.setMorphWeight(i, state.morphWeights[i]);
             }
         }
 

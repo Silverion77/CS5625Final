@@ -18,8 +18,30 @@ namespace Chireiden.Scenes
         KO
     }
 
+    public class MorphState
+    {
+        public float[] oldMorphWeights;
+        public float[] targetMorphWeights;
+        public float[] morphWeights;
+        public double[] morphInterpTimes;
+        public double[] morphAnimTimes;
+
+        public MorphState(int numMorphs)
+        {
+            oldMorphWeights = new float[numMorphs];
+            targetMorphWeights = new float[numMorphs];
+            morphInterpTimes = new double[numMorphs];
+            morphAnimTimes = new double[numMorphs];
+            morphWeights = new float[numMorphs];
+        }
+    }
+
     public class ZombieFairy : SkeletalMeshNode
     {
+
+        public const float hitCylinderRadius = 1f;
+        public const float hitCylinderHeight = 4;
+
         ZombieState zombieState;
 
         Vector3 targetLoc;
@@ -32,6 +54,8 @@ namespace Chireiden.Scenes
         // Becomes true once we see her; doesn't become false until she runs far enough away
         bool awareOfOkuu = false;
 
+        bool wasHurt = false;
+
         Quaternion targetRotation;
 
         double idleTimer;
@@ -42,11 +66,19 @@ namespace Chireiden.Scenes
         const float leashDistance = 50;
 
         const float moveSpeed = 3f;
-        const float staggerSpeed = -2f;
+        const float staggerSpeed = -1.5f;
+        const double staggerExtraDelay = 1;
+
+        double staggerTime = 0;
 
         const float projectileDistance = 10;
         const float meleeMoveDistance = 5;
         const float meleeDistance = 2;
+
+        int hitStage;
+        int hitPoints = 10;
+
+        MorphState morphState = new MorphState(ShaderProgram.MAX_MORPHS);
 
         public ZombieFairy(MeshContainer m, Vector3 loc) : base(m, loc)
         {
@@ -100,7 +132,8 @@ namespace Chireiden.Scenes
 
         void shoot(Vector3 target)
         {
-            if (zombieState == ZombieState.Shooting) animTime = 0;
+            if (zombieState == ZombieState.Shooting)
+                animTime = 0;
             zombieState = ZombieState.Shooting;
             switchAnimationSmooth("shoot");
             targetLoc = target;
@@ -108,6 +141,8 @@ namespace Chireiden.Scenes
 
         void beHurt()
         {
+            if (zombieState == ZombieState.Staggering)
+                animTime = 0;
             zombieState = ZombieState.Staggering;
             switchAnimationSmooth("hurt");
         }
@@ -116,6 +151,9 @@ namespace Chireiden.Scenes
         {
             zombieState = ZombieState.KO;
             switchAnimationSmooth("ko");
+            setMorphSmooth(morphState, "><_eyes", 1, 1);
+            setMorphSmooth(morphState, "tears", 1, 1);
+            setMorphSmooth(morphState, "oo", 1, 1);
         }
 
         public void updateOkuuLocation(Vector3 loc)
@@ -196,7 +234,14 @@ namespace Chireiden.Scenes
                 awareOfOkuu = false;
                 idleTimer = 20;
             }
-            // TODO: if we got hurt this timestep, don't do the following
+            if (wasHurt)
+            {
+                wasHurt = false;
+                if (hitPoints <= 0)
+                    knockedOut();
+                else if (zombieState != ZombieState.KO)
+                    beHurt();
+            }
             // Advance whatever we were doing before
             else if (awareOfOkuu || canSeeOkuu())
             {
@@ -212,6 +257,8 @@ namespace Chireiden.Scenes
             rotation = targetRotation;
 
             velocity = getMoveSpeed() * velocityDir;
+
+            interpolateMorphs(morphState, e.Time);
 
             Vector3 origPos = worldPosition;
             if (toWorldMatrix != null && !velocity.Equals(Vector3.Zero))
@@ -229,6 +276,12 @@ namespace Chireiden.Scenes
 
             // Okuu has kids? News to me
             updateChildren(e, toWorldMatrix);
+        }
+
+        public override void render(Camera camera)
+        {
+            setMorphWeights(morphState);
+            base.render(camera);
         }
 
         void randomIdleAction()
@@ -285,8 +338,16 @@ namespace Chireiden.Scenes
             switch (zombieState)
             {
                 case ZombieState.Idle:
-                    goAfterOkuu();
-                    return true;
+                    if (staggerTime > 0)
+                    {
+                        staggerTime -= delta;
+                        return false;
+                    }
+                    else
+                    {
+                        goAfterOkuu();
+                        return true;
+                    }
                 case ZombieState.Moving:
                     goAfterOkuu();
                     // If we were already moving then this isn't a state change
@@ -294,15 +355,24 @@ namespace Chireiden.Scenes
                     return true;
                 case ZombieState.KO:
                     return false;
+                case ZombieState.Staggering:
+                    if (animationEnded)
+                    {
+                        staggerTime = staggerExtraDelay;
+                        hitStage = 0;
+                        idle();
+                        return true;
+                    }
+                    return false;
                 default:
                     // If we're in the middle of something else, let it finish
                     // Otherwise, continue going after Okuu.
                     if (animationEnded)
                     {
-                        Console.WriteLine("Animation ended");
                         goAfterOkuu();
                         return true;
                     }
+                    else targetLoc = okuuLocation;
                     return false;
             }
         }
@@ -344,6 +414,20 @@ namespace Chireiden.Scenes
                     }
                     return false;
             }
+        }
+
+        public void registerHit(int stage)
+        {
+            Console.WriteLine("Fairy was hurt");
+            awareOfOkuu = true;
+            wasHurt = true;
+            hitPoints -= stage;
+            hitStage = stage;
+        }
+
+        public int lastHitStage()
+        {
+            return hitStage;
         }
     }
 }
