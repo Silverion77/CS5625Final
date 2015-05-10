@@ -87,7 +87,7 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 	
 	vec2 currentTexCoord = T;
 	
-	float heightFromTexture = texture(heightTexture, currentTexCoord).r;
+	float heightFromTexture = texture2D(heightTexture, currentTexCoord).r;
 	// while the current texture height is above the surface
 	// extend along V until the layer is below the heightMap
 	while(heightFromTexture > curLayerHeight)
@@ -96,14 +96,14 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 		// offset texture coordinate
 		currentTexCoord -= deltaTex;
 		// new depth from heightmap
-		heightFromTexture = texture(heightTexture, currentTexCoord).r;
+		heightFromTexture = texture2D(heightTexture, currentTexCoord).r;
 	}
 	
 	// Recalculate step above to use for interpolation
 	vec2 prevTexCoord = currentTexCoord + deltaTex;
 	
 	float distanceToNextH = heightFromTexture - curLayerHeight;
-	float distanceToPrevH = texture(heightTexture, prevTexCoord).r
+	float distanceToPrevH = texture2D(heightTexture, prevTexCoord).r
 								- curLayerHeight + layerHeight;
 	
 	// Linear interpolation

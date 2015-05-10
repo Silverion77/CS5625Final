@@ -228,5 +228,10 @@ namespace Chireiden.Meshes
             material.unuseMaterialParameters(program, startTexUnit);
             GL.BindVertexArray(0);
         }
+
+        public void setMaterial(Material mat)
+        {
+            material = mat;
+        }
     }
 }

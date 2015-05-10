@@ -12,7 +12,6 @@ namespace Chireiden.Materials
 {
     public class FireMaterial : Material
     {
-        //time+= 0.001f;
         Texture noiseTexture;
         Texture fireTexture;
         

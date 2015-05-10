@@ -82,5 +82,10 @@ namespace Chireiden.Meshes
         {
             meshes.Remove(m);
         }
+
+        public List<TriMesh> getMeshes()
+        {
+            return meshes;
+        }
     }
 }

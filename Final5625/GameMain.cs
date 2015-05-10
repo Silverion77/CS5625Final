@@ -112,6 +112,9 @@ namespace Chireiden
 
             loadStage("data/stage/testlevel");
 
+            var fireball = new FieryProjectile(1, new Vector3(2, 2, 2), Vector3.Zero);
+            okuu.addChild(fireball);
+
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
         }
