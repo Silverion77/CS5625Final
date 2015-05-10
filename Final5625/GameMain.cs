@@ -30,6 +30,7 @@ using System.Text;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Text;
+using System.Collections.Generic;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -52,6 +53,8 @@ namespace Chireiden
         UtsuhoReiuji okuu;
         TrackingCamera camera;
         Stage stage;
+
+        List<ZombieFairy> zombies;
 
         Stopwatch stopwatch;
 
@@ -116,7 +119,7 @@ namespace Chireiden
         void loadStage(string stageFile)
         {
             StageData stageData = StageImporter.importStageFromFile(stageFile);
-            world = StageImporter.makeStageWorld(stageData, out stage, out okuu);
+            world = StageImporter.makeStageWorld(stageData, out stage, out okuu, out zombies);
 
             camera = new TrackingCamera(okuu, (float)Math.PI / 4, aspectRatio, 0.1f, 100);
             camera.setStage(stage);
@@ -232,6 +235,12 @@ namespace Chireiden
                 Vector3 worldMovementVector = camera.getMovementVector(moveX, moveY);
                 okuu.toggleRunWalk(running);
                 okuu.inputMove(worldMovementVector);
+            }
+
+            // Give every zombie fairy Okuu's location, so that their AI can use it
+            foreach (ZombieFairy fairy in zombies)
+            {
+                fairy.updateOkuuLocation(okuu.worldPosition);
             }
 
             // TODO: handle enemy movement here, once enemies are implemented
