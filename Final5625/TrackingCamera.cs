@@ -146,6 +146,7 @@ namespace Chireiden
                 light_falloffDistance[i] = light.FalloffDistance;
                 light_energy[i] = light.Energy;
                 light_color[i] = light.Color;
+                i++;
             }
         }
 
@@ -213,7 +214,7 @@ namespace Chireiden
         public void zoom(float amount)
         {
             distanceBehind += amount * MouseWheelSensitivity;
-            distanceBehind = Math.Max(Math.Min(distanceBehind, 100), 1);
+            distanceBehind = Math.Max(Math.Min(distanceBehind, 20), 1);
         }
 
         public Vector3 getWorldSpacePos()

@@ -119,12 +119,25 @@ namespace Chireiden.Scenes.Stages
             // This is just for debugging, so that we can see
             PointLight light = new PointLight(new Vector3(0, -2f, 4.3f), 2, 20, new Vector3(1, 1, 1));
             okuu.addChild(light);
-            world.registerPointLight(light);
 
             okuu.setStage(stage);
 
             Vector3 goalWorldPos = new Vector3(data.TileSideLength * (data.GoalPosition.X + 0.5f),
                 data.TileSideLength * (data.GoalPosition.Y + 0.5f), 0);
+
+            MeshNode goalFlagMesh = new MeshNode(MeshLibrary.GoalFlag, goalWorldPos);
+            PointLight goalLight = new PointLight(new Vector3(0, -1f, 6), 2, 20, new Vector3(1, 1, 1));
+            PointLight goalLight2 = new PointLight(new Vector3(0, 1f, 6), 2, 20, new Vector3(1, 1, 1));
+            ParticleEmitter pe = new ParticleEmitter(new Vector3(0, 0, 8), 100f);
+
+            world.addChild(goalFlagMesh);
+            goalFlagMesh.addChild(goalLight);
+            goalFlagMesh.addChild(goalLight2);
+            goalFlagMesh.addChild(pe);
+
+            world.registerPointLight(light);
+            world.registerPointLight(goalLight);
+            world.registerPointLight(goalLight2);
 
             Console.WriteLine("TODO: Handle goal checking");
 

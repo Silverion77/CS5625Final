@@ -14,6 +14,7 @@ namespace Chireiden
         public static MeshContainer Okuu;
         public static MeshContainer HappySphere;
         public static MeshContainer ZombieFairy;
+        public static MeshContainer GoalFlag;
 
         public static void loadMeshes()
         {
@@ -21,6 +22,7 @@ namespace Chireiden
             Okuu = MeshImporter.importFromFile("data/model/okuu/okuu.dae");
             HappySphere = MeshImporter.importFromFile("data/model/happysphere/happysphere.dae");
             ZombieFairy = MeshImporter.importFromFile("data/model/zombie_fairy/zombie_fairy.dae");
+            GoalFlag = MeshImporter.importFromFile("data/model/goal_flag/goal_flag.dae");
         }
     }
 }

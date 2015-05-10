@@ -145,7 +145,7 @@ namespace Chireiden.Meshes
                     var indices = f.Indices;
                     if (indices.Count != 3)
                     {
-                        Console.WriteLine("ERROR LOADING MESH: THIS AIN'T NO TRIANGLE");
+                        Console.WriteLine("Error loading mesh: {0} vertices in one face", indices.Count);
                     }
                     faceArr[vertID] = indices[0];
                     faceArr[vertID + 1] = indices[1];
