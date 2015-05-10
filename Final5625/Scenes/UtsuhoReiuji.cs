@@ -146,7 +146,7 @@ namespace Chireiden.Scenes
         bool blinkInProgress = false;
         bool blinkEnabled = true;
 
-        public UtsuhoReiuji(MeshContainer m, Vector3 loc)
+        UtsuhoReiuji(MeshContainer m, Vector3 loc)
             : base(m, loc)
         {
             if (!allAnimsOK(m))

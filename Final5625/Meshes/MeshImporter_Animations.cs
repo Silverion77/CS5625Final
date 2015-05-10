@@ -110,6 +110,7 @@ namespace Chireiden.Meshes
             foreach (AnimationCue cue in cueSheet.Cues)
             {
                 AnimationClip clip = new AnimationClip(allFrames, cue, numBones, boneDict);
+                Console.WriteLine("Adding animation {0} (time {1} - {2})", cue.Name, cue.StartTime, cue.EndTime);
                 clips.Add(clip);
             }
             return clips;

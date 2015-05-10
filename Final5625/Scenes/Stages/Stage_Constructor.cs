@@ -379,14 +379,6 @@ namespace Chireiden.Scenes.Stages
                 MaterialTileCollection matTiles;
                 geometryByMaterial.TryGetValue(matID, out matTiles);
 
-                foreach (Vector3 v in matTiles.Vertices)
-                {
-                    Console.WriteLine(v);
-                }
-                foreach (int i in matTiles.Faces)
-                {
-                    Console.WriteLine(i);
-                }
                 StageTilesNode stn = stageMaterialOfID(matID, matTiles);
                 stageElements.Add(stn);
             }

@@ -189,7 +189,6 @@ namespace Chireiden.Scenes.Stages
         bool computeFloorCrossed(float origZ, float newZ, out float time)
         {
             float zDiff = newZ - origZ;
-            Console.WriteLine("origZ = {0}, newZ = {1}, zDiff = {2}", origZ, newZ, zDiff);
             if (zDiff == 0 || newZ > 0)
             {
                 time = 0;
@@ -207,11 +206,8 @@ namespace Chireiden.Scenes.Stages
         /// <returns></returns>
         public Vector3 computeCollisionTime(Vector3 oldPos, Vector3 pos)
         {
-            Console.WriteLine("oldPos = {0}, pos = {1}", oldPos, pos);
             Vector2 oldMapCoords = new Vector2(oldPos.X / tileSideLength, oldPos.Y / tileSideLength);
             Vector2 mapCoords = new Vector2(pos.X / tileSideLength, pos.Y / tileSideLength);
-
-            Console.WriteLine("oldMapCoords = {0}, mapCoords = {1}", oldMapCoords, mapCoords);
 
             Vector2 mapMoveVec = mapCoords - oldMapCoords;
 
@@ -233,7 +229,6 @@ namespace Chireiden.Scenes.Stages
                 {
                     // We're only interested in when they first entered out-of-bounds squares
                     if (tileInBounds(x, y)) continue;
-                    Console.WriteLine("Scanning out of bounds tile ({0},{1})", x, y);
                     float crossingTime;
                     // If we didn't actually enter this square, skip it
                     if (!computeWhenEntered(oldMapCoords, mapMoveVec, x, y, out crossingTime)) continue;
