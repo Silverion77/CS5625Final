@@ -58,6 +58,7 @@
     <Compile Include="Meshes\Vector4Texture.cs" />
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
+    <Compile Include="Scenes\FieryProjectile.cs" />
     <Compile Include="Scenes\Stages\Stage.cs" />
     <Compile Include="Scenes\Stages\StageImporter.cs" />
     <Compile Include="Scenes\Stages\StageTilesNode.cs" />

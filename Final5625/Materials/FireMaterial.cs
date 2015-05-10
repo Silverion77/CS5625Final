@@ -15,8 +15,7 @@ namespace Chireiden.Materials
         //time+= 0.001f;
         Texture noiseTexture;
         Texture fireTexture;
-        private float time = 0f;
-
+        
         Vector3 scrollSpeeds = new Vector3(1f, 2f, 4f);
 
         public FireMaterial()
@@ -27,7 +26,6 @@ namespace Chireiden.Materials
 
         public int useMaterialParameters(ShaderProgram program, int startTexUnit)
         {
-            program.setUniformFloat1("un_Time", time);
             program.setUniformFloat3("un_ScrollSpeeds", scrollSpeeds);
 
             program.bindTexture2D("un_NoiseTexture", startTexUnit, noiseTexture);
