@@ -4,11 +4,12 @@
 #version 330
 
 #define MAX_LIGHTS 40
+#extension GL_ARB_explicit_attrib_location : enable
 
-in vec3 vert_position;
-in vec3 vert_normal;
-in vec2 vert_texCoord;
-in vec4 vert_tangent;
+layout(location = 0) in vec3 vert_position;
+layout(location = 1) in vec3 vert_normal;
+layout(location = 2) in vec2 vert_texCoord;
+layout(location = 3) in vec4 vert_tangent;
 
 // uniforms
 uniform mat4 modelMatrix;
