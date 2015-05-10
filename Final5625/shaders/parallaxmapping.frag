@@ -16,6 +16,7 @@ uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D heightTexture;
 uniform sampler2D normalTexture;
+uniform float mat_shininess;
 // scale for size of Parallax Mapping effect
 uniform float parallaxScale;
 
@@ -37,26 +38,40 @@ out vec4 out_frag_color;
 vec4 normalMapLighting(in vec2 T, in vec3 V)
 {
 	vec3 N = normalize(texture(normalTexture, T).xyz);
-	vec3 D = texture(heightTexture, T).rgb;
+	vec3 mat_diffuse = texture(diffuseTexture, T).rgb;
+	vec3 mat_specular = texture(specularTexture, T).rgb;
+
+	vec3 v = -normalize(geom_position);
 
 	vec4 result;
 	for (int i = 0; i < light_count; i++) {
-		vec3 L = normalize(toLightsInTS[i]);
-		// ambient lighting
-		float iamb = 0.2;
-		// diffuse lighting
-		float idiff = clamp(dot(N, L), 0, 1);
+		vec3 l = light_eyePosition[i] - geom_position;
+		vec3 L = toLightsInTS[i];
+		float r_squared = dot(l, l);
+		l = normalize(l);
+
+		// The attenuation model used here is from http://wiki.blender.org/index.php/Doc:2.6/Manual/Lighting/Lights/Light_Attenuation
+		float d2 = light_falloffDistance[i] * light_falloffDistance[i];
+		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
+		// Compute diffuse
+		float diffuse_dot = max(dot(N,L), 0);
+
+		// give some ambient lighting
+		result.xyz += 0.5 * mat_diffuse;
+		// the rest depends on the light angle (diffuse_dot)
+		result.xyz += 0.5 * mat_diffuse * diffuse_dot * light_color[i] * intensity;
+
 		// specular lighting
 		float ispec = 0;
 		if(dot(N, L) > 0.2) {
-			vec3 R = reflect(-L, N);
-			ispec = pow(dot(R, V), 32) / 1.5;
+			vec3 H = normalize(V + L);
+			float specular_dot = pow(max(0, dot(N, H)), mat_shininess);
+			result.xyz += mat_specular * specular_dot * light_color[i] * intensity;
 		}
-		result.rgb += D;// * (ambientLighting + (idiff + ispec));
 		//  * pow(shadowMultiplier, 4)
 	}
 	result.a = 1;
-	return vec4(N, 1);
+	return result;
 }
 
 // Code adapted from http://sunandblackcat.com/tipFullView.php?l=eng&topicid=28
