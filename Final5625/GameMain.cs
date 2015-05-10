@@ -62,6 +62,9 @@ namespace Chireiden
 
         bool paused = false;
 
+        // Temp used to retrieve new projectiles from Okuu
+        FieryProjectile newProjectile = null;
+
         public GameMain()
             : base(1600, 900,
             new GraphicsMode(), "Subterranean Arsonism", 0,
@@ -250,7 +253,10 @@ namespace Chireiden
 
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
-
+            if (okuu.getProjectile(out newProjectile))
+            {
+                world.addChild(newProjectile);
+            }
             ParticleSystem.Update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
