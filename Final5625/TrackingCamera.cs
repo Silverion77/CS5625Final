@@ -125,7 +125,15 @@ namespace Chireiden
                 }
             }
 
+            worldSpacePos = worldSpacePos + target.camRightOffset() * right;
+            lookAt = lookAt + target.camRightOffset() * right;
+
             viewMatrix = Matrix4.LookAt(worldSpacePos, lookAt, up);
+        }
+
+        public Vector3 cameraForwardDir()
+        {
+            return (20 * forward + target.camRightOffset() * right).Normalized();
         }
 
         public Matrix4 getViewMatrix()

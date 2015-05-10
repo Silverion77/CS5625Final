@@ -75,10 +75,19 @@ namespace Chireiden.Scenes
         const float meleeMoveDistance = 5;
         const float meleeDistance = 2;
 
+        const double shootTime = 85.0 / 24;
+
+        double koTime = 0;
+
         int hitStage;
         int hitPoints = 10;
 
+        Matrix4 palmRMatrix;
+
         MorphState morphState = new MorphState(ShaderProgram.MAX_MORPHS);
+
+        static Vector3 handLoc = new Vector3(-0.64f, -0.1f, 0.95f);
+        Scatterer fireHand = new Scatterer(handLoc, 100f, 0.025f);
 
         public ZombieFairy(MeshContainer m, Vector3 loc) : base(m, loc)
         {
@@ -139,6 +148,26 @@ namespace Chireiden.Scenes
             targetLoc = target;
         }
 
+        ZombieProjectile outgoingProjectile;
+
+        void launchProjectile()
+        {
+            Vector3 bulletPos = Vector4.Transform(new Vector4(handLoc, 1), palmRMatrix).Xyz;
+            outgoingProjectile = new ZombieProjectile(.5f, bulletPos, 20 * getFacingDirection());
+        }
+
+        public bool getProjectile(out ZombieProjectile projectile)
+        {
+            if (outgoingProjectile != null)
+            {
+                projectile = outgoingProjectile;
+                outgoingProjectile = null;
+                return true;
+            }
+            projectile = null;
+            return false;
+        }
+
         void beHurt()
         {
             if (zombieState == ZombieState.Staggering)
@@ -156,9 +185,17 @@ namespace Chireiden.Scenes
             setMorphSmooth(morphState, "oo", 1, 1);
         }
 
+        float distFromOkuu = 0;
+
         public void updateOkuuLocation(Vector3 loc)
         {
             okuuLocation = loc;
+            distFromOkuu = (worldPosition - okuuLocation).Length;
+        }
+
+        public double timeKOed()
+        {
+            return koTime;
         }
 
         bool outOfLeashRange()
@@ -228,13 +265,19 @@ namespace Chireiden.Scenes
         /// <param name="parentToWorldMatrix"></param>
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
+            if (distFromOkuu > GameMain.RenderDistance) return;
+
+            if (zombieState == ZombieState.KO)
+            {
+                koTime += e.Time;
+            }
             if (outOfLeashRange())
             {
                 move(leashLocation);
                 awareOfOkuu = false;
                 idleTimer = 20;
             }
-            if (wasHurt)
+            else if (wasHurt)
             {
                 wasHurt = false;
                 if (hitPoints <= 0)
@@ -270,18 +313,27 @@ namespace Chireiden.Scenes
                 translation = Vector3.Add(translation, localVel);
             }
 
+
             correctPosition(origPos, parentToWorldMatrix);
 
             updateMatricesAndWorldPos(parentToWorldMatrix);
 
-            // Okuu has kids? News to me
+            if (zombieState == ZombieState.Attacking || zombieState == ZombieState.Shooting)
+            {
+                fireHand.update(e, palmRMatrix);
+            }
+
             updateChildren(e, toWorldMatrix);
         }
 
         public override void render(Camera camera)
         {
+            if (distFromOkuu > GameMain.RenderDistance) return;
             setMorphWeights(morphState);
             base.render(camera);
+
+            palmRMatrix = getBoneTransform("palm.r");
+            palmRMatrix = palmRMatrix * toWorldMatrix;
         }
 
         void randomIdleAction()
@@ -302,21 +354,18 @@ namespace Chireiden.Scenes
 
         void goAfterOkuu()
         {
-            Vector3 diff = okuuLocation - worldPosition;
-            float distance = diff.Length;
-
             // If she's not close enough to shoot, move closer
-            if (distance > projectileDistance)
+            if (distFromOkuu > projectileDistance)
             {
                 move(okuuLocation);
             }
             // If she's in projectile range, shoot
-            else if (distance > meleeMoveDistance)
+            else if (distFromOkuu > meleeMoveDistance)
             {
                 shoot(okuuLocation);
             }
             // If she's close enough to melee, close in for that
-            else if (distance > meleeDistance)
+            else if (distFromOkuu > meleeDistance)
             {
                 move(okuuLocation);
             }
@@ -364,6 +413,19 @@ namespace Chireiden.Scenes
                         return true;
                     }
                     return false;
+                case ZombieState.Shooting:
+                    double prevAnimTime = animTime - delta;
+                    targetLoc = okuuLocation;
+                    if (prevAnimTime < shootTime && animTime >= shootTime)
+                    {
+                        launchProjectile();
+                    }
+                    if (animationEnded)
+                    {
+                        goAfterOkuu();
+                        return true;
+                    }
+                    else return false;
                 default:
                     // If we're in the middle of something else, let it finish
                     // Otherwise, continue going after Okuu.
@@ -428,6 +490,29 @@ namespace Chireiden.Scenes
         public int lastHitStage()
         {
             return hitStage;
+        }
+
+        const double startAttackTime = 37.0 / 24;
+        const double endAttackTime = 53.0 / 24;
+        const float AttackHitSphereRadius = 0.5f;
+
+        public void checkAttackHit(UtsuhoReiuji okuu)
+        {
+            if (zombieState != ZombieState.Attacking || animTime < startAttackTime || animTime > endAttackTime) return;
+
+            Vector3 collisionPos = okuu.worldPosition;
+            if (Math.Abs(collisionPos.X - worldPosition.X) > 3
+                || Math.Abs(collisionPos.Y - worldPosition.Y) > 3) return;
+            float distRequired = AttackHitSphereRadius + UtsuhoReiuji.hitCylinderHeight;
+            bool hit = false;
+            Vector3 hitSpherePos = fireHand.worldPosition;
+            float dist = (collisionPos.Xy - hitSpherePos.Xy).Length;
+            if (dist <= distRequired && hitSpherePos.Z > 0 && hitSpherePos.Z < UtsuhoReiuji.hitCylinderHeight)
+            {
+                hit = true;
+            }
+            if (hit)
+                okuu.getHurt(3);
         }
     }
 }

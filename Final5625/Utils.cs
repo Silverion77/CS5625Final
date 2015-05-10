@@ -62,6 +62,13 @@ namespace Chireiden
             return xyPlaneRotation(FORWARD, dir);
         }
 
+        public static Vector3 projectOntoXY(Vector3 dir)
+        {
+            Vector3 projectedOntoXY = new Vector3(dir.X, dir.Y, 0);
+            projectedOntoXY.Normalize();
+            return projectedOntoXY;
+        }
+
         static Random random = new Random();
 
         public static double randomDouble()

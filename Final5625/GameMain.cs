@@ -62,6 +62,8 @@ namespace Chireiden
 
         bool paused = false;
 
+        public const float RenderDistance = 100;
+
         // Temp used to retrieve new projectiles from Okuu
         FieryProjectile newProjectile = null;
 
@@ -115,9 +117,6 @@ namespace Chireiden
 
             loadStage("data/stage/testlevel");
 
-            var fireball = new FieryProjectile(1, new Vector3(2, 2, 2), Vector3.Zero);
-            okuu.addChild(fireball);
-
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
         }
@@ -127,7 +126,7 @@ namespace Chireiden
             StageData stageData = StageImporter.importStageFromFile(stageFile);
             world = StageImporter.makeStageWorld(stageData, out stage, out okuu, out zombies);
 
-            camera = new TrackingCamera(okuu, (float)Math.PI / 4, aspectRatio, 0.1f, 100);
+            camera = new TrackingCamera(okuu, (float)Math.PI / 4, aspectRatio, 0.1f, RenderDistance);
             camera.setStage(stage);
         }
 
@@ -180,6 +179,9 @@ namespace Chireiden
         }
 
         float updateTime = 0;
+        List<FieryProjectile> okuuProjectiles = new List<FieryProjectile>();
+        List<ZombieFairy> KOedFairies = new List<ZombieFairy>();
+        List<ZombieProjectile> zombieProjectiles = new List<ZombieProjectile>();
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
@@ -243,6 +245,8 @@ namespace Chireiden
                 okuu.inputMove(worldMovementVector);
             }
 
+            okuu.setCameraForward(camera.cameraForwardDir());
+
             // Give every zombie fairy Okuu's location, so that their AI can use it
             foreach (ZombieFairy fairy in zombies)
             {
@@ -251,18 +255,100 @@ namespace Chireiden
 
             okuu.checkAttackHit(zombies);
 
+            foreach (ZombieFairy fairy in zombies)
+            {
+                fairy.checkAttackHit(okuu);
+            }
+
             // TODO: handle enemy movement here, once enemies are implemented
 
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
+
+            foreach (ZombieFairy fairy in zombies)
+            {
+                if (fairy.timeKOed() > 20) KOedFairies.Add(fairy);
+            }
+            foreach (ZombieFairy fairy in KOedFairies)
+            {
+                world.removeChild(fairy);
+                zombies.Remove(fairy);
+            }
+            KOedFairies.Clear();
+
+            handleOkuuProjectiles(e);
+            handleZombieProjectiles(e);
+
             if (okuu.getProjectile(out newProjectile))
             {
+                newProjectile.setStage(stage);
                 world.addChild(newProjectile);
+                world.registerPointLight(newProjectile.light);
+                okuuProjectiles.Add(newProjectile);
             }
+
+            foreach (ZombieFairy fairy in zombies)
+            {
+                ZombieProjectile fairyProjectile;
+                if (fairy.getProjectile(out fairyProjectile))
+                {
+                    fairyProjectile.setStage(stage);
+                    world.addChild(fairyProjectile);
+                    world.registerPointLight(fairyProjectile.light);
+                    zombieProjectiles.Add(fairyProjectile);
+                }
+            }
+
             ParticleSystem.Update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
             updateTime = (1000.0f * stopwatch.ElapsedTicks) / Stopwatch.Frequency;
+        }
+
+        List<FieryProjectile> goneProjs = new List<FieryProjectile>();
+
+        void handleOkuuProjectiles(FrameEventArgs e)
+        {
+            foreach (FieryProjectile projectile in okuuProjectiles)
+            {
+                projectile.checkTargetHits(zombies);
+                if (projectile.hitSomething())
+                {
+                    goneProjs.Add(projectile);
+                }
+            }
+
+            foreach (FieryProjectile projectile in goneProjs)
+            {
+                Console.WriteLine("TODO: Explode");
+                okuuProjectiles.Remove(projectile);
+                world.removeChild(projectile);
+                world.unregisterPointLight(projectile.light);
+                // TODO: create an explosion
+            }
+            goneProjs.Clear();
+        }
+
+        void handleZombieProjectiles(FrameEventArgs e)
+        {
+            foreach (ZombieProjectile projectile in zombieProjectiles)
+            {
+                projectile.checkTargetHit(okuu);
+                if (projectile.hitSomething())
+                {
+                    goneProjs.Add(projectile);
+                }
+            }
+
+            foreach (ZombieProjectile projectile in goneProjs)
+            {
+                Console.WriteLine("TODO: Explode");
+                zombieProjectiles.Remove(projectile);
+                world.removeChild(projectile);
+                world.unregisterPointLight(projectile.light);
+                // TODO: create an explosion
+            }
+            goneProjs.Clear();
         }
 
         float renderTime = 0;

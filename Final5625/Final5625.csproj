@@ -59,11 +59,13 @@
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
     <Compile Include="Scenes\FieryProjectile.cs" />
+    <Compile Include="Scenes\Scatterer.cs" />
     <Compile Include="Scenes\Stages\Stage.cs" />
     <Compile Include="Scenes\Stages\StageImporter.cs" />
     <Compile Include="Scenes\Stages\StageTilesNode.cs" />
     <Compile Include="Scenes\Stages\Stage_Constructor.cs" />
     <Compile Include="Scenes\ZombieFairy.cs" />
+    <Compile Include="Scenes\ZombieProjectile.cs" />
     <Compile Include="ShaderLibrary.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />

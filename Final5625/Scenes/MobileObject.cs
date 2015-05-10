@@ -62,13 +62,16 @@ namespace Chireiden.Scenes
                 translation = Vector3.Add(translation, localVel);
             }
 
+            // Update intermediate world position
+            updateMatricesAndWorldPos(parentToWorldMatrix);
+
             correctPosition(origPos, parentToWorldMatrix);
 
-            // Compute intermediate world position, so we can see if we're out of bounds
+            // Now update corrected position
             updateMatricesAndWorldPos(parentToWorldMatrix);
         }
 
-        protected void correctPosition(Vector3 origPos, Matrix4 parentToWorldMatrix)
+        protected virtual void correctPosition(Vector3 origPos, Matrix4 parentToWorldMatrix)
         {
             if (stage != null)
             {
@@ -99,6 +102,11 @@ namespace Chireiden.Scenes
         public virtual void setVelocity(Vector3 vel)
         {
             velocity = moveSpeed * vel;
+        }
+
+        public virtual float camRightOffset()
+        {
+            return 0;
         }
     }
 }
