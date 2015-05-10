@@ -51,7 +51,7 @@ namespace Chireiden.Meshes
             camera.setPointLightUniforms(program);
 
             foreach (TriMesh m in meshes) {
-                m.renderMesh(camera, toWorldMatrix, ShaderLibrary.BlenderShader, 0);
+                m.renderMesh(camera, toWorldMatrix, program, 0);
             }
 
             program.unuse();
@@ -81,6 +81,11 @@ namespace Chireiden.Meshes
         public void removeMesh(TriMesh m)
         {
             meshes.Remove(m);
+        }
+
+        public List<TriMesh> getMeshes()
+        {
+            return meshes;
         }
     }
 }

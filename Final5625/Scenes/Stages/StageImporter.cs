@@ -135,7 +135,7 @@ namespace Chireiden.Scenes.Stages
 
             for (int i = 0; i <= 5; i++)
             {
-                MeshNode box = new MeshNode(MeshLibrary.HappySphere, Vector3.Lerp(armBegin, armEnd, i / 5f));
+                MeshNode box = new MeshNode(MeshLibrary.Sphere, Vector3.Lerp(armBegin, armEnd, i / 5f));
                 okuu.addCollisionHitbox(box);
             }
 

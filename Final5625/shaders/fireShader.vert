@@ -1,17 +1,18 @@
-#version 330
+#version 140
 
-in vec3 in_Position;
-in vec3 in_Normal;
-in vec2 in_TexCoord;
+in vec3 vert_position;
+in vec3 vert_normal;
+in vec2 vert_texCoord;
+in vec4 vert_tangent;
 
 // uniforms
 uniform mat4 projectionMatrix;
 uniform mat4 modelViewMatrix;
 
-out vec2 out_texCoord;
+out vec2 geom_texCoord;
 
 void main()
 {
-	out_texCoord = in_TexCoord;
-	gl_Position = projectionMatrix * modelViewMatrix * vec4(in_Position, 1);
+	geom_texCoord = vert_texCoord;
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(vert_position, 1);
 }

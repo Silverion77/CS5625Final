@@ -9,17 +9,18 @@
 
 #version 140
 #extension GL_ARB_texture_rectangle : enable
+#extension GL_ARB_explicit_attrib_location : enable
 
 #define MAX_MORPHS 20
 
-in vec3 vert_position;
-in vec3 vert_normal;
-in vec2 vert_texCoord;
-in vec4 vert_tangent;
-in vec4 vert_boneIDs;
-in vec4 vert_boneWeights;
-in float vert_morphStart;
-in float vert_morphCount;
+layout(location = 0) in vec3 vert_position;
+layout(location = 1) in vec3 vert_normal;
+layout(location = 2) in vec2 vert_texCoord;
+layout(location = 3) in vec4 vert_tangent;
+layout(location = 4) in vec4 vert_boneIDs;
+layout(location = 5) in vec4 vert_boneWeights;
+layout(location = 6) in float vert_morphStart;
+layout(location = 7) in float vert_morphCount;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;

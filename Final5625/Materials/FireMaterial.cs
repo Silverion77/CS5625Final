@@ -12,11 +12,10 @@ namespace Chireiden.Materials
 {
     public class FireMaterial : Material
     {
-        //time+= 0.001f;
         Texture noiseTexture;
         Texture fireTexture;
         
-        Vector3 scrollSpeeds = new Vector3(1f, 2f, 4f);
+        Vector3 scrollSpeeds = new Vector3(10f, 20f, 40f);
 
         public FireMaterial()
         {

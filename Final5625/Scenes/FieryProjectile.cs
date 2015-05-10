@@ -18,7 +18,11 @@ namespace Chireiden.Scenes
         private float time = 0f;
 
         public FieryProjectile(float s, Vector3 t, Vector3 v)
-            : base(s, t, Quaternion.Identity, v) { }
+            : base(s, t, Quaternion.Identity, v)
+        {
+            sphere = ((MeshGroup)MeshLibrary.Sphere).getMeshes()[0];
+            sphere.setMaterial(new FireMaterial());
+        }
 
         public override void render(Camera camera)
         {
