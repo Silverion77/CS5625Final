@@ -128,6 +128,13 @@ namespace Chireiden.Scenes.Stages
 
             Console.WriteLine("TODO: Handle goal checking");
 
+            foreach (Vector2 loc in data.ZombiePositions)
+            {
+                ZombieFairy fairy = new ZombieFairy(new Vector3(loc.X * data.TileSideLength, loc.Y * data.TileSideLength, 0));
+                world.addChild(fairy);
+                fairy.setStage(stage);
+            }
+
             Console.WriteLine("TODO: Handle zombie fairies");
 
             return world;

@@ -61,6 +61,7 @@
     <Compile Include="Scenes\Stages\StageImporter.cs" />
     <Compile Include="Scenes\Stages\StageTilesNode.cs" />
     <Compile Include="Scenes\Stages\Stage_Constructor.cs" />
+    <Compile Include="Scenes\ZombieFairy.cs" />
     <Compile Include="ShaderLibrary.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Framebuffer.cs" />
@@ -255,12 +256,66 @@
     <Content Include="data\model\happysphere\happysphere.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="data\model\zombie_fairy\zombie_fairy.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="data\Simple_FS.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="data\Simple_VS.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="data\model\zombie_fairy\animations.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\cloth.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\cloth.bmp.001.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\face.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\face.bmp.001.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\hada.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\hada.bmp.001.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\hair.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\hair.bmp.001.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\hane.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\hane.png.001.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\mo_fu.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\mo_fu.png.001.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\rear.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\tex.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\tex.bmp.001.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\model\zombie_fairy\tex.bmp.002.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="data\stage\testlevel">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

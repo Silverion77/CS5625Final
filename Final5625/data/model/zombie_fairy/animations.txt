@@ -1,0 +1,6 @@
+idle 0 64 true
+move 65 97 true
+attack 98 194 false
+shoot 195 323 false
+hurt 324 348 false
+ko 349 428 false

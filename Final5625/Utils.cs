@@ -64,6 +64,11 @@ namespace Chireiden
 
         static Random random = new Random();
 
+        public static double randomDouble()
+        {
+            return random.NextDouble();
+        }
+
         /// <summary>
         /// Returns a random double in the range (lowerBound, upperBound).
         /// </summary>
