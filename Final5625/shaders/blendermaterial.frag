@@ -1,4 +1,5 @@
 #version 140
+#extension GL_ARB_explicit_attrib_location : enable
 
 #define MAX_LIGHTS 40	
 
@@ -41,7 +42,9 @@ uniform float pointLight_shadowMapConstantBias = .02;
 uniform mat4 pointLight_viewMatrix[MAX_LIGHTS];
 uniform mat4 pointLight_projectionMatrix;
 
-out vec4 out_frag_color;
+layout (location = 0) out vec4 out_frag_color; 
+layout (location = 1) out vec4 out_frag_normal; 
+layout (location = 2) out vec4 out_frag_position; 
 
 // poisson samples
 uniform float poissonSamples[80] = float[80](0.0340212, 0.674301, 0.0858099, 0.496943, 0.0694185, 0.860058, 0.0406619, 0.218842,
@@ -169,5 +172,7 @@ void main()
 	vec3 norm = (n + 1) / 2;
 
 	out_frag_color = result;
+	out_frag_normal = vec4(n, 1.0);
+	out_frag_position = vec4(0,1.0,0,1.0);//vec4(geom_position, 1.0);
 
 }

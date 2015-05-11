@@ -80,7 +80,7 @@ namespace Chireiden
             DisplayDevice.Default, 4, 5,
             GraphicsContextFlags.ForwardCompatible | GraphicsContextFlags.Debug)
         {
-            Framebuffer.Init(Width, Height);
+            Framebuffer.Init(Width, Height, this);
             ParticleSystem.Init();
         }
 
@@ -144,7 +144,7 @@ namespace Chireiden
             loseText = new TextRenderer(600, 300, ClientSize.Width, ClientSize.Height);
             loseText.DrawString("Press Ctrl-R to try again", new Font(FontFamily.GenericSansSerif, 36), Brushes.White, PointF.Empty);
 
-            Framebuffer.Init(ClientSize.Width, ClientSize.Height);
+            Framebuffer.Init(ClientSize.Width, ClientSize.Height, this);
         }
 
         protected override void OnResize(EventArgs e)
@@ -466,6 +466,11 @@ namespace Chireiden
             goneProjs.Clear();
         }
 
+        public Camera getCamera()
+        {
+            return camera;
+        }
+
         void handleExplosions()
         {
             foreach (LightExplosion explode in explosions)
@@ -518,9 +523,9 @@ namespace Chireiden
               
             world.render(camera);
 
-            Framebuffer.StartTransparency();
-            ParticleSystem.Render(camera);
-            Framebuffer.EndTransparency();
+            //Framebuffer.StartTransparency();
+            //ParticleSystem.Render(camera);
+            //Framebuffer.EndTransparency();
 
             string okuuHPstring = "Okuu's HP: " + okuu.HitPoints + " / 100";
             okuuHPText.DrawString(okuuHPstring, font, Brushes.White, PointF.Empty);
