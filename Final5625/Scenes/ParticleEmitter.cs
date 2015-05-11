@@ -67,7 +67,12 @@ namespace Chireiden.Scenes
         {
             base.update(e, parentToWorldMatrix);
 
-            excessParticles += rate * (float)e.Time;
+            emitParticles(e.Time);
+        }
+
+        public virtual void emitParticles(double delta)
+        {
+            excessParticles += rate * (float)delta;
             while (excessParticles >= 1.0f)
             {
                 excessParticles -= 1.0f;

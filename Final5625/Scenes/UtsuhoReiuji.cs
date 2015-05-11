@@ -33,6 +33,15 @@ namespace Chireiden.Scenes
         Backstep
     }
 
+    public enum OkuuAttackType
+    {
+        Nothing,
+        Attack1,
+        Attack2,
+        Attack3,
+        Explosion
+    }
+
     public class UtsuhoReiuji : SkeletalMeshNode
     {
         /// <summary>
@@ -82,6 +91,8 @@ namespace Chireiden.Scenes
 
         // The state we are currently in
         OkuuState okuuState;
+
+        public int HitPoints { get; set; }
 
         public const float hitCylinderRadius = 1f;
         public const float hitCylinderHeight = 4;
@@ -161,6 +172,8 @@ namespace Chireiden.Scenes
 
         Vector3 cameraForward;
 
+        bool hasWon = false;
+
         UtsuhoReiuji(MeshContainer m, Vector3 loc)
             : base(m, loc)
         {
@@ -173,6 +186,7 @@ namespace Chireiden.Scenes
             targetRotation = Quaternion.Identity;
             idle();
             wallRepelDistance = 1.5f;
+            HitPoints = 100;
         }
 
         public void setCameraForward(Vector3 forward)
@@ -193,6 +207,14 @@ namespace Chireiden.Scenes
                     else walk();
                 }
             }
+        }
+
+        public void winGame()
+        {
+            hasWon = true;
+            cheer();
+            setMorphSmooth(morphState, "smile_eyes", 1, 0.5);
+            setMorphSmooth(morphState, "smile_mouth", 1, 0.5);
         }
 
         public void toggleReadyIdle()
@@ -315,6 +337,26 @@ namespace Chireiden.Scenes
             setTargetRotationAndVelocityFromDir(Utils.projectOntoXY(cameraForward));
         }
 
+        LightExplosion outExplosion;
+
+        void makeExplosion()
+        {
+            Vector3 bulletPos = Vector4.Transform(new Vector4(ArmCannonEnd, 1), cannonEndMatrix).Xyz;
+            outExplosion = new LightExplosion(bulletPos, new Vector3(1, 0.5f, 0.2f), 0.2, 2000f, 3);
+        }
+
+        public bool getExplosion(out LightExplosion outExplode)
+        {
+            if (outExplosion != null)
+            {
+                outExplode = outExplosion;
+                outExplosion = null;
+                return true;
+            }
+            outExplode = null;
+            return false;
+        }
+
         void startAiming()
         {
             // After playing the raise_cannon animation, which should be uninterruptable, 
@@ -353,6 +395,7 @@ namespace Chireiden.Scenes
 
         void beHurt()
         {
+            attackStage = 0;
             invulTimer = 1;
             switch (okuuState)
             {
@@ -447,8 +490,35 @@ namespace Chireiden.Scenes
             else return 0.1f;
         }
 
+        public bool isKOed()
+        {
+            return HitPoints <= 0;
+        }
+
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
+            if (hasWon)
+            {
+                advanceCurrentState(e.Time);
+                interpolateMorphs(morphState, e.Time);
+
+                updateMatricesAndWorldPos(parentToWorldMatrix);
+
+                cannonEndMatrix = getBoneTransform("cannon_end");
+                cannonEndMatrix = cannonEndMatrix * toWorldMatrix;
+
+                // Move the collision box
+                foreach (SceneTreeNode collisionBox in collisionBoxes)
+                {
+                    collisionBox.update(e, cannonEndMatrix);
+                }
+                foreach (SceneTreeNode attachment in cannonAttachments)
+                {
+                    attachment.update(e, cannonEndMatrix);
+                }
+                return;
+            }
+
             bool stateChangedFromInput = setNextState();
             if (!stateChangedFromInput)
             {
@@ -591,7 +661,8 @@ namespace Chireiden.Scenes
 
         public bool isInvulnerable()
         {
-            return (invulTimer > 0 || okuuState == OkuuState.Backstepping && animTime <= backstepEndMove);
+            return (hasWon || okuuState == OkuuState.KO || invulTimer > 0 ||
+                okuuState == OkuuState.Backstepping && animTime <= backstepEndMove);
         }
 
         /// <summary>
@@ -599,13 +670,18 @@ namespace Chireiden.Scenes
         /// </summary>
         void advanceCurrentState(double delta)
         {
+            // Try advancing the animation.
+            bool animationEnded = advanceAnimation(delta);
+            // When aiming, our rotation should track with the camera
             if (okuuState == OkuuState.Aiming)
             {
                 Vector3 newFacing = Utils.projectOntoXY(cameraForward);
                 setTargetRotationAndVelocityFromDir(newFacing);
             }
-            // Try advancing the animation.
-            bool animationEnded = advanceAnimation(delta);
+            if (okuuState == OkuuState.Backstepping && animTime - delta < backstepStartMove && animTime >= backstepStartMove)
+            {
+                makeExplosion();
+            }
             // If it's over, then there are a few things we may need to do.
             if (animationEnded)
             {
@@ -682,6 +758,7 @@ namespace Chireiden.Scenes
             {
                 if (okuuState == OkuuState.KO)
                 {
+                    HitPoints = 100;
                     blinkEnabled = true;
                     setMorphSmooth(morphState, "sad_brow", 0, 1);
                     setMorphSmooth(morphState, "><_eyes", 0, 0);
@@ -698,8 +775,8 @@ namespace Chireiden.Scenes
                 }
                 else
                 {
-                    knockedOut();
-                    return true;
+                    amountDamage = 100;
+                    return processDamageTaken();
                 }
             }
             else if (damageTaken && !isInvulnerable())
@@ -758,7 +835,18 @@ namespace Chireiden.Scenes
 
         bool processDamageTaken()
         {
-            // We only get here if we're not invulnerable
+            // We only get here if we're not invulnerable, so deduct the HP
+            HitPoints -= amountDamage;
+            amountDamage = 0;
+
+            if (HitPoints <= 0)
+            {
+                HitPoints = 0;
+                knockedOut();
+                return true;
+            }
+
+            // Figure out if we stagger or not
             switch (okuuState)
             {
                 case OkuuState.Uninterruptable:
@@ -769,7 +857,7 @@ namespace Chireiden.Scenes
                     // And obviously if we're KO'd it doesn't matter
                     return false;
                 default:
-                    // Everywhere else, getting hit matters
+                    // Everywhere else, getting hit makes us stagger
                     beHurt();
                     return true;
             }
@@ -960,10 +1048,13 @@ namespace Chireiden.Scenes
             cannonPressed = true;
         }
 
+        int amountDamage = 0;
+
         public void getHurt(int attackPower)
         {
             Console.WriteLine("TODO: compute how much actual damage");
             damageTaken = true;
+            amountDamage = attackPower;
         }
 
         public void instantKnockout()
@@ -989,15 +1080,24 @@ namespace Chireiden.Scenes
             collisionBoxes.Add(box);
         }
 
-        public void checkAttackHit(List<ZombieFairy> zombies)
+        public static OkuuAttackType attackTypeOfNum(int i)
         {
-            if (okuuState != OkuuState.Attacking) return;
+            if (i == 1) return OkuuAttackType.Attack1;
+            else if (i == 2) return OkuuAttackType.Attack2;
+            else if (i == 3) return OkuuAttackType.Attack3;
+            else return OkuuAttackType.Nothing;
+        }
+
+        public ZombieFairy checkAttackHit(List<ZombieFairy> zombies)
+        {
+            ZombieFairy lastDamaged = null;
+            if (okuuState != OkuuState.Attacking) return null;
             foreach (ZombieFairy fairy in zombies)
             {
                 Vector3 collisionPos = fairy.worldPosition;
                 if (Math.Abs(collisionPos.X - worldPosition.X) > 3
                     || Math.Abs(collisionPos.Y - worldPosition.Y) > 3
-                    || fairy.lastHitStage() == attackStage) continue;
+                    || fairy.lastHit() == attackTypeOfNum(attackStage)) continue;
                 float distRequired = AttackHitSphereRadius + ZombieFairy.hitCylinderRadius;
                 bool hit = false;
                 foreach (MeshNode collisionBox in collisionBoxes)
@@ -1011,8 +1111,12 @@ namespace Chireiden.Scenes
                     }
                 }
                 if (hit)
-                    fairy.registerHit(attackStage);
+                {
+                    lastDamaged = fairy;
+                    fairy.registerHit(attackTypeOfNum(attackStage));
+                }
             }
+            return lastDamaged;
         }
 
         public bool getProjectile(out FieryProjectile proj)
