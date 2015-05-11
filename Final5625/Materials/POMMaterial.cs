@@ -14,12 +14,6 @@ namespace Chireiden.Materials
 {
     public class POMMaterial : Material
     {
-        // Standard parameters for Blinn-Phong
-        Vector4 diffuseColor;
-        Vector3 specularColor;
-        Vector3 ambientColor;
-        float shininess;
-
         // Textures
         // For now, we will use 2 textures for Blinn Phong (subject to change)
         Texture diffuseTexture;
@@ -27,14 +21,11 @@ namespace Chireiden.Materials
         // Required for POM
         Texture heightMap;
         Texture normalMap;
-        float parallaxScale = .07f;
+        float parallaxScale = .02f;
+        float shininess;
 
-        public POMMaterial(Vector4 diffuseColor, Vector3 specularColor,
-                            Vector3 ambientColor, float shininess, string TextureDirectory)
+        public POMMaterial(float shininess, string TextureDirectory)
         {
-            this.diffuseColor = diffuseColor;
-            this.specularColor = specularColor;
-            this.ambientColor = ambientColor;
             this.shininess = shininess;
             String texturePath = "data/texture/" + TextureDirectory;
             diffuseTexture = TextureManager.getTexture(texturePath + "/diffuse.png");
@@ -44,7 +35,7 @@ namespace Chireiden.Materials
         }
 
         public POMMaterial(string TextureDirectory) :
-            this(Vector4.Zero, Vector3.Zero, Vector3.Zero, 0, TextureDirectory) { }
+            this(32, TextureDirectory) { }
 
         public bool hasDiffuseTexture()
         {
@@ -63,6 +54,7 @@ namespace Chireiden.Materials
             program.bindTexture2D("heightTexture", startTexUnit + 2, heightMap);
             program.bindTexture2D("normalTexture", startTexUnit + 3, normalMap);
             program.setUniformFloat1("parallaxScale", parallaxScale);
+            program.setUniformFloat1("mat_shininess", shininess);
 
             return startTexUnit + 4;
         }
