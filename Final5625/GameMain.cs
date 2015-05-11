@@ -523,9 +523,9 @@ namespace Chireiden
               
             world.render(camera);
 
-            //Framebuffer.StartTransparency();
-            //ParticleSystem.Render(camera);
-            //Framebuffer.EndTransparency();
+            Framebuffer.StartTransparency();
+            ParticleSystem.Render(camera);
+            Framebuffer.EndTransparency();
 
             string okuuHPstring = "Okuu's HP: " + okuu.HitPoints + " / 100";
             okuuHPText.DrawString(okuuHPstring, font, Brushes.White, PointF.Empty);
