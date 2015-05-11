@@ -119,6 +119,9 @@ namespace Chireiden
 
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
+
+            Framebuffer.InitShadowMaps(world.getPointLights().Count, 1024, 1024);
+
         }
 
         void loadStage(string stageFile)
@@ -365,24 +368,27 @@ namespace Chireiden
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-            Framebuffer.StartShadowMaps();
-            foreach (PointLight light in world.getPointLights())
+            // render shadow cube maps for each light
+            /*
+            for (int j = 0; j < world.getPointLights().Count; j++)
             {
                 Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
                                                  new Vector3(0,1,0), new Vector3(0,-1,0),
                                                  new Vector3(0,0,1), new Vector3(0,0,-1)};
-                foreach (Vector3 dir in dirs)
+                for (int i = 0; i < 6; i++)
                 {
-                    light.setupCamera(dir);
-                    world.render(light.getCamera());
+                    Framebuffer.StartShadowMap(j, i, 1024, 1024);
+                    world.getPointLights()[j].setupCamera(dirs[i]);
+                    world.render(world.getPointLights()[j].getCamera());
                 }
             }
             Framebuffer.EndShadowMaps();
-
-            //world.render(camera);
+            */
+              
+            world.render(camera);
 
             Framebuffer.StartTransparency();
-            //ParticleSystem.Render(camera);
+            ParticleSystem.Render(camera);
             Framebuffer.EndTransparency();
 
             Framebuffer.BlitToScreen();

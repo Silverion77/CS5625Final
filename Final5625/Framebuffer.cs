@@ -16,6 +16,8 @@ namespace Chireiden
         static int height;
 
         static uint FboHandle; 
+        // depth buffer for each light
+        static uint[] ShadowDepthRenderbuffers = new uint[ShaderProgram.MAX_LIGHTS];
         static uint DepthRenderbuffer;
 
         // The first is the main renderbuffer, while the second is used for
@@ -115,15 +117,46 @@ namespace Chireiden
             generateFullscreenQuad();
         }
 
-        public static void StartShadowMaps()
+        public static void InitShadowMaps(int numLights, int shadowWidth, int shadowHeight)
         {
-            GL.Enable(EnableCap.TextureCubeMapSeamless);
-            GL.BindFra
+            // Create depth render buffers for each light
+            GL.GenTextures(numLights, ShadowDepthRenderbuffers);
+            for (int i = 0; i < numLights; i++) {
+                GL.BindTexture(TextureTarget.TextureCubeMap, ShadowDepthRenderbuffers[i]);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Nearest);
+
+                GL.TexImage2D(TextureTarget.TextureCubeMap, 0, PixelInternalFormat.DepthComponent24, shadowWidth, shadowHeight, 0,
+                              PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+                GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+            }
+
+            CheckFrameBufferStatus();
+
+        }
+        
+        public static void StartShadowMap(int lightIndex, int i, int shadowWidth, int shadowHeight)
+        {
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.TextureCubeMapPositiveX + i, ShadowDepthRenderbuffers[lightIndex], 0);
+            GL.Viewport(0, 0, shadowWidth, shadowHeight);
+
+            GL.ClearColor(0, 0, 0, 0);
+            GL.Clear(ClearBufferMask.DepthBufferBit);
+
+            CheckFrameBufferStatus();
+
         }
 
         public static void EndShadowMaps()
         {
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
+            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, DepthRenderbuffer);
 
+
+            GL.Viewport(0, 0, width, height);
         }
 
         /// <summary>

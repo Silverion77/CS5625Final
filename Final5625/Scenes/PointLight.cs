@@ -73,6 +73,17 @@ namespace Chireiden.Scenes
 
         public void setupCamera(Vector3 direction)
         {
+            Vector3 up = Vector3.UnitZ;
+
+            if (direction.Y >= 1.0)
+            {
+                up = Vector3.UnitY;
+            }
+            else if (direction.Y <= -1.0) 
+            {
+                up = -Vector3.UnitY;
+            }
+
             Matrix4 viewMatrix = Matrix4.LookAt(this.worldPosition, this.worldPosition + direction, Vector3.UnitZ);
             ((LightCamera)camera).update(this, viewMatrix);
         }
