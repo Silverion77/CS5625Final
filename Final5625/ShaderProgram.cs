@@ -298,6 +298,15 @@ namespace Chireiden
             GL.Uniform1(unifLoc, textureUnit);
         }
 
+        public void bindTextureRect(string name, int textureUnit, uint textureID)
+        {
+            TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
+            int unifLoc = uniformLocation(name);
+            GL.ActiveTexture(actualUnit);
+            GL.BindTexture(TextureTarget.TextureRectangle, textureID);
+            GL.Uniform1(unifLoc, textureUnit);
+        }
+
         public void unbindTextureRect(int textureUnit)
         {
             TextureUnit actualUnit = TextureUnit.Texture0 + textureUnit;
