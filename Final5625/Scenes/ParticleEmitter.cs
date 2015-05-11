@@ -10,15 +10,19 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Chireiden.Scenes
 {
-    public class ParticleEmitter: MobileObject
+    /// <summary>
+    /// A ParticleEmmitter spawns particles within the ellipsoid defined by transforming 
+    /// the unit sphere by the modelMatrix. 
+    /// </summary>
+    public abstract class ParticleEmitter: MobileObject
     {
         // The rate that particles are emitted in particles/frame
-        float rate;
+        protected float rate;
 
         // The (fractional) number of additional particles we weren't able to emit this frame
-        float excessParticles = 0;
+        protected float excessParticles = 0;
 
-        float scaleFactor = 1;
+        protected float scaleFactor = 1;
 
         public virtual float ParticleZVelocity
         {
@@ -28,7 +32,7 @@ namespace Chireiden.Scenes
             }
         }
 
-        Random rand = new Random();
+        protected Random rand = new Random();
 
         public ParticleEmitter(Vector3 position, float particlesPerSecond, float scale)
             : base(position)
@@ -41,11 +45,11 @@ namespace Chireiden.Scenes
         {
             rate = particlesPerSecond;
         }
-        private float randomAngle()
+        protected float randomAngle()
         {
             return (float)rand.NextDouble() * 2.0f * 3.1415926535f;
         }
-        private Vector3 randomVector()
+        protected Vector3 randomVector()
         {
             //See: http://math.stackexchange.com/a/44691
             float theta = randomAngle();
@@ -57,6 +61,7 @@ namespace Chireiden.Scenes
 
             return new Vector3(x, y, z);
         }
+        abstract protected ParticleSystem.Particle generateParticle();
 
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
@@ -66,22 +71,7 @@ namespace Chireiden.Scenes
             while (excessParticles >= 1.0f)
             {
                 excessParticles -= 1.0f;
-                ParticleSystem.Particle p = new ParticleSystem.Particle();
-
-                var r = randomVector() * scaleFactor;
-                var pos = Vector4.Transform(new Vector4(r.X, r.Y, r.Z, 1), toWorldMatrix);
-
-                p.position = new Vector3(pos.X / pos.W, pos.Y / pos.W, pos.Z / pos.W);
-                p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, ParticleZVelocity);
-                p.rotation = randomAngle();
-                p.angularVelocity = 0;
-                
-                p.gravity = 0.0f;
-                p.radius = 1.0f * (Math.Min(1, scaleFactor * 5));
-                p.life = 3.0f;
-                p.invTotalLife = 1.0f / p.life;
-                p.texture = 0;
-                ParticleSystem.SpawnParticle(p);
+                ParticleSystem.SpawnParticle(generateParticle());
             }
         }
 

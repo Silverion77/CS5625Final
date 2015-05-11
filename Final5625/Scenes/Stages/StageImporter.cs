@@ -124,7 +124,7 @@ namespace Chireiden.Scenes.Stages
             MeshNode goalFlagMesh = new MeshNode(MeshLibrary.GoalFlag, goalWorldPos);
             PointLight goalLight = new PointLight(new Vector3(0, -1f, 6), 2, 20, new Vector3(1, 1, 1));
             PointLight goalLight2 = new PointLight(new Vector3(0, 1f, 6), 2, 20, new Vector3(1, 1, 1));
-            ParticleEmitter pe = new ParticleEmitter(new Vector3(0, 0, 8), 100f);
+            ParticleEmitter pe = new FireEmitter(new Vector3(0, 0, 8), 100f);
 
             Vector3 armBegin = new Vector3(-0.96f, 0, 2.97f);
             Vector3 armEnd = new Vector3(-2.44f, 0, 1.96f);
@@ -136,7 +136,7 @@ namespace Chireiden.Scenes.Stages
             }
 
             PointLight light = new PointLight(armEnd + new Vector3(0, 0, 0.2f), 2, 20, new Vector3(1, 0.5f, 0.2f));
-            Scatterer emitter = new Scatterer(armEnd + new Vector3(0, 0, 0.2f), 100f, 0.1f);
+            FireScatterer emitter = new FireScatterer(armEnd + new Vector3(0, 0, 0.2f), 100f, 0.1f);
             okuu.addCannonAttachment(light);
             okuu.addCannonAttachment(emitter);
 

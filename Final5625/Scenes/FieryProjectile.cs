@@ -33,7 +33,7 @@ namespace Chireiden.Scenes
         protected virtual void setUpFireLights()
         {
             light = new PointLight(new Vector3(0, 0, 0), 20, 20, new Vector3(1, 0.48f, 0.2f));
-            fire = new ParticleEmitter(new Vector3(0, 0, 0), 150f);
+            fire = new FireEmitter(new Vector3(0, 0, 0), 150f);
             this.addChild(light);
             this.addChild(fire);
         }

@@ -87,7 +87,7 @@ namespace Chireiden.Scenes
         MorphState morphState = new MorphState(ShaderProgram.MAX_MORPHS);
 
         static Vector3 handLoc = new Vector3(-0.64f, -0.1f, 0.95f);
-        Scatterer fireHand = new Scatterer(handLoc, 100f, 0.025f);
+        FireScatterer fireHand = new FireScatterer(handLoc, 100f, 0.025f);
 
         public ZombieFairy(MeshContainer m, Vector3 loc) : base(m, loc)
         {

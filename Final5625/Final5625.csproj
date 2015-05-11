@@ -54,11 +54,13 @@
     <Compile Include="Materials\LambertianMaterial.cs" />
     <Compile Include="Materials\NullMaterial.cs" />
     <Compile Include="Meshes\Animations\BlendShape.cs" />
+    <Compile Include="Meshes\ArrayTexture.cs" />
     <Compile Include="Meshes\FloatArrayTexture.cs" />
     <Compile Include="Meshes\Vector4Texture.cs" />
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
     <Compile Include="Scenes\FieryProjectile.cs" />
+    <Compile Include="Scenes\FireEmitter.cs" />
     <Compile Include="Scenes\Scatterer.cs" />
     <Compile Include="Scenes\Stages\Stage.cs" />
     <Compile Include="Scenes\Stages\StageImporter.cs" />

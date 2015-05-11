@@ -26,12 +26,14 @@ namespace Chireiden
     ///    3 x float: Position
     ///    1 x float: Rotation
     ///    1 x float: Radius
+    ///    1 x float: Color Scale
+    ///    1 x float: Alpha Scale
     ///    1 x int16: Reaction Coordinate ("time") 
     ///    1 x int8: Texture Layer
-    ///    9 x int8: Padding
+    ///    1 x int8: Padding
     ///
     /// </summary>
-    class ParticleSystem
+    public class ParticleSystem
     {
         public class Particle
         {
@@ -42,6 +44,9 @@ namespace Chireiden
             public float angularVelocity;
 
             public float radius;
+
+            public float colorScale;
+            public float alphaScale;
 
             public float life;
             public float invTotalLife;
@@ -64,8 +69,8 @@ namespace Chireiden
 
         static LinkedList<Particle> particles = new LinkedList<Particle>();
 
-        static Texture reactionTexture;
-        static Texture particleTexture;
+        static ArrayTexture reactionTexture;
+        static ArrayTexture particleTexture;
 
         public static void Init()
         {
@@ -97,18 +102,24 @@ namespace Chireiden
             //radius
             GL.EnableVertexAttribArray(2);
             GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, PARTICLE_DATA_SIZE, 16);
-            //reaction coordinate
+            //color scale
             GL.EnableVertexAttribArray(3);
-            GL.VertexAttribPointer(3, 1, VertexAttribPointerType.UnsignedShort, true, PARTICLE_DATA_SIZE, 20);
-            //texture layer
+            GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, PARTICLE_DATA_SIZE, 20);
+            //alpha scale
             GL.EnableVertexAttribArray(4);
-            GL.VertexAttribPointer(4, 1, VertexAttribPointerType.UnsignedByte, false, PARTICLE_DATA_SIZE, 22);
+            GL.VertexAttribPointer(4, 1, VertexAttribPointerType.Float, false, PARTICLE_DATA_SIZE, 24);
+            //reaction coordinate
+            GL.EnableVertexAttribArray(5);
+            GL.VertexAttribPointer(5, 1, VertexAttribPointerType.UnsignedShort, true, PARTICLE_DATA_SIZE, 28);
+            //texture layer
+            GL.EnableVertexAttribArray(6);
+            GL.VertexAttribPointer(6, 1, VertexAttribPointerType.UnsignedByte, false, PARTICLE_DATA_SIZE, 30);
             GL.BindVertexArray(0);
 
             Fences[0] = Fences[1] = Fences[2] = IntPtr.Zero;
 
-            reactionTexture = new Texture("data/texture/particle/reaction.png");
-            particleTexture = new Texture("data/texture/particle/0.png");
+            reactionTexture = new ArrayTexture(256, 1, "data/texture/particle/reaction.png");
+            particleTexture = new ArrayTexture(128, 128, "data/texture/particle/0.png");
         }
 
         public static void SpawnParticle(Particle particle)
@@ -162,8 +173,10 @@ namespace Chireiden
                     *(float*)(ptr + 32 * i + 8) = p.position.Z;
                     *(float*)(ptr + 32 * i + 12) = p.rotation;
                     *(float*)(ptr + 32 * i + 16) = p.radius;
-                    *(ushort*)(ptr + 32 * i + 20) = (ushort)(1.0f - p.life * p.invTotalLife * ushort.MaxValue);
-                    *(byte*)(ptr + 32 * i + 22) = p.texture;
+                    *(float*)(ptr + 32 * i + 20) = p.colorScale;
+                    *(float*)(ptr + 32 * i + 24) = p.alphaScale;
+                    *(ushort*)(ptr + 32 * i + 28) = (ushort)(1.0f - p.life * p.invTotalLife * ushort.MaxValue);
+                    *(byte*)(ptr + 32 * i + 30) = p.texture;
                     i++;
                 }
             }
@@ -181,11 +194,11 @@ namespace Chireiden
             ShaderLibrary.ParticleShader.use();
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, reactionTexture.getTextureID());
+            GL.BindTexture(TextureTarget.Texture2DArray, reactionTexture.getTextureID());
             ShaderLibrary.ParticleShader.setUniformInt1("reaction", 0);
 
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, particleTexture.getTextureID());
+            GL.BindTexture(TextureTarget.Texture2DArray, particleTexture.getTextureID());
             ShaderLibrary.ParticleShader.setUniformInt1("tex", 1);
 
             ShaderLibrary.ParticleShader.setUniformMatrix4("viewProjectionMatrix", viewProjectionMatrix);

@@ -8,11 +8,17 @@ in VertexData{
 	float radius;
 	float angle;
 	int instanceID;
+	float colorScale;
+	float alphaScale;
+	flat int textureLayer;
 }vertexIn[1];
  
 out VertexData{
 	float reactionCoord;
 	vec2 texCoord;
+	float colorScale;
+	float alphaScale;
+	flat int textureLayer;
 }vertexOut;
 
 uniform vec3 up;
@@ -33,6 +39,9 @@ void main()
 		return;
 
 	vertexOut.reactionCoord = vertexIn[0].reactionCoord;
+	vertexOut.textureLayer = vertexIn[0].textureLayer;
+	vertexOut.colorScale = vertexIn[0].colorScale;
+	vertexOut.alphaScale = vertexIn[0].alphaScale;
 
 	float sAng = sin(vertexIn[0].angle);
 	float cAng = cos(vertexIn[0].angle);

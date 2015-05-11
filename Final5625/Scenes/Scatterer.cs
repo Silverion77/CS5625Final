@@ -5,7 +5,7 @@ using OpenTK;
 
 namespace Chireiden.Scenes
 {
-    public class Scatterer : ParticleEmitter
+    public class FireScatterer : FireEmitter
     {
 
         public override float ParticleZVelocity
@@ -16,12 +16,12 @@ namespace Chireiden.Scenes
             }
         }
         
-        public Scatterer(Vector3 position, float particlesPerSecond, float scale)
+        public FireScatterer(Vector3 position, float particlesPerSecond, float scale)
             : base(position, particlesPerSecond, scale)
         {
 
         }
 
-        public Scatterer(Vector3 position, float pps) : base(position, pps) { }
+        public FireScatterer(Vector3 position, float pps) : base(position, pps) { }
     }
 }
