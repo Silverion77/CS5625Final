@@ -6,7 +6,7 @@ layout(location = 2) in float radius;
 layout(location = 3) in float colorScale;
 layout(location = 4) in float alphaScale;
 layout(location = 5) in float reactionCoord;
-layout(location = 6) in int textureLayer;
+layout(location = 6) in float textureLayer;
 
 out VertexData{
 	float reactionCoord;
@@ -15,7 +15,7 @@ out VertexData{
 	int instanceID;
 	float colorScale;
 	float alphaScale;
-	flat int textureLayer;
+	float textureLayer;
 }vertexOut;
 
 void main(void)

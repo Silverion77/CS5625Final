@@ -34,7 +34,7 @@ namespace Chireiden.Scenes
             p.radius = 1.0f * (Math.Min(1, scaleFactor * 5));
             p.life = 3.0f;
             p.invTotalLife = 1.0f / p.life;
-            p.texture = 0;
+            p.texture = (byte)(rand.Next() % 4);
             p.colorScale = 1;
             p.alphaScale = 1;
 

@@ -10,7 +10,7 @@ in VertexData{
 	int instanceID;
 	float colorScale;
 	float alphaScale;
-	flat int textureLayer;
+	float textureLayer;
 }vertexIn[1];
  
 out VertexData{
@@ -18,7 +18,7 @@ out VertexData{
 	vec2 texCoord;
 	float colorScale;
 	float alphaScale;
-	flat int textureLayer;
+	float textureLayer;
 }vertexOut;
 
 uniform vec3 up;

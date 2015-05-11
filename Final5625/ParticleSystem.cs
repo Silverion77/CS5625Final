@@ -118,8 +118,22 @@ namespace Chireiden
 
             Fences[0] = Fences[1] = Fences[2] = IntPtr.Zero;
 
-            reactionTexture = new ArrayTexture(256, 1, "data/texture/particle/reaction.png");
-            particleTexture = new ArrayTexture(128, 128, "data/texture/particle/0.png");
+            reactionTexture = new ArrayTexture(256, 1, "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png");
+            particleTexture = new ArrayTexture(128, 128, "data/texture/particle/0.png",
+                "data/texture/particle/1.png",
+                "data/texture/particle/2.png",
+                "data/texture/particle/3.png",
+                "data/texture/particle/4.png",
+                "data/texture/particle/5.png",
+                "data/texture/particle/6.png",
+                "data/texture/particle/7.png");
         }
 
         public static void SpawnParticle(Particle particle)

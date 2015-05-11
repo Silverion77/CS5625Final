@@ -535,7 +535,7 @@ namespace Chireiden
         {
             using (GameMain example = new GameMain())
             {
-                example.Run(30);
+                example.Run(60);
             }
         }
     }

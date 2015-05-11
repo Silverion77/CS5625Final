@@ -10,7 +10,7 @@ in VertexData{
 	vec2 texCoord;
 	float colorScale;
 	float alphaScale;
-	flat int textureLayer;
+	float textureLayer;
 }vertexIn;
 
 void main()
