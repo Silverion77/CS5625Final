@@ -62,7 +62,7 @@ namespace Chireiden
 
         bool paused = false;
 
-        public const float RenderDistance = 100;
+        public const float RenderDistance = 500;
 
         // Temp used to retrieve new projectiles from Okuu
         FieryProjectile newProjectile = null;
