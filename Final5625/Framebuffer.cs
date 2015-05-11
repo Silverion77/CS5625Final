@@ -115,6 +115,17 @@ namespace Chireiden
             generateFullscreenQuad();
         }
 
+        public static void StartShadowMaps()
+        {
+            GL.Enable(EnableCap.TextureCubeMapSeamless);
+            GL.BindFra
+        }
+
+        public static void EndShadowMaps()
+        {
+
+        }
+
         /// <summary>
         /// Transparent particles are rendered using premultiplied alpha, which allows for additive blending.
         /// To properly compose them into the scene, it is necessary to render them to a seperate buffer
@@ -131,6 +142,7 @@ namespace Chireiden
 
             CheckFrameBufferStatus();
         }
+
         public static void EndTransparency()
         {
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);

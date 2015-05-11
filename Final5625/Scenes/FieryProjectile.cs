@@ -46,20 +46,23 @@ namespace Chireiden.Scenes
 
         public override void render(Camera camera)
         {
-            ShaderProgram program = ShaderLibrary.FireShader;
+            if (!(camera is LightCamera))
+            {
+                ShaderProgram program = ShaderLibrary.FireShader;
 
-            Matrix4 viewMatrix = camera.getViewMatrix();
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
-            Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
+                Matrix4 viewMatrix = camera.getViewMatrix();
+                Matrix4 projectionMatrix = camera.getProjectionMatrix();
+                Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
 
-            program.use();
-            program.setUniformFloat1("un_Time", time);
-            program.setUniformMatrix4("projectionMatrix", projectionMatrix);
-            program.setUniformMatrix4("modelViewMatrix", modelView);
-            sphere.renderMesh(camera, toWorldMatrix, program, 0);
-            program.unuse();
-            renderChildren(camera);
-            time += 0.001f;
+                program.use();
+                program.setUniformFloat1("un_Time", time);
+                program.setUniformMatrix4("projectionMatrix", projectionMatrix);
+                program.setUniformMatrix4("modelViewMatrix", modelView);
+                sphere.renderMesh(camera, toWorldMatrix, program, 0);
+                program.unuse();
+                renderChildren(camera);
+                time += 0.001f;
+            }
         }
 
         protected override void correctPosition(Vector3 origPos, Matrix4 parentToWorldMatrix)

@@ -24,6 +24,11 @@ namespace Chireiden.Scenes
         /// </summary>
         public Vector3 Color { get; set; }
 
+        /// <summary>
+        /// The brightness of the light.
+        /// </summary>
+        private Camera camera = new LightCamera((float)Math.PI/2, 1.0f, .1f, 100.0f);
+
         public PointLight()
             : base()
         {
@@ -59,6 +64,17 @@ namespace Chireiden.Scenes
         public override void render(Camera camera)
         {
             renderChildren(camera);
+        }
+
+        public Camera getCamera()
+        {
+            return camera;
+        }
+
+        public void setupCamera(Vector3 direction)
+        {
+            Matrix4 viewMatrix = Matrix4.LookAt(this.worldPosition, this.worldPosition + direction, Vector3.UnitZ);
+            ((LightCamera)camera).update(this, viewMatrix);
         }
     }
 }

@@ -59,6 +59,7 @@
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
     <Compile Include="Scenes\FieryProjectile.cs" />
+    <Compile Include="Scenes\LightCamera.cs" />
     <Compile Include="Scenes\Scatterer.cs" />
     <Compile Include="Scenes\Stages\Stage.cs" />
     <Compile Include="Scenes\Stages\StageImporter.cs" />
@@ -446,6 +447,9 @@
     <None Include="shaders\fireShader.vert">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="shaders\shadowmap.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="data\model\textCube\kuukrow.jpg">

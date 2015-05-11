@@ -21,6 +21,7 @@ namespace Chireiden
         public static ShaderProgram TextShader;
         public static ShaderProgram LambertianShader;
         public static ShaderProgram FireShader;
+        public static ShaderProgram ShadowMapShader;
 
         public static void loadShaders() {
             CubeShader = new ShaderProgram("data/Simple_VS.vert", "data/Simple_FS.frag");
@@ -36,6 +37,7 @@ namespace Chireiden
             TextShader = new ShaderProgram("shaders/on_screen_quad.vert", "shaders/fsq.frag");
             LambertianShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/lambertian.frag");
             FireShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/fireShader.frag");
+            ShadowMapShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/shadowmap.frag");
         }
     }
 }

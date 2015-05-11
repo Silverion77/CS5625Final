@@ -59,6 +59,7 @@ namespace Chireiden.Meshes
         protected int eboHandle;
 
         protected int vaoHandle;
+        public bool castsShadows = false;
 
         /// <summary>
         /// Construct a TriMesh. The boolean flag is there because, if some subclasses have additional

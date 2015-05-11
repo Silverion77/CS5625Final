@@ -48,26 +48,29 @@ namespace Chireiden.Scenes
 
         public override void render(Camera camera)
         {
-            ShaderProgram program = ShaderLibrary.POMShader;
+            if (!(camera is LightCamera))
+            {
+                ShaderProgram program = ShaderLibrary.POMShader;
 
-            Matrix4 viewMatrix = camera.getViewMatrix();
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
-            Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
-            Matrix3 normalMatrix = Utils.normalMatrix(modelView);
+                Matrix4 viewMatrix = camera.getViewMatrix();
+                Matrix4 projectionMatrix = camera.getProjectionMatrix();
+                Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
+                Matrix3 normalMatrix = Utils.normalMatrix(modelView);
 
-            program.use();
-            // set shader uniforms
-            program.setUniformMatrix4("modelMatrix", toWorldMatrix);
-            program.setUniformMatrix4("viewMatrix", viewMatrix);
-            program.setUniformMatrix4("modelViewMatrix", modelView);
-            program.setUniformMatrix4("inverseViewMatrix", viewMatrix.Inverted());
-            program.setUniformMatrix4("projectionMatrix", projectionMatrix);
-            program.setUniformMatrix3("normalMatrix", normalMatrix);
-            program.setUniformFloat3("camera_position", camera.getWorldSpacePos());
-            camera.setPointLightUniforms(program);
-            square.renderMesh(camera, toWorldMatrix, program, 0);
-            program.unuse();
-            renderChildren(camera);
+                program.use();
+                // set shader uniforms
+                program.setUniformMatrix4("modelMatrix", toWorldMatrix);
+                program.setUniformMatrix4("viewMatrix", viewMatrix);
+                program.setUniformMatrix4("modelViewMatrix", modelView);
+                program.setUniformMatrix4("inverseViewMatrix", viewMatrix.Inverted());
+                program.setUniformMatrix4("projectionMatrix", projectionMatrix);
+                program.setUniformMatrix3("normalMatrix", normalMatrix);
+                program.setUniformFloat3("camera_position", camera.getWorldSpacePos());
+                camera.setPointLightUniforms(program);
+                square.renderMesh(camera, toWorldMatrix, program, 0);
+                program.unuse();
+                renderChildren(camera);
+            }
         }
     }
 }

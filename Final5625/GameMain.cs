@@ -365,10 +365,24 @@ namespace Chireiden
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-            world.render(camera);
+            Framebuffer.StartShadowMaps();
+            foreach (PointLight light in world.getPointLights())
+            {
+                Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
+                                                 new Vector3(0,1,0), new Vector3(0,-1,0),
+                                                 new Vector3(0,0,1), new Vector3(0,0,-1)};
+                foreach (Vector3 dir in dirs)
+                {
+                    light.setupCamera(dir);
+                    world.render(light.getCamera());
+                }
+            }
+            Framebuffer.EndShadowMaps();
+
+            //world.render(camera);
 
             Framebuffer.StartTransparency();
-            ParticleSystem.Render(camera);
+            //ParticleSystem.Render(camera);
             Framebuffer.EndTransparency();
 
             Framebuffer.BlitToScreen();

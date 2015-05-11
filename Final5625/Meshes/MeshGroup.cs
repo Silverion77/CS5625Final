@@ -17,6 +17,7 @@ namespace Chireiden.Meshes
     public class MeshGroup : MeshContainer
     {
         List<TriMesh> meshes;
+        bool castsShadows = true;
 
         public MeshGroup()
         {
@@ -31,30 +32,66 @@ namespace Chireiden.Meshes
 
         public void renderMeshes(Camera camera, Matrix4 toWorldMatrix)
         {
-            ShaderProgram program = ShaderLibrary.BlenderShader;
+            if (camera is Chireiden.Scenes.LightCamera)
+            {
+                if (castsShadows)
+                {
+                    ShaderProgram program = ShaderLibrary.ShadowMapShader;
+                    Matrix4 viewMatrix = camera.getViewMatrix();
+                    Matrix4 projectionMatrix = camera.getProjectionMatrix();
 
-            Matrix4 viewMatrix = camera.getViewMatrix();
-            Matrix4 projectionMatrix = camera.getProjectionMatrix();
+                    // Compute transformation matrices
+                    Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
+                    Matrix3 normalMatrix = Utils.normalMatrix(modelView);
 
-            // Compute transformation matrices
-            Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
-            Matrix3 normalMatrix = Utils.normalMatrix(modelView);
+                    program.use();
 
-            program.use();
+                    // set shader uniforms, incl. modelview and projection matrices
+                    program.setUniformMatrix4("projectionMatrix", projectionMatrix);
+                    program.setUniformMatrix4("modelViewMatrix", modelView);
+                    program.setUniformMatrix4("viewMatrix", viewMatrix);
+                    program.setUniformMatrix3("normalMatrix", normalMatrix);
 
-            // set shader uniforms, incl. modelview and projection matrices
-            program.setUniformMatrix4("projectionMatrix", projectionMatrix);
-            program.setUniformMatrix4("modelViewMatrix", modelView);
-            program.setUniformMatrix4("viewMatrix", viewMatrix);
-            program.setUniformMatrix3("normalMatrix", normalMatrix);
+                    program.setUniformInt1("shadowMapWidth", 1024);
+                    program.setUniformInt1("shadowMapHeight", 1024);
 
-            camera.setPointLightUniforms(program);
-
-            foreach (TriMesh m in meshes) {
-                m.renderMesh(camera, toWorldMatrix, program, 0);
+                    foreach (TriMesh m in meshes)
+                    {
+                        m.renderMesh(camera, toWorldMatrix, program, 0);
+                    }
+                    program.unuse();
+                }
             }
 
-            program.unuse();
+            else
+            {
+                ShaderProgram program = ShaderLibrary.BlenderShader;
+
+                Matrix4 viewMatrix = camera.getViewMatrix();
+                Matrix4 projectionMatrix = camera.getProjectionMatrix();
+
+                // Compute transformation matrices
+                Matrix4 modelView = Matrix4.Mult(toWorldMatrix, viewMatrix);
+                Matrix3 normalMatrix = Utils.normalMatrix(modelView);
+
+                program.use();
+
+                // set shader uniforms, incl. modelview and projection matrices
+                program.setUniformMatrix4("projectionMatrix", projectionMatrix);
+                program.setUniformMatrix4("modelViewMatrix", modelView);
+                program.setUniformMatrix4("viewMatrix", viewMatrix);
+                program.setUniformMatrix3("normalMatrix", normalMatrix);
+
+                camera.setPointLightUniforms(program);
+
+                foreach (TriMesh m in meshes)
+                {
+                    m.renderMesh(camera, toWorldMatrix, program, 0);
+                }
+                program.unuse();
+            }
+
+            
         }
 
         public void renderMeshes(Camera c, Matrix4 m, Clip clip, double time)
