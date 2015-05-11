@@ -20,7 +20,7 @@ namespace Chireiden.Scenes
 
         protected override void setUpFireLights()
         {
-            light = new PointLight(new Vector3(0, 0, 0), 10, 20, new Vector3(0.2f, 0.48f, 1f));
+            light = new PointLight(new Vector3(0, 0, 0), 2, 10, new Vector3(0.2f, 0.48f, 1f));
             fire = new ParticleEmitter(new Vector3(0, 0, 0), 150f, 0.5f);
             this.addChild(light);
             this.addChild(fire);
@@ -41,7 +41,6 @@ namespace Chireiden.Scenes
             float dist = (collisionPos.Xy - worldPosition.Xy).Length;
             if (dist <= distRequired && worldPosition.Z > 0 && worldPosition.Z < UtsuhoReiuji.hitCylinderHeight)
             {
-                Console.WriteLine("Hit Okuu");
                 collided = true;
             }
         }

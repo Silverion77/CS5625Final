@@ -32,16 +32,18 @@ namespace Chireiden.Scenes
 
         protected virtual void setUpFireLights()
         {
-            light = new PointLight(new Vector3(0, 0, 0), 20, 20, new Vector3(1, 0.48f, 0.2f));
+            light = new PointLight(new Vector3(0, 0, 0), 2, 10, new Vector3(1, 0.48f, 0.2f));
             fire = new ParticleEmitter(new Vector3(0, 0, 0), 150f);
             this.addChild(light);
             this.addChild(fire);
         }
 
+        Vector3 explodePos;
+
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
             base.update(e, parentToWorldMatrix);
-            if (worldPosition.Z > 40) collided = true;
+            if (worldPosition.Z > 40 || worldPosition.Z < 0) collided = true;
         }
 
         public override void render(Camera camera)
@@ -75,11 +77,17 @@ namespace Chireiden.Scenes
                     worldSpaceCorrected = stage.computeCollisionTime(origPos, worldPosition);
                     // Add the correction -- overcorrect slightly
                     correction = 1.01f * (worldSpaceCorrected - worldPosition);
+                    explodePos = 1.02f * worldSpaceCorrected - 0.02f * worldPosition;
                     translation = translation + correction;
                     collided = true;
                 }
                 // Don't do the wall repelling
             }
+        }
+
+        public Vector3 explosionPos()
+        {
+            return explodePos;
         }
 
         public virtual void checkTargetHits(List<ZombieFairy> zombies)
