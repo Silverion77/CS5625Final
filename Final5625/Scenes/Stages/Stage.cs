@@ -20,6 +20,8 @@ namespace Chireiden.Scenes.Stages
 
         List<StageTilesNode> stageElements;
 
+        Vector2 goalPosition;
+
         public Stage(int[,] tiles, int tileSideLength, int wallHeight)
         {
             this.tiles = tiles;
@@ -48,8 +50,17 @@ namespace Chireiden.Scenes.Stages
             stageElements = new List<StageTilesNode>();
             setUpStage(tiles, tileSideLength, wallHeight);
 
+            goalPosition = data.GoalPosition + new Vector2(0.5f, 0.5f);
+
             toWorldMatrix = Matrix4.Identity;
             toParentMatrix = Matrix4.Identity;
+        }
+
+        public bool atGoal(Vector3 okuuPos)
+        {
+            Vector2 mapCoords = new Vector2(okuuPos.X / tileSideLength, okuuPos.Y / tileSideLength);
+            Vector2 diff = mapCoords - goalPosition;
+            return (diff.Length <= 0.2);
         }
 
         static StageTilesNode stageMaterialOfID(int id, MaterialTileCollection matTiles)

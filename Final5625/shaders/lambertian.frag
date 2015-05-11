@@ -132,7 +132,7 @@ void main()
 		float d2 = light_falloffDistance[i] * light_falloffDistance[i];
 		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
 
-		float dotProd = max(dot(n,l), 0);
+		float dotProd = max(dot(n,l), 0.5);
 		
 		factor = 1.0; //getShadowFactor(i, geom_position);
 		result.xyz += factor * diffuse.xyz * dotProd * light_color[i] * intensity;

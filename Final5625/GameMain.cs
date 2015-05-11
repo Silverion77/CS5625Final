@@ -62,10 +62,17 @@ namespace Chireiden
 
         bool paused = false;
 
-        public const float RenderDistance = 100;
+        public const float RenderDistance = 500;
 
         // Temp used to retrieve new projectiles from Okuu
         FieryProjectile newProjectile = null;
+
+        TextRenderer okuuHPText;
+        TextRenderer fairyHPText;
+        TextRenderer winText;
+        TextRenderer loseText;
+
+        bool gameCleared = false;
 
         public GameMain()
             : base(1600, 900,
@@ -80,6 +87,8 @@ namespace Chireiden
         public static int ScreenWidth { get; set; }
         public static int ScreenHeight { get; set; }
 
+        string levelFile = "data/stage/testlevel";
+
         protected override void OnLoad(System.EventArgs e)
         {
             VSync = VSyncMode.Off;
@@ -91,13 +100,7 @@ namespace Chireiden
 
             // Other state
             GL.Enable(EnableCap.DepthTest);
-
-            // Make the world
-            world = new World();
-
-            ScreenWidth = ClientSize.Width;
-            ScreenHeight = ClientSize.Height;
-            aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
+            WindowBorder = WindowBorder.Fixed;
 
             /*
             MeshNode happyNode = new MeshNode(MeshLibrary.HappySphere, new Vector3(0, 0, 5));
@@ -115,7 +118,9 @@ namespace Chireiden
             var light = new PointLight(new Vector3(0.5f, 1f, 4), 2, 5, new Vector3(1, 1, 1));
             world.addPointLight(light); */
 
-            loadStage("data/stage/testlevel");
+            setUpScreen();
+
+            loadStage(levelFile);
 
             previous = OpenTK.Input.Mouse.GetState();
             stopwatch = new Stopwatch();
@@ -124,8 +129,42 @@ namespace Chireiden
 
         }
 
+        bool firstTime = true;
+
+        void setUpScreen()
+        {
+            ScreenWidth = ClientSize.Width;
+            ScreenHeight = ClientSize.Height;
+            aspectRatio = ClientSize.Width / (float)(ClientSize.Height);
+
+            okuuHPText = new TextRenderer(400, 40, ClientSize.Width, ClientSize.Height);
+            fairyHPText = new TextRenderer(400, 40, ClientSize.Width, ClientSize.Height);
+            winText = new TextRenderer(600, 300, ClientSize.Width, ClientSize.Height);
+            winText.DrawString("You win!", new Font(FontFamily.GenericSansSerif, 72), Brushes.White, PointF.Empty);
+            loseText = new TextRenderer(600, 300, ClientSize.Width, ClientSize.Height);
+            loseText.DrawString("Press Ctrl-R to try again", new Font(FontFamily.GenericSansSerif, 36), Brushes.White, PointF.Empty);
+
+            Framebuffer.Init(ClientSize.Width, ClientSize.Height);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            if (firstTime)
+            {
+                firstTime = false;
+                return;
+            }
+            setUpScreen();
+            Console.WriteLine("width = {0}, height = {1}", ClientSize.Width, ClientSize.Height);
+            TrackingCamera replacement = new TrackingCamera(okuu, (float)Math.PI / 4, aspectRatio, 0.1f, RenderDistance);
+            replacement.setStage(stage);
+            replacement.copyRotation(camera);
+            camera = replacement;
+        }
+
         void loadStage(string stageFile)
         {
+            gameCleared = false;
             StageData stageData = StageImporter.importStageFromFile(stageFile);
             world = StageImporter.makeStageWorld(stageData, out stage, out okuu, out zombies);
 
@@ -147,11 +186,36 @@ namespace Chireiden
                     break;
             }
         }
+
+        bool fullScreen = false;
         
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             switch (e.Key)
             {
+                case Key.Enter:
+                    if (e.Keyboard.IsKeyDown(Key.AltRight))
+                    {
+                        if (!fullScreen)
+                        {
+                            WindowBorder = WindowBorder.Hidden;
+                            WindowState = WindowState.Fullscreen;
+                            fullScreen = true;
+                        }
+                        else
+                        {
+                            WindowBorder = WindowBorder.Fixed;
+                            WindowState = WindowState.Normal;
+                            fullScreen = false;
+                        }
+                    }
+                    break;
+                case Key.R:
+                    if (e.Keyboard.IsKeyDown(Key.ControlLeft) || e.Keyboard.IsKeyDown(Key.ControlRight))
+                    {
+                        loadStage(levelFile);
+                    }
+                    break;
                 case Key.F:
                     camera.toggleCameraFrozen();
                     break;
@@ -164,7 +228,7 @@ namespace Chireiden
                 case Key.Tab:
                     okuu.inputBackstep();
                     break;
-                case Key.R:
+                case Key.E:
                     okuu.toggleReadyIdle();
                     break;
                 case Key.T:
@@ -256,14 +320,13 @@ namespace Chireiden
                 fairy.updateOkuuLocation(okuu.worldPosition);
             }
 
-            okuu.checkAttackHit(zombies);
+            ZombieFairy damaged = okuu.checkAttackHit(zombies);
+            if (damaged != null) lastDamaged = damaged;
 
             foreach (ZombieFairy fairy in zombies)
             {
                 fairy.checkAttackHit(okuu);
             }
-
-            // TODO: handle enemy movement here, once enemies are implemented
 
             // Update then adds velocity to position, and also updates modeling transformations.
             world.update(e);
@@ -282,12 +345,31 @@ namespace Chireiden
             handleOkuuProjectiles(e);
             handleZombieProjectiles(e);
 
+            handleExplosions();
+
             if (okuu.getProjectile(out newProjectile))
             {
                 newProjectile.setStage(stage);
                 world.addChild(newProjectile);
                 world.registerPointLight(newProjectile.light);
                 okuuProjectiles.Add(newProjectile);
+            }
+
+            LightExplosion backstepExplode;
+            if (okuu.getExplosion(out backstepExplode))
+            {
+                backstepExplode.addToWorld(world);
+                explosions.Add(backstepExplode);
+
+                foreach (ZombieFairy fairy in zombies)
+                {
+                    float dist = (fairy.worldPosition - backstepExplode.Location).Length;
+                    if (dist < explosionDamageRadius)
+                    {
+                        fairy.registerHit(OkuuAttackType.Explosion);
+                        lastDamaged = fairy;
+                    }
+                }
             }
 
             foreach (ZombieFairy fairy in zombies)
@@ -302,6 +384,15 @@ namespace Chireiden
                 }
             }
 
+            if (stage.atGoal(okuu.worldPosition) && !gameCleared)
+            {
+                okuu.winGame();
+                foreach (ZombieFairy fairy in zombies) {
+                    fairy.endGame();
+                }
+                gameCleared = true;
+            }
+
             ParticleSystem.Update(e);
 
             // TODO: probably game logic goes here, e.g. hit detection, damage calculations
@@ -309,6 +400,10 @@ namespace Chireiden
         }
 
         List<FieryProjectile> goneProjs = new List<FieryProjectile>();
+        List<LightExplosion> explosions = new List<LightExplosion>();
+        List<LightExplosion> endedExplosions = new List<LightExplosion>();
+
+        float explosionDamageRadius = 5;
 
         void handleOkuuProjectiles(FrameEventArgs e)
         {
@@ -323,11 +418,22 @@ namespace Chireiden
 
             foreach (FieryProjectile projectile in goneProjs)
             {
-                Console.WriteLine("TODO: Explode");
                 okuuProjectiles.Remove(projectile);
                 world.removeChild(projectile);
                 world.unregisterPointLight(projectile.light);
-                // TODO: create an explosion
+                Vector3 explodeLoc = projectile.worldPosition;
+                LightExplosion explode = new LightExplosion(explodeLoc, new Vector3(1, 0.5f, 0.2f), 2, 10000f, 5);
+                explode.addToWorld(world);
+                explosions.Add(explode);
+
+                foreach (ZombieFairy fairy in zombies) {
+                    float dist = (fairy.worldPosition - explodeLoc).Length;
+                    if (dist < explosionDamageRadius)
+                    {
+                        fairy.registerHit(OkuuAttackType.Explosion);
+                        lastDamaged = fairy;
+                    }
+                }
             }
             goneProjs.Clear();
         }
@@ -345,14 +451,39 @@ namespace Chireiden
 
             foreach (ZombieProjectile projectile in goneProjs)
             {
-                Console.WriteLine("TODO: Explode");
                 zombieProjectiles.Remove(projectile);
                 world.removeChild(projectile);
                 world.unregisterPointLight(projectile.light);
-                // TODO: create an explosion
+                Vector3 explodeLoc = projectile.worldPosition;
+                LightExplosion explode = new LightExplosion(explodeLoc, new Vector3(0.2f, 0.5f, 1f), 2, 500f, 4);
+                explode.addToWorld(world);
+                explosions.Add(explode);
+
+                float dist = (okuu.worldPosition - explodeLoc).Length;
+                if (dist < explosionDamageRadius)
+                    okuu.getHurt(10);
             }
             goneProjs.Clear();
         }
+
+        void handleExplosions()
+        {
+            foreach (LightExplosion explode in explosions)
+            {
+                if (explode.isOver())
+                    endedExplosions.Add(explode);
+            }
+            foreach (LightExplosion ended in endedExplosions)
+            {
+                ended.removeFromWorld(world);
+                explosions.Remove(ended);
+            }
+            endedExplosions.Clear();
+        }
+
+        Font font = new Font(FontFamily.GenericSansSerif, 24);
+
+        ZombieFairy lastDamaged = null;
 
         float renderTime = 0;
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -391,6 +522,26 @@ namespace Chireiden
             ParticleSystem.Render(camera);
             Framebuffer.EndTransparency();
 
+            string okuuHPstring = "Okuu's HP: " + okuu.HitPoints + " / 100";
+            okuuHPText.DrawString(okuuHPstring, font, Brushes.White, PointF.Empty);
+            okuuHPText.drawTextAtLoc(10, 10);
+
+            if (lastDamaged != null)
+            {
+                string fairyHPstring = "Zombie fairy's HP: " + lastDamaged.HitPoints + " / 10";
+                fairyHPText.DrawString(fairyHPstring, font, Brushes.White, PointF.Empty);
+                fairyHPText.drawTextAtLoc(ScreenWidth - 400, ScreenHeight - 50);
+            }
+
+            if (gameCleared)
+            {
+                winText.drawTextAtLoc(ScreenWidth / 2 - 200, ScreenHeight / 2 - 36);
+            }
+            else if (okuu.isKOed())
+            {
+                loseText.drawTextAtLoc(ScreenWidth / 2 - 270, ScreenHeight / 2 - 18);
+            }
+
             Framebuffer.BlitToScreen();
 
             SwapBuffers();
@@ -404,7 +555,7 @@ namespace Chireiden
         {
             using (GameMain example = new GameMain())
             {
-                example.Run(30);
+                example.Run(60);
             }
         }
     }

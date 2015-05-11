@@ -39,6 +39,18 @@ namespace Chireiden.Scenes
     public class ZombieFairy : SkeletalMeshNode
     {
 
+        public static int DamageFromAttack(OkuuAttackType type)
+        {
+            switch (type)
+            {
+                case OkuuAttackType.Attack1: return 1;
+                case OkuuAttackType.Attack2: return 2;
+                case OkuuAttackType.Attack3: return 4;
+                case OkuuAttackType.Explosion: return 4;
+                default: return 0;
+            }
+        }
+
         public const float hitCylinderRadius = 1f;
         public const float hitCylinderHeight = 4;
 
@@ -62,8 +74,8 @@ namespace Chireiden.Scenes
         double moveDistanceGoal = 0.5;
         double wanderDistance = 5;
 
-        const float visionDistance = 20;
-        const float leashDistance = 50;
+        const float visionDistance = 50;
+        const float leashDistance = 100;
 
         const float moveSpeed = 3f;
         const float staggerSpeed = -1.5f;
@@ -71,23 +83,26 @@ namespace Chireiden.Scenes
 
         double staggerTime = 0;
 
-        const float projectileDistance = 10;
-        const float meleeMoveDistance = 5;
-        const float meleeDistance = 2;
+        const float projectileDistance = 40;
+        const float meleeMoveDistance = 10;
+        const float meleeDistance = 3;
 
         const double shootTime = 85.0 / 24;
 
         double koTime = 0;
 
-        int hitStage;
-        int hitPoints = 10;
+        OkuuAttackType lastHitBy;
+        public int HitPoints { get; set; }
 
         Matrix4 palmRMatrix;
 
         MorphState morphState = new MorphState(ShaderProgram.MAX_MORPHS);
 
         static Vector3 handLoc = new Vector3(-0.64f, -0.1f, 0.95f);
-        Scatterer fireHand = new Scatterer(handLoc, 100f, 0.025f);
+
+        FireScatterer fireHand = new FireScatterer(handLoc, 10f, 0.025f);
+
+        bool gameOver = false;
 
         public ZombieFairy(MeshContainer m, Vector3 loc) : base(m, loc)
         {
@@ -102,6 +117,7 @@ namespace Chireiden.Scenes
             velocityDir = Utils.FORWARD;
             targetRotation = Quaternion.Identity;
             leashLocation = loc;
+            HitPoints = 10;
         }
 
         public ZombieFairy(Vector3 loc) : this(MeshLibrary.ZombieFairy, loc)
@@ -166,6 +182,11 @@ namespace Chireiden.Scenes
             }
             projectile = null;
             return false;
+        }
+
+        public void endGame()
+        {
+            gameOver = true;
         }
 
         void beHurt()
@@ -265,6 +286,11 @@ namespace Chireiden.Scenes
         /// <param name="parentToWorldMatrix"></param>
         public override void update(FrameEventArgs e, Matrix4 parentToWorldMatrix)
         {
+            if (gameOver)
+            {
+                advanceStateIdle(e.Time);
+                return;
+            }
             if (distFromOkuu > GameMain.RenderDistance) return;
 
             if (zombieState == ZombieState.KO)
@@ -280,7 +306,7 @@ namespace Chireiden.Scenes
             else if (wasHurt)
             {
                 wasHurt = false;
-                if (hitPoints <= 0)
+                if (HitPoints <= 0)
                     knockedOut();
                 else if (zombieState != ZombieState.KO)
                     beHurt();
@@ -408,7 +434,7 @@ namespace Chireiden.Scenes
                     if (animationEnded)
                     {
                         staggerTime = staggerExtraDelay;
-                        hitStage = 0;
+                        lastHitBy = OkuuAttackType.Nothing;
                         idle();
                         return true;
                     }
@@ -478,18 +504,19 @@ namespace Chireiden.Scenes
             }
         }
 
-        public void registerHit(int stage)
+        public void registerHit(OkuuAttackType type)
         {
             Console.WriteLine("Fairy was hurt");
             awareOfOkuu = true;
             wasHurt = true;
-            hitPoints -= stage;
-            hitStage = stage;
+            HitPoints -= DamageFromAttack(type);
+            HitPoints = Math.Max(HitPoints, 0);
+            lastHitBy = type;
         }
 
-        public int lastHitStage()
+        public OkuuAttackType lastHit()
         {
-            return hitStage;
+            return lastHitBy;
         }
 
         const double startAttackTime = 37.0 / 24;
@@ -512,7 +539,7 @@ namespace Chireiden.Scenes
                 hit = true;
             }
             if (hit)
-                okuu.getHurt(3);
+                okuu.getHurt(6);
         }
     }
 }

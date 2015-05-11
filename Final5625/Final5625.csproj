@@ -54,12 +54,16 @@
     <Compile Include="Materials\LambertianMaterial.cs" />
     <Compile Include="Materials\NullMaterial.cs" />
     <Compile Include="Meshes\Animations\BlendShape.cs" />
+    <Compile Include="Meshes\ArrayTexture.cs" />
     <Compile Include="Meshes\FloatArrayTexture.cs" />
     <Compile Include="Meshes\Vector4Texture.cs" />
     <Compile Include="Meshes\MeshImporter_BlendShapes.cs" />
     <Compile Include="MeshLibrary.cs" />
+    <Compile Include="Scenes\ExplosionEmitter.cs" />
     <Compile Include="Scenes\FieryProjectile.cs" />
     <Compile Include="Scenes\LightCamera.cs" />
+    <Compile Include="Scenes\FireEmitter.cs" />
+    <Compile Include="Scenes\LightExplosion.cs" />
     <Compile Include="Scenes\Scatterer.cs" />
     <Compile Include="Scenes\Stages\Stage.cs" />
     <Compile Include="Scenes\Stages\StageImporter.cs" />
@@ -356,6 +360,27 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\texture\particle\0.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\5.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\6.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\texture\particle\7.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\texture\particle\genReaction.py" />

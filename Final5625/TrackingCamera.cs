@@ -167,6 +167,12 @@ namespace Chireiden
             program.setUniformVec3Array("light_color", light_color);
         }
 
+        public void copyRotation(TrackingCamera other)
+        {
+            this.pitch = other.pitch;
+            this.yaw = other.yaw;
+        }
+
         /// <summary>
         /// Toggles mouselook rotation of the camera on and off. If off, the camera will
         /// remain in its current offset, but will continue to track with the target object.
