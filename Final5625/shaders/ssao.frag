@@ -8,7 +8,6 @@
  */
  
 #version 140
-#extension GL_ARB_texture_rectangle : enable
 
 const float PI = 3.14159265358979323846264;
  
@@ -87,9 +86,9 @@ void main() {
 	   	float tot = 0;
 	    for (int i = 0; i < numSamples; i++) {  
 		    vec2 hsample = hammersley2d(uint(i), uint(numSamples));
-		    vec3 sample = poissonSamples[2*i]* uniform_sample(hsample.x, hsample.y);
+		    vec3 samplePos = poissonSamples[2*i]* uniform_sample(hsample.x, hsample.y);
 		    
-		    vec3 s = tbn * sample;
+		    vec3 s = tbn * samplePos;
 		    s = s * ssao_radius + position;
 		    vec3 omega = normalize(s - position);
 		   
@@ -116,5 +115,5 @@ void main() {
 		    contribution = contribution / tot;
 	    }
 		      
-    	FragColor = vec4(vec3(contribution), 1.0);  
+    	FragColor = vec4(vec3(contribution), 1.0);
 }
