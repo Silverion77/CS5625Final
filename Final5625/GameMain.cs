@@ -505,7 +505,7 @@ namespace Chireiden
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             // render shadow cube maps for each light
-            /*
+            
             for (int j = 0; j < world.getPointLights().Count; j++)
             {
                 Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
@@ -519,7 +519,7 @@ namespace Chireiden
                 }
             }
             Framebuffer.EndShadowMaps();
-            */
+            
               
             world.render(camera);
 

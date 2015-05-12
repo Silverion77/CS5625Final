@@ -18,7 +18,8 @@ namespace Chireiden
 
         static uint FboHandle; 
         // depth buffer for each light
-        static uint[] ShadowDepthRenderbuffers = new uint[ShaderProgram.MAX_LIGHTS];
+        static uint[] ShadowRenderbuffers = new uint[ShaderProgram.MAX_LIGHTS];
+        static uint ShadowDepthRenderbuffer;
         static uint DepthRenderbuffer;
 
         // for SSAO and similar
@@ -150,18 +151,35 @@ namespace Chireiden
 
         public static void InitShadowMaps(int numLights, int shadowWidth, int shadowHeight)
         {
+            // Create Depth Renderbuffer
+            GL.GenRenderbuffers(1, out ShadowDepthRenderbuffer);
+            GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, ShadowDepthRenderbuffer);
+            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.DepthComponent32, shadowWidth, shadowHeight);
+
             // Create depth render buffers for each light
-            GL.GenTextures(numLights, ShadowDepthRenderbuffers);
+            GL.GenTextures(numLights, ShadowRenderbuffers);
             for (int i = 0; i < numLights; i++) {
-                GL.BindTexture(TextureTarget.TextureCubeMap, ShadowDepthRenderbuffers[i]);
+                GL.BindTexture(TextureTarget.TextureCubeMap, ShadowRenderbuffers[i]);
                 GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
                 GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
                 GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
                 GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
                 GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMinFilter.Nearest);
 
-                GL.TexImage2D(TextureTarget.TextureCubeMap, 0, PixelInternalFormat.DepthComponent24, shadowWidth, shadowHeight, 0,
-                              PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveX, 0, PixelInternalFormat.Rgba16f, shadowWidth, shadowHeight, 0,
+                              PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveY, 0, PixelInternalFormat.Rgba16f, shadowWidth, shadowHeight, 0,
+                              PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapPositiveZ, 0, PixelInternalFormat.Rgba16f, shadowWidth, shadowHeight, 0,
+                              PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapNegativeX, 0, PixelInternalFormat.Rgba16f, shadowWidth, shadowHeight, 0,
+                              PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapNegativeY, 0, PixelInternalFormat.Rgba16f, shadowWidth, shadowHeight, 0,
+                              PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.TextureCubeMapNegativeZ, 0, PixelInternalFormat.Rgba16f, shadowWidth, shadowHeight, 0,
+                              PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+
+                GL.GenerateMipmap(GenerateMipmapTarget.TextureCubeMap);
                 GL.BindTexture(TextureTarget.TextureCubeMap, 0);
             }
 
@@ -171,7 +189,18 @@ namespace Chireiden
         
         public static void StartShadowMap(int lightIndex, int i, int shadowWidth, int shadowHeight)
         {
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.TextureCubeMapPositiveX + i, ShadowDepthRenderbuffers[lightIndex], 0);
+            DrawBuffersEnum[] buffers = new[]
+				{
+					(DrawBuffersEnum)FramebufferAttachment.ColorAttachment0
+				};
+            GL.DrawBuffers(buffers.Length, buffers);
+
+            //GL.ColorMask(false, false, false, false);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.TextureCubeMapPositiveX + i, ShadowRenderbuffers[lightIndex], 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2D, 0, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2, TextureTarget.Texture2D, 0, 0);
+            GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, ShadowDepthRenderbuffer);
+
             GL.Viewport(0, 0, shadowWidth, shadowHeight);
 
             GL.ClearColor(0, 0, 0, 0);
@@ -184,10 +213,21 @@ namespace Chireiden
         public static void EndShadowMaps()
         {
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2D, NormalTexture, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2, TextureTarget.Texture2D, PositionTexture, 0);
             GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, DepthRenderbuffer);
 
-
             GL.Viewport(0, 0, width, height);
+
+            DrawBuffersEnum[] buffers = new[]
+				{
+					(DrawBuffersEnum)FramebufferAttachment.ColorAttachment0,
+					(DrawBuffersEnum)FramebufferAttachment.ColorAttachment1,
+					(DrawBuffersEnum)FramebufferAttachment.ColorAttachment2,
+				};
+            GL.DrawBuffers(buffers.Length, buffers);
+
+            CheckFrameBufferStatus();
         }
 
         /// <summary>
