@@ -32,6 +32,7 @@ namespace Chireiden
         static uint[] ColorBuffers = new uint[3];
 
         static uint DownsampleTexture;
+        static bool downsampleInitialized = false;
 
         static int FullscreenQuadVbo;
         static int FullscreenQuadVao;
@@ -98,7 +99,10 @@ namespace Chireiden
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R16f, width, height, 0, PixelFormat.Red, PixelType.UnsignedByte, IntPtr.Zero);
+            float[] downsampleData = new float[width * height * 4];
+            for (int i = 0; i < width * height * 4; i++)
+                downsampleData[i] = 0;
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.R16f, width, height, 0, PixelFormat.Rgba, PixelType.Float, downsampleData);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
             // Create Depth Renderbuffer
@@ -357,11 +361,13 @@ namespace Chireiden
 
             GL.Viewport(0, 0, width, height);
             ShaderLibrary.LogLuminanceShader.use();
-            ShaderLibrary.LogLuminanceShader.setUniformFloat1("alpha", 0.015f);
+            ShaderLibrary.LogLuminanceShader.setUniformFloat1("alpha", downsampleInitialized ? 0.015f : 1.0f);
             ShaderLibrary.LogLuminanceShader.bindTexture2D("colorBuffer", 0, ColorBuffers[0]);
 
             RenderFullscreenQuad();
             ShaderLibrary.LogLuminanceShader.unuse();
+            downsampleInitialized = true;
+
             GL.BindTexture(TextureTarget.Texture2D, DownsampleTexture);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             
