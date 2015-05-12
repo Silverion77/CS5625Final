@@ -384,13 +384,23 @@ namespace Chireiden
             ShaderLibrary.TonemapShader.setUniformInt1("logLuminance", 1);
             RenderFullscreenQuad();
             ShaderLibrary.TonemapShader.unuse();
-             
+
+            // temp: debug -- view the shadow cube map for the first light
+            /*
+            ShaderLibrary.ShadowMapViewerShader.use();
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.TextureCubeMap, ShadowRenderbuffers[0]);
+            ShaderLibrary.ShadowMapViewerShader.setUniformInt1("shadowMap", 0);
+            RenderFullscreenQuad();
+            ShaderLibrary.ShadowMapViewerShader.unuse();
+            */ 
+            
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, FboHandle);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
             GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, RenderbufferTarget.Renderbuffer, DepthRenderbuffer);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment1, TextureTarget.Texture2D, NormalTexture, 0);
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment2, TextureTarget.Texture2D, PositionTexture, 0);
-
+           
             DrawBuffersEnum[] buffers = new[]
 				{
 					(DrawBuffersEnum)FramebufferAttachment.ColorAttachment0,

@@ -23,9 +23,10 @@ namespace Chireiden
         public static ShaderProgram LambertianShader;
         public static ShaderProgram FireShader;
         public static ShaderProgram ShadowMapShader;
+        public static ShaderProgram ShadowMapViewerShader;
 
         public static void loadShaders() {
-            SsaoShader = new ShaderProgram("shaders/ssao.vert", "shaders/ssao.frag");
+            SsaoShader = new ShaderProgram("shaders/simple.vert", "shaders/ssao.frag");
             CubeShader = new ShaderProgram("data/Simple_VS.vert", "data/Simple_FS.frag");
             BlenderShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/blendermaterial.frag");
             TonemapShader = new ShaderProgram("shaders/simple2d.vert", "shaders/tonemap.frag");
@@ -40,6 +41,7 @@ namespace Chireiden
             LambertianShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/lambertian.frag");
             FireShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/fireShader.frag");
             ShadowMapShader = new ShaderProgram("shaders/pos_tex_nor_tan.vert", "shaders/shadowmap.frag");
+            ShadowMapViewerShader = new ShaderProgram("shaders/simple.vert", "shaders/view_shadowmap.frag");
         }
     }
 }

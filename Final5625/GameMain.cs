@@ -518,24 +518,6 @@ namespace Chireiden
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-            // render shadow cube maps for each light
-            // hack: for speedup purposes, only render shadow cube map for first light (cannon arm)
-            /*
-            for (int j = 0; j < Math.Min(world.getPointLights().Count, 1); j++)
-            {
-                Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
-                                                 new Vector3(0,1,0), new Vector3(0,-1,0),
-                                                 new Vector3(0,0,1), new Vector3(0,0,-1)};
-                for (int i = 0; i < 6; i++)
-                {
-                    Framebuffer.StartShadowMap(j, i, 1024, 1024);
-                    world.getPointLights()[j].setupCamera(dirs[i]);
-                    world.render(world.getPointLights()[j].getCamera());
-                }
-            }
-            Framebuffer.EndShadowMaps(); */
-            
               
             world.render(camera);
 
