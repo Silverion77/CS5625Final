@@ -90,8 +90,7 @@ namespace Chireiden
         /// </summary>
         public void computeFrame()
         {
-            Vector3 lookAt = target.worldPosition;
-            lookAt.Z += 3.75f;
+            Vector3 lookAt = target.camFocusPosition();
 
             // The default offset is "behind" the target position in world space terms
             Vector3 offset = new Vector3(0, -1, 0);
@@ -112,6 +111,10 @@ namespace Chireiden
             Vector3 rotatedOffset = Vector3.Multiply(forward, distanceBehind);
             worldSpacePos = lookAt - rotatedOffset;
 
+            // Add an over-the-shoulder offset
+            worldSpacePos = worldSpacePos + target.camRightOffset() * right;
+            lookAt = lookAt + target.camRightOffset() * right;
+
             // Also, let's make the camera not clip through the world
             if (stage != null)
             {
@@ -124,9 +127,6 @@ namespace Chireiden
                         worldSpacePos = worldSpaceCorrected;
                 }
             }
-
-            worldSpacePos = worldSpacePos + target.camRightOffset() * right;
-            lookAt = lookAt + target.camRightOffset() * right;
 
             viewMatrix = Matrix4.LookAt(worldSpacePos, lookAt, up);
         }

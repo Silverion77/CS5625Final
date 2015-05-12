@@ -74,8 +74,8 @@ namespace Chireiden.Scenes
         double moveDistanceGoal = 0.5;
         double wanderDistance = 5;
 
-        const float visionDistance = 50;
-        const float leashDistance = 100;
+        const float visionDistance = 60;
+        const float leashDistance = 200;
 
         const float moveSpeed = 3f;
         const float staggerSpeed = -1.5f;
@@ -83,7 +83,7 @@ namespace Chireiden.Scenes
 
         double staggerTime = 0;
 
-        const float projectileDistance = 40;
+        const float projectileDistance = 150;
         const float meleeMoveDistance = 10;
         const float meleeDistance = 3;
 

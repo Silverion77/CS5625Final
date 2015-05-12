@@ -218,6 +218,9 @@ namespace Chireiden
                         loadStage(levelFile);
                     }
                     break;
+                case Key.P:
+                    showFPS = !showFPS;
+                    break;
                 case Key.F:
                     camera.toggleCameraFrozen();
                     break;
@@ -518,7 +521,7 @@ namespace Chireiden
 
             // render shadow cube maps for each light
             
-            for (int j = 0; j < world.getPointLights().Count; j++)
+            for (int j = 0; j < 1; j++)
             {
                 Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
                                                  new Vector3(0,1,0), new Vector3(0,-1,0),

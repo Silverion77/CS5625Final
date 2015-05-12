@@ -119,7 +119,7 @@ namespace Chireiden.Scenes
             int id = skeletalMeshes.idOfMorph(animation);
             if (interpTime == 0)
             {
-                skeletalMeshes.setMorphWeight(id, targetWeight);
+                state.morphWeights[id] = targetWeight;
             }
             else
             {
