@@ -148,5 +148,5 @@ void main()
 
 	out_frag_color = factor * result;
 	out_frag_normal = vec4(n, 1.0);
-	out_frag_position = vec4(0,1.0,0,1.0);//vec4(geom_position, 1.0);
+	out_frag_position = vec4(geom_position, 1.0);
 }
