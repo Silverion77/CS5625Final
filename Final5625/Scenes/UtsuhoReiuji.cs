@@ -92,7 +92,11 @@ namespace Chireiden.Scenes
         // The state we are currently in
         OkuuState okuuState;
 
+        public const int MaxHitPoints = 100;
         public int HitPoints { get; set; }
+
+        const double hpRegenInterval = 5;
+        double regenTime = 0;
 
         public const float hitCylinderRadius = 1f;
         public const float hitCylinderHeight = 4;
@@ -186,7 +190,7 @@ namespace Chireiden.Scenes
             targetRotation = Quaternion.Identity;
             idle();
             wallRepelDistance = 1.5f;
-            HitPoints = 100;
+            HitPoints = MaxHitPoints;
         }
 
         public void setCameraForward(Vector3 forward)
@@ -517,6 +521,13 @@ namespace Chireiden.Scenes
                     attachment.update(e, cannonEndMatrix);
                 }
                 return;
+            }
+
+            regenTime += e.Time;
+            if (regenTime > hpRegenInterval && okuuState != OkuuState.KO)
+            {
+                regenTime = regenTime % hpRegenInterval;
+                HitPoints = Math.Min(HitPoints + 1, MaxHitPoints);
             }
 
             bool stateChangedFromInput = setNextState();

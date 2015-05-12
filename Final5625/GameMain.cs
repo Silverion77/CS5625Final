@@ -88,7 +88,7 @@ namespace Chireiden
         public static int ScreenWidth { get; set; }
         public static int ScreenHeight { get; set; }
 
-        string levelFile = "data/stage/testlevel";
+        string levelFile = "data/stage/betterlevel";
 
         protected override void OnLoad(System.EventArgs e)
         {
@@ -521,6 +521,7 @@ namespace Chireiden
 
             // render shadow cube maps for each light
             // hack: for speedup purposes, only render shadow cube map for first light (cannon arm)
+            /*
             for (int j = 0; j < Math.Min(world.getPointLights().Count, 1); j++)
             {
                 Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
@@ -533,7 +534,7 @@ namespace Chireiden
                     world.render(world.getPointLights()[j].getCamera());
                 }
             }
-            Framebuffer.EndShadowMaps();
+            Framebuffer.EndShadowMaps(); */
             
               
             world.render(camera);
