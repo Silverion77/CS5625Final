@@ -39,7 +39,7 @@ layout (location = 0) out vec4 out_frag_color;
 layout (location = 1) out vec4 out_frag_normal; 
 layout (location = 2) out vec4 out_frag_position; 
 
-vec4 normalMapLighting(in vec2 T, in vec3 V, in vec3 N)
+vec4 normalMapLighting(in vec2 T, in vec3 V, in vec3 n)
 {
 	vec3 mat_diffuse = texture(diffuseTexture, T / scale_factor).rgb;
 	vec3 mat_specular = texture(specularTexture, T / scale_factor).rgb;
@@ -57,22 +57,23 @@ vec4 normalMapLighting(in vec2 T, in vec3 V, in vec3 N)
 		float d2 = light_falloffDistance[i] * light_falloffDistance[i];
 		float intensity = light_energy[i] * (d2 / (d2 + r_squared));
 		// Compute diffuse
-		float diffuse_dot = max(dot(N,L), 0);
+		float diffuse_dot = max(dot(n, l), 0);
 
 		// give some ambient lighting
-		result.xyz += 0.5 * mat_diffuse;
+		//result.xyz += 0.2 * mat_diffuse;
 		// the rest depends on the light angle (diffuse_dot)
-		result.xyz += 0.5 * mat_diffuse * diffuse_dot * light_color[i] * intensity;
+		result.xyz += mat_diffuse * diffuse_dot * light_color[i] * intensity;
 
 		// specular lighting
-		float ispec = 0;
-		if(dot(N, L) > 0.2) {
-			vec3 H = normalize(V + L);
-			float specular_dot = pow(max(0, dot(N, H)), mat_shininess);
+		if(dot(n, l) > 0.2) {
+			vec3 h = normalize(v + l);
+			float specular_dot = pow(max(0, dot(n, h)), mat_shininess);
 			result.xyz += mat_specular * specular_dot * light_color[i] * intensity;
 		}
-		//  * pow(shadowMultiplier, 4)
 	}
+	// Make it fade to black as we go higher
+	float scalingFactor = min(1, pow(1.5, -(geom_worldPos.z - 10)));
+	result.xyz *= scalingFactor;
 	result.a = 1;
 	return result;
 }
@@ -97,7 +98,7 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 	
 	vec2 currentTexCoord = T;
 	
-	float heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord / scale_factor).r;
+	float heightFromTexture = 1.0 - texture2D(heightTexture, currentTexCoord / scale_factor).r;
 	// while the current texture height is above the surface
 	// extend along V until the layer is below the heightMap
 	while(heightFromTexture > curLayerHeight)
@@ -106,14 +107,14 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 		// offset texture coordinate
 		currentTexCoord -= deltaTex;
 		// new depth from heightmap
-		heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord / scale_factor).r;
+		heightFromTexture = 1.0 - texture2D(heightTexture, currentTexCoord / scale_factor).r;
 	}
 	
 	// Recalculate step above to use for interpolation
 	vec2 prevTexCoord = currentTexCoord + deltaTex;
 	
 	float distanceToNextH = heightFromTexture - curLayerHeight;
-	float distanceToPrevH = 1 - texture2D(heightTexture, prevTexCoord / scale_factor).r
+	float distanceToPrevH = 1.0 - texture2D(heightTexture, prevTexCoord / scale_factor).r
 								- curLayerHeight + layerHeight;
 	
 	// Linear interpolation
@@ -164,11 +165,68 @@ void main()
 	float parallaxHeight;
 	vec2 tex = parallaxMapping(V, geom_texCoord, parallaxHeight);
 	
-	// TODO: Shadowing?
-	
-	// Lighting calculation ** ADD shadow here**
-	N = normalize(texture(normalTexture, tex / scale_factor).xyz);
-	out_frag_color = normalMapLighting(tex, V, N);
-	out_frag_normal = vec4(N, 1.0);
+	// Normal in TS??
+	vec3 Norm = texture(normalTexture, tex / scale_factor).xyz;
+	Norm = T * Norm.x + B * Norm.y + N * Norm.z;
+	Norm = normalize((viewMatrix * vec4(N, 0)).xyz);
+	out_frag_color = normalMapLighting(tex, V, Norm);
+	out_frag_normal = vec4(Norm, 1.0);
 	out_frag_position = vec4(geom_position, 1.0);
+}
+
+float parallaxSoftShadowMultiplier(in vec3 L, in vec2 initialTexCoord,
+                                       in float initialHeight)
+{
+   float shadowMultiplier = 1;
+
+   const float minLayers = 15;
+   const float maxLayers = 30;
+
+   // calculate lighting only for surface oriented to the light source
+   if(dot(vec3(0, 0, 1), L) > 0)
+   {
+      // calculate initial parameters
+      float numSamplesUnderSurface	= 0;
+      shadowMultiplier	= 0;
+      float numLayers	= mix(maxLayers, minLayers, abs(dot(vec3(0, 0, 1), L)));
+      float layerHeight	= initialHeight / numLayers;
+      vec2 texStep	= parallaxScale * L.xy / L.z / numLayers;
+
+      // current parameters
+      float currentLayerHeight	= initialHeight - layerHeight;
+      vec2 currentTextureCoords	= initialTexCoord + texStep;
+      float heightFromTexture	= texture(u_heightTexture, currentTextureCoords).r;
+      int stepIndex	= 1;
+
+      // while point is below depth 0.0 )
+      while(currentLayerHeight > 0)
+      {
+         // if point is under the surface
+         if(heightFromTexture < currentLayerHeight)
+         {
+            // calculate partial shadowing factor
+            numSamplesUnderSurface	+= 1;
+            float newShadowMultiplier	= (currentLayerHeight - heightFromTexture) *
+                                             (1.0 - stepIndex / numLayers);
+            shadowMultiplier	= max(shadowMultiplier, newShadowMultiplier);
+         }
+
+         // offset to the next layer
+         stepIndex	+= 1;
+         currentLayerHeight	-= layerHeight;
+         currentTextureCoords	+= texStep;
+         heightFromTexture	= texture(u_heightTexture, currentTextureCoords).r;
+      }
+
+      // Shadowing factor should be 1 if there were no points under the surface
+      if(numSamplesUnderSurface < 1)
+      {
+         shadowMultiplier = 1;
+      }
+      else
+      {
+         shadowMultiplier = 1.0 - shadowMultiplier;
+      }
+   }
+   return shadowMultiplier;
 }

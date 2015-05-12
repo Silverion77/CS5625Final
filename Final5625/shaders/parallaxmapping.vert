@@ -31,9 +31,9 @@ void main()
 	vec3 N = normalize(vert_normal);
 	vec3 T = normalize(vert_tangent.xyz);
 	vec3 B = normalize(cross(N, T) * vert_tangent.w);
-	geom_normal = normalize(modelMatrix * vec4(N,0)).xyz;
-	geom_tangent = normalize(modelMatrix * vec4(T,0)).xyz;
-	geom_bitangent = normalize(modelMatrix * vec4(B,0)).xyz;
+	geom_normal = normalize((modelMatrix * vec4(N,0)).xyz);
+	geom_tangent = normalize((modelMatrix * vec4(T,0)).xyz);
+	geom_bitangent = normalize((modelMatrix * vec4(B,0)).xyz);
 	
 	geom_worldPos = worldPos.xyz;
 	geom_texCoord = vert_texCoord;
