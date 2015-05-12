@@ -33,8 +33,8 @@ namespace Chireiden
         float farClip;
 
         float rumbleMag;
-        const float RUMBLE_DISTANCE_MAX_THRESHOLD = 100;
-        const float RUMBLE_DISTANCE_MIN_THRESHOLD = 1.0f;
+        const float RUMBLE_DISTANCE_MAX_THRESHOLD = 10000;
+        const float RUMBLE_DISTANCE_MIN_THRESHOLD = 100;
         const int RUMBLE_MIN_TIME = 40;
         const int RUMBLE_MAX_TIME = 75;
         int rumbleTime = 0;
@@ -143,6 +143,7 @@ namespace Chireiden
 
         public void startRumble(float distance)
         {
+
             // lerp distance between 1 for close and 0 for far
             if (distance > RUMBLE_DISTANCE_MAX_THRESHOLD) {
                 return;

@@ -347,6 +347,7 @@ namespace Chireiden.Scenes
         {
             Vector3 bulletPos = Vector4.Transform(new Vector4(ArmCannonEnd, 1), cannonEndMatrix).Xyz;
             outExplosion = new LightExplosion(bulletPos, new Vector3(1, 0.5f, 0.2f), 0.2, 2000f, 3);
+
         }
 
         public bool getExplosion(out LightExplosion outExplode)
