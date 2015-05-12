@@ -517,8 +517,8 @@ namespace Chireiden
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             // render shadow cube maps for each light
-            
-            for (int j = 0; j < world.getPointLights().Count; j++)
+            // hack: for speedup purposes, only render shadow cube map for first light (cannon arm)
+            for (int j = 0; j < Math.Min(world.getPointLights().Count, 1); j++)
             {
                 Vector3[] dirs = new Vector3[] { new Vector3(1,0,0), new Vector3(-1,0,0), 
                                                  new Vector3(0,1,0), new Vector3(0,-1,0),
