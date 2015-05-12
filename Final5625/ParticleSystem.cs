@@ -125,7 +125,9 @@ namespace Chireiden
                 "data/texture/particle/reaction.png",
                 "data/texture/particle/reaction.png",
                 "data/texture/particle/reaction.png",
-                "data/texture/particle/reaction.png");
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/reaction.png",
+                "data/texture/particle/flash.png");
             particleTexture = new ArrayTexture(128, 128, "data/texture/particle/0.png",
                 "data/texture/particle/1.png",
                 "data/texture/particle/2.png",
@@ -133,7 +135,9 @@ namespace Chireiden
                 "data/texture/particle/4.png",
                 "data/texture/particle/5.png",
                 "data/texture/particle/6.png",
-                "data/texture/particle/7.png");
+                "data/texture/particle/7.png",
+                "data/texture/particle/8.png",
+                "data/texture/particle/9.png");
         }
 
         public static void SpawnParticle(Particle particle)
