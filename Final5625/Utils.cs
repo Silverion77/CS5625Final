@@ -164,6 +164,51 @@ namespace Chireiden
             GL.BindVertexArray(0);
         }
 
+        // perlin noise generation
+        // see http://mrl.nyu.edu/~perlin/doc/oscar.html#noise
+        // also http://freespace.virgin.net/hugo.elias/models/m_perlin.htm
+        static float noise(int x)
+        {
+            x = (x<<13) ^ x;
+            int y = ((x * (x * x * 15731 + 789221) + 1376312589) & 2147483647);
+            return (1.0f - y / 1073741824.0f);  
+        }
+
+        static float cosInterp(float e0, float e1, float x)
+        {
+            float w = x * (float)Math.PI;
+            float y = (1 - (float)Math.Cos(w)) * .5f;
+            return e0 * (1 - y) + e1 * y;
+        }
+        
+        static float smoothedNoise(float x)
+        {
+            return Utils.noise((int)x) / 2.0f + Utils.noise((int)x - 1) / 4.0f + Utils.noise((int)x + 1) / 4.0f;
+        }
+
+        static float interpNoise(float x)
+        {
+            int ix = (int)x;
+            float fracx = x - ix;
+            float v1 = Utils.smoothedNoise(ix);
+            float v2 = Utils.smoothedNoise(ix + 1);
+            return Utils.cosInterp(v1, v2, fracx);
+        }
+
+        public static float perlineNoise1D(float x, float persistance, int octaves)
+        {
+            float tot = 0;
+            float freq;
+            float amp;
+            for (int i = 0; i < octaves - 1; i++) 
+            {
+                freq = (float)Math.Pow(2, i);
+                amp = (float)Math.Pow(persistance, i);
+                tot += Utils.interpNoise(x * freq) * amp;
+            }
+            return tot;
+        }
+
         static Utils()
         {
             createVBOs();

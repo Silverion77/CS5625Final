@@ -32,6 +32,14 @@ namespace Chireiden
         float nearClip;
         float farClip;
 
+        float rumbleMag;
+        const float RUMBLE_DISTANCE_MAX_THRESHOLD = 100;
+        const float RUMBLE_DISTANCE_MIN_THRESHOLD = 1.0f;
+        const int RUMBLE_MIN_TIME = 40;
+        const int RUMBLE_MAX_TIME = 75;
+        int rumbleTime = 0;
+        int rumbleMaxTime = RUMBLE_MAX_TIME;
+
         Vector3 forward;
         Vector3 right;
         Vector3 up = Vector3.UnitZ;
@@ -96,13 +104,13 @@ namespace Chireiden
             Vector3 offset = new Vector3(0, -1, 0);
 
             // First rotate by the pitch angle (around global up axis)
-            Quaternion pitchRotation = Quaternion.FromAxisAngle(up, pitch);
+            Quaternion pitchRotation = Quaternion.FromAxisAngle(up, pitch + getRumbleOffset(10000));
             offset = Vector3.Transform(offset, pitchRotation);
 
             // Now compute rightward vector -- distance from camera to lookAt = negation of offset
             Vector3 right = Vector3.Cross(-offset, up);
             // Rotate by yaw angle (around right axis)
-            Quaternion yawRotation = Quaternion.FromAxisAngle(right, yaw);
+            Quaternion yawRotation = Quaternion.FromAxisAngle(right, yaw + getRumbleOffset(0));
             offset = Vector3.Transform(offset, yawRotation);
 
             this.right = right;
@@ -129,6 +137,45 @@ namespace Chireiden
             }
 
             viewMatrix = Matrix4.LookAt(worldSpacePos, lookAt, up);
+
+            rumbleTime--;
+        }
+
+        public void startRumble(float distance)
+        {
+            // lerp distance between 1 for close and 0 for far
+            if (distance > RUMBLE_DISTANCE_MAX_THRESHOLD) {
+                return;
+            }
+            if (distance < RUMBLE_DISTANCE_MIN_THRESHOLD) {
+                distance = RUMBLE_DISTANCE_MIN_THRESHOLD;
+            }
+            float magnitude = (RUMBLE_DISTANCE_MAX_THRESHOLD - distance)/((float)((RUMBLE_DISTANCE_MAX_THRESHOLD - RUMBLE_DISTANCE_MIN_THRESHOLD)));
+            magnitude = (float)Math.Max(Math.Min(magnitude, 1.0), 0.0);
+
+            int newRumbleTime = RUMBLE_MIN_TIME + (int)(magnitude * (RUMBLE_MAX_TIME - RUMBLE_MIN_TIME));
+
+            if (newRumbleTime > rumbleTime)
+            {
+                rumbleMaxTime = newRumbleTime;
+                rumbleTime = newRumbleTime;
+                rumbleMag = magnitude;
+            }
+
+        }
+
+        // Given a seed, computes a perlin noise rumble offset appropriate
+        // for the recency of the last explosion
+        public float getRumbleOffset(float t) 
+        {
+            if (rumbleTime > 0) 
+            {
+                float x = rumbleTime/((float)rumbleMaxTime);
+                // compute some non-zero offset damped by rumbletime and scaled by magnitude
+                return (3*x*x - 2*x * x*x) * Utils.perlineNoise1D((t + rumbleTime)*.1f, .5f, 6) * rumbleMag * .15f;
+            }
+            // otherwise, too much time since last explosion , clamp to 0
+            return 0.0f;
         }
 
         public Vector3 cameraForwardDir()

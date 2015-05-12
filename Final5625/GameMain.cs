@@ -368,6 +368,7 @@ namespace Chireiden
             {
                 backstepExplode.addToWorld(world);
                 explosions.Add(backstepExplode);
+                camera.startRumble((backstepExplode.worldPosition - camera.WorldPosition).Length);
 
                 foreach (ZombieFairy fairy in zombies)
                 {
@@ -433,6 +434,7 @@ namespace Chireiden
                 LightExplosion explode = new LightExplosion(explodeLoc, new Vector3(1, 0.5f, 0.2f), 2, 10000f, 5);
                 explode.addToWorld(world);
                 explosions.Add(explode);
+                camera.startRumble((explode.worldPosition - camera.WorldPosition).Length);
 
                 foreach (ZombieFairy fairy in zombies) {
                     float dist = (fairy.worldPosition - explodeLoc).Length;
@@ -466,6 +468,8 @@ namespace Chireiden
                 LightExplosion explode = new LightExplosion(explodeLoc, new Vector3(0.2f, 0.5f, 1f), 2, 500f, 4);
                 explode.addToWorld(world);
                 explosions.Add(explode);
+
+                camera.startRumble((explode.worldPosition - camera.WorldPosition).Length);
 
                 float dist = (okuu.worldPosition - explodeLoc).Length;
                 if (dist < explosionDamageRadius)
