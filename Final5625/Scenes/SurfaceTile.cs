@@ -9,42 +9,17 @@ using OpenTK.Graphics.OpenGL;
 
 using Chireiden.Meshes;
 using Chireiden.Materials;
+using Chireiden.Scenes.Stages;
 
 namespace Chireiden.Scenes
 {
     /// <summary>
     /// An object in the scene tree to be used as a surface for the game. E.g. walls, floor, etc.
     /// </summary>
-    public class SurfaceTile : PlaceableObject
+    class SurfaceTile : StageTilesNode
     {
-        /// <summary>
-        /// TriMesh square backing this surface tile
-        /// </summary>
-        private TriMesh square;
-        public SurfaceTile(float s, Vector3 t, Quaternion r)
-            : base(s, t, r)
-        {
-            Vector3 v00 = new Vector3(0, 0, 0);
-            Vector3 v10 = new Vector3(1, 0, 0);
-            Vector3 v01 = new Vector3(0, 1, 0);
-            Vector3 v11 = new Vector3(1, 1, 0);
-            Vector3[] vs = { v00, v01, v10, v11 };
-            int[] fs = { 0, 1, 2, 3, 2, 1 };
-            Vector3 n = new Vector3(0, 0, 1);
-            Vector3[] ns = { n, n, n, n };
-            Vector2 tc00 = new Vector2(0, 0);
-            Vector2 tc10 = new Vector2(1, 0);
-            Vector2 tc01 = new Vector2(0, 1);
-            Vector2 tc11 = new Vector2(1, 1);
-            Vector2[] tcs = { tc00, tc01, tc10, tc11 };
-            Vector4 tan = new Vector4(1, 0, 0, 1);
-            Vector4[] tans = { tan, tan, tan, tan };
-            square = new TriMesh(vs, fs, ns, tcs, tans, new POMMaterial("tile"));
-        }
-        
-        public SurfaceTile(Vector3 loc)
-            : this (1, loc, Quaternion.Identity)
-        { }
+        public SurfaceTile(Vector3[] verts, int[] faces, Vector3[] normals, Vector2[] texCoords, Vector4[] tangents, Material mat)
+            : base(verts, faces, normals, texCoords, tangents, mat) { }
 
         public override void render(Camera camera)
         {
@@ -67,7 +42,7 @@ namespace Chireiden.Scenes
                 program.setUniformMatrix3("normalMatrix", normalMatrix);
                 program.setUniformFloat3("camera_position", camera.getWorldSpacePos());
                 camera.setPointLightUniforms(program);
-                square.renderMesh(camera, toWorldMatrix, program, 0);
+                mesh.renderMesh(camera, toWorldMatrix, program, 0);
                 program.unuse();
                 renderChildren(camera);
             }

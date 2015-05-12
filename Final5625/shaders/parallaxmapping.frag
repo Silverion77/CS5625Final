@@ -19,8 +19,10 @@ uniform sampler2D normalTexture;
 uniform float mat_shininess;
 // scale for size of Parallax Mapping effect
 uniform float parallaxScale;
+uniform vec2 scale_factor;
 
 // Light uniforms
+uniform mat4 viewMatrix;
 uniform mat4 inverseViewMatrix;
 uniform int light_count;
 uniform vec3 light_eyePosition[MAX_LIGHTS];
@@ -33,13 +35,14 @@ uniform vec3 camera_position;
 
 vec3 toLightsInTS[MAX_LIGHTS];
 
-out vec4 out_frag_color;
+layout (location = 0) out vec4 out_frag_color; 
+layout (location = 1) out vec4 out_frag_normal; 
+layout (location = 2) out vec4 out_frag_position; 
 
-vec4 normalMapLighting(in vec2 T, in vec3 V)
+vec4 normalMapLighting(in vec2 T, in vec3 V, in vec3 N)
 {
-	vec3 N = normalize(texture(normalTexture, T).xyz);
-	vec3 mat_diffuse = texture(diffuseTexture, T).rgb;
-	vec3 mat_specular = texture(specularTexture, T).rgb;
+	vec3 mat_diffuse = texture(diffuseTexture, T / scale_factor).rgb;
+	vec3 mat_specular = texture(specularTexture, T / scale_factor).rgb;
 
 	vec3 v = -normalize(geom_position);
 
@@ -94,7 +97,7 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 	
 	vec2 currentTexCoord = T;
 	
-	float heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord).r;
+	float heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord / scale_factor).r;
 	// while the current texture height is above the surface
 	// extend along V until the layer is below the heightMap
 	while(heightFromTexture > curLayerHeight)
@@ -103,14 +106,14 @@ vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 		// offset texture coordinate
 		currentTexCoord -= deltaTex;
 		// new depth from heightmap
-		heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord).r;
+		heightFromTexture = 1 - texture2D(heightTexture, currentTexCoord / scale_factor).r;
 	}
 	
 	// Recalculate step above to use for interpolation
 	vec2 prevTexCoord = currentTexCoord + deltaTex;
 	
 	float distanceToNextH = heightFromTexture - curLayerHeight;
-	float distanceToPrevH = 1 - texture2D(heightTexture, prevTexCoord).r
+	float distanceToPrevH = 1 - texture2D(heightTexture, prevTexCoord / scale_factor).r
 								- curLayerHeight + layerHeight;
 	
 	// Linear interpolation
@@ -164,5 +167,8 @@ void main()
 	// TODO: Shadowing?
 	
 	// Lighting calculation ** ADD shadow here**
-	out_frag_color = normalMapLighting(tex, V);
+	N = normalize(texture(normalTexture, tex / scale_factor).xyz);
+	out_frag_color = normalMapLighting(tex, V, N);
+	out_frag_normal = vec4(N, 1.0);
+	out_frag_position = vec4(geom_position, 1.0);
 }

@@ -21,7 +21,8 @@ namespace Chireiden.Materials
         // Required for POM
         Texture heightMap;
         Texture normalMap;
-        float parallaxScale = .02f;
+        float parallaxScale = .1f;
+        Vector2 scaleFactor = new Vector2(20, 20);
         float shininess;
 
         public POMMaterial(float shininess, string TextureDirectory)
@@ -55,6 +56,7 @@ namespace Chireiden.Materials
             program.bindTexture2D("normalTexture", startTexUnit + 3, normalMap);
             program.setUniformFloat1("parallaxScale", parallaxScale);
             program.setUniformFloat1("mat_shininess", shininess);
+            program.setUniformFloat2("scale_factor", scaleFactor);
 
             return startTexUnit + 4;
         }

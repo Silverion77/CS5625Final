@@ -10,7 +10,7 @@ namespace Chireiden.Scenes.Stages
 {
     class StageTilesNode : SceneTreeNode
     {
-        TriMesh mesh;
+        protected TriMesh mesh;
 
         public StageTilesNode(Vector3[] verts, int[] faces, Vector3[] normals, Vector2[] texCoords, Vector4[] tangents, Material mat)
         {

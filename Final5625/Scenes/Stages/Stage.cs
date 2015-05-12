@@ -67,10 +67,14 @@ namespace Chireiden.Scenes.Stages
         {
             switch (id)
             {
+                case 1:
+                    Material m = new POMMaterial(30, "tile");
+                    return new SurfaceTile(matTiles.Vertices.ToArray(), matTiles.Faces.ToArray(),
+                        matTiles.Normals.ToArray(), matTiles.TexCoords.ToArray(), matTiles.Tangents.ToArray(), m);
                 default:
                     // Rock texture by http://agf81.deviantart.com/art/Stone-Texture-Seamless-197981741
                     Texture lambertTex = TextureManager.getTexture("data/texture/stone.jpg");
-                    Material m = new LambertianMaterial(new Vector4(1, 1, 1, 1), lambertTex, 10, 10);
+                    m = new LambertianMaterial(new Vector4(1, 1, 1, 1), lambertTex, 10, 10);
                     return new StageTilesNode(matTiles.Vertices.ToArray(), matTiles.Faces.ToArray(),
                         matTiles.Normals.ToArray(), matTiles.TexCoords.ToArray(), matTiles.Tangents.ToArray(), m);
             }
