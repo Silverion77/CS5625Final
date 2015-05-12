@@ -28,7 +28,7 @@ namespace Chireiden.Scenes
             p.position = new Vector3(pos.X / pos.W, pos.Y / pos.W, pos.Z / pos.W);
             p.velocity = new Vector3((float)rand.NextDouble() - 0.5f, (float)rand.NextDouble() - 0.5f, ParticleZVelocity);
             p.rotation = randomAngle();
-            p.angularVelocity = 0;
+            p.angularVelocity = (float)rand.NextDouble() - 0.5f;
 
             p.gravity = 0.0f;
             p.radius = 1.0f * (Math.Min(1, scaleFactor * 5));
