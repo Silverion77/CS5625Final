@@ -211,23 +211,23 @@ namespace Chireiden
             GL.BlendEquationSeparate(BlendEquationMode.FuncAdd, BlendEquationMode.FuncAdd);
             GL.BlendFuncSeparate(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero, BlendingFactorSrc.DstAlpha, BlendingFactorDest.Zero);            
             // temp: uncomment below to see only SSAO pass
-            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+            //GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
             ShaderLibrary.SsaoShader.use();
-            //GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
             CheckFrameBufferStatus();
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, NormalTexture);
-            ShaderLibrary.TonemapShader.setUniformInt1("normalBuffer", 0);
+            ShaderLibrary.SsaoShader.setUniformInt1("normalBuffer", 0);
 
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, PositionTexture);
-            ShaderLibrary.TonemapShader.setUniformInt1("positionBuffer", 1);
+            ShaderLibrary.SsaoShader.setUniformInt1("positionBuffer", 1);
 
             ShaderLibrary.SsaoShader.setUniformInt1("gbuf_height", height);
             ShaderLibrary.SsaoShader.setUniformInt1("gbuf_width", width);
-            ShaderLibrary.SsaoShader.setUniformFloat1("ssao_radius", .45f);
-            ShaderLibrary.SsaoShader.setUniformFloat1("ssao_depthBias", .067f);
+            ShaderLibrary.SsaoShader.setUniformFloat1("ssao_radius", .35f);
+            ShaderLibrary.SsaoShader.setUniformFloat1("ssao_depthBias", .1f);
             ShaderLibrary.SsaoShader.setUniformInt1("ssao_sampleCount", 40);
             ShaderLibrary.SsaoShader.setUniformMatrix4("projectionMatrix", game.getCamera().getProjectionMatrix());
             RenderFullscreenQuad();

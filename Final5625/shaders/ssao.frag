@@ -114,6 +114,6 @@ void main() {
 	    if (tot > 0) {
 		    contribution = contribution / tot;
 	    }
-		      
+		  
     	FragColor = vec4(vec3(contribution), 1.0);
 }
