@@ -218,6 +218,9 @@ namespace Chireiden
                         loadStage(levelFile);
                     }
                     break;
+                case Key.P:
+                    showFPS = !showFPS;
+                    break;
                 case Key.F:
                     camera.toggleCameraFrozen();
                     break;

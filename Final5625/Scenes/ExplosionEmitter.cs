@@ -24,6 +24,14 @@ namespace Chireiden.Scenes
         {
             return 20 * t * t;
         }
+
+        double rateFunction(double t)
+        {
+            // Integral of quadratic from 0 to 1 is 1/3, so every explosion will generate
+            // (inital rate) / 3 particles.
+            return t * t;
+        }
+
         override protected ParticleSystem.Particle generateParticle()
         {
             double factor = 1 - elapsed / duration;
@@ -50,11 +58,12 @@ namespace Chireiden.Scenes
             p.alphaScale = 1.0f;
             return p;
         }
+
         public override void emitParticles(double delta)
         {
             elapsed += delta;
             double factor = 1 - elapsed / duration;
-            excessParticles += rate * (float)(factor * delta);
+            excessParticles += rate * (float)(rateFunction(factor) * delta);
             while (excessParticles >= 1.0f)
             {
                 excessParticles -= 1.0f;

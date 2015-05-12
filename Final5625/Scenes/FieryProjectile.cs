@@ -79,8 +79,9 @@ namespace Chireiden.Scenes
                     // If we're not in bounds, we need to do a projection
                     worldSpaceCorrected = stage.computeCollisionTime(origPos, worldPosition);
                     // Add the correction -- overcorrect slightly
-                    correction = 1.01f * (worldSpaceCorrected - worldPosition);
-                    explodePos = 1.02f * worldSpaceCorrected - 0.02f * worldPosition;
+                    correction = worldSpaceCorrected - worldPosition;
+                    translation = translation + correction;
+                    correction.Normalize();
                     translation = translation + correction;
                     collided = true;
                 }

@@ -1129,5 +1129,19 @@ namespace Chireiden.Scenes
             }
             return false;
         }
+
+        public override Vector3 camFocusPosition()
+        {
+            Vector3 focus = worldPosition;
+            focus.Z += 3.75f;
+            if (okuuState == OkuuState.KO)
+            {
+                Vector3 backward = -5 * getFacingDirection();
+                backward.Z -= 2.8f;
+                double factor = Math.Min(1, animTime / currentAnimation.Duration);
+                focus += (float)factor * backward;
+            }
+            return focus;
+        }
     }
 }

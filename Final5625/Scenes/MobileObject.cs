@@ -108,5 +108,11 @@ namespace Chireiden.Scenes
         {
             return 0;
         }
+
+
+        public virtual Vector3 camFocusPosition()
+        {
+            return worldPosition;
+        }
     }
 }
