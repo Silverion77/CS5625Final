@@ -531,7 +531,6 @@ namespace Chireiden
                 }
             }
             Framebuffer.EndShadowMaps();
-            
               
             world.render(camera);
 
