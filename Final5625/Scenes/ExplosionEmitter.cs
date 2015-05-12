@@ -46,6 +46,8 @@ namespace Chireiden.Scenes
             p.life = 3.0f;
             p.invTotalLife = 1.0f / p.life;
             p.texture = (byte)(rand.Next() % 4);
+            p.colorScale = 1.0f;
+            p.alphaScale = 1.0f;
             return p;
         }
         public override void emitParticles(double delta)
