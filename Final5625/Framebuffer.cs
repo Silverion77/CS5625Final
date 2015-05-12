@@ -250,36 +250,41 @@ namespace Chireiden
             GL.DrawBuffers(buffers.Length, buffers);
 
             // Screen Space Ambient Occlusion
-            
-            // want product of source and destination to layer ssao
-            GL.BlendEquationSeparate(BlendEquationMode.FuncAdd, BlendEquationMode.FuncAdd);
-            GL.BlendFuncSeparate(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero, BlendingFactorSrc.DstAlpha, BlendingFactorDest.Zero);            
-            // temp: uncomment below to see only SSAO pass
-            //GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
-            ShaderLibrary.SsaoShader.use();
-            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
-            CheckFrameBufferStatus();
+            if (game.ssaoState > 0)
+            {
+                // want product of source and destination to layer ssao
+                GL.BlendEquationSeparate(BlendEquationMode.FuncAdd, BlendEquationMode.FuncAdd);
+                GL.BlendFuncSeparate(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero, BlendingFactorSrc.DstAlpha, BlendingFactorDest.Zero);
+                if (game.ssaoState == 2)
+                {
+                    // ssao pass only
+                    GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                }
+                ShaderLibrary.SsaoShader.use();
+                GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[0], 0);
+                CheckFrameBufferStatus();
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, NormalTexture);
-            ShaderLibrary.SsaoShader.setUniformInt1("normalBuffer", 0);
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, NormalTexture);
+                ShaderLibrary.SsaoShader.setUniformInt1("normalBuffer", 0);
 
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, PositionTexture);
-            ShaderLibrary.SsaoShader.setUniformInt1("positionBuffer", 1);
+                GL.ActiveTexture(TextureUnit.Texture1);
+                GL.BindTexture(TextureTarget.Texture2D, PositionTexture);
+                ShaderLibrary.SsaoShader.setUniformInt1("positionBuffer", 1);
 
-            ShaderLibrary.SsaoShader.setUniformInt1("gbuf_height", height);
-            ShaderLibrary.SsaoShader.setUniformInt1("gbuf_width", width);
-            ShaderLibrary.SsaoShader.setUniformFloat1("ssao_radius", .35f);
-            ShaderLibrary.SsaoShader.setUniformFloat1("ssao_depthBias", .1f);
-            ShaderLibrary.SsaoShader.setUniformInt1("ssao_sampleCount", 40);
-            ShaderLibrary.SsaoShader.setUniformMatrix4("projectionMatrix", game.getCamera().getProjectionMatrix());
-            GL.Disable(EnableCap.DepthTest);
-            RenderFullscreenQuad();
-            GL.Enable(EnableCap.DepthTest);
-            ShaderLibrary.SsaoShader.unuse();
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-            
+                ShaderLibrary.SsaoShader.setUniformInt1("gbuf_height", height);
+                ShaderLibrary.SsaoShader.setUniformInt1("gbuf_width", width);
+                ShaderLibrary.SsaoShader.setUniformFloat1("ssao_radius", .35f);
+                ShaderLibrary.SsaoShader.setUniformFloat1("ssao_depthBias", .1f);
+                ShaderLibrary.SsaoShader.setUniformInt1("ssao_sampleCount", 40);
+                ShaderLibrary.SsaoShader.setUniformMatrix4("projectionMatrix", game.getCamera().getProjectionMatrix());
+                GL.Disable(EnableCap.DepthTest);
+                RenderFullscreenQuad();
+                GL.Enable(EnableCap.DepthTest);
+                ShaderLibrary.SsaoShader.unuse();
+                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            }
+
             GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, ColorBuffers[1], 0);
 
             GL.Viewport(0, 0, width, height);

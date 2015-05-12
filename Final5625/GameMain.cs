@@ -62,6 +62,7 @@ namespace Chireiden
 
         bool paused = false;
 
+        public int ssaoState = 1; // 0=ssao off, 1=ssao on, 2=ssao only
         public const float RenderDistance = 500;
 
         // Temp used to retrieve new projectiles from Okuu
@@ -245,6 +246,12 @@ namespace Chireiden
                 case Key.M:
                     okuu.medicalMiracle();
                     break;
+                case Key.U:
+                    if (e.Keyboard.IsKeyDown(Key.I) && e.Keyboard.IsKeyDown(Key.O))
+                    {
+                        toggleSsaoState();
+                    }
+                    break;
                 default:
                     break;
             }
@@ -254,6 +261,12 @@ namespace Chireiden
         List<FieryProjectile> okuuProjectiles = new List<FieryProjectile>();
         List<ZombieFairy> KOedFairies = new List<ZombieFairy>();
         List<ZombieProjectile> zombieProjectiles = new List<ZombieProjectile>();
+
+        void toggleSsaoState()
+        {
+            ssaoState++;
+            ssaoState = ssaoState % 3;
+        }
 
         bool updateFrameTriggered = false;
         protected override void OnUpdateFrame(FrameEventArgs e)
