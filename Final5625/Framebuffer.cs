@@ -270,7 +270,9 @@ namespace Chireiden
             ShaderLibrary.SsaoShader.setUniformFloat1("ssao_depthBias", .1f);
             ShaderLibrary.SsaoShader.setUniformInt1("ssao_sampleCount", 40);
             ShaderLibrary.SsaoShader.setUniformMatrix4("projectionMatrix", game.getCamera().getProjectionMatrix());
+            GL.Disable(EnableCap.DepthTest);
             RenderFullscreenQuad();
+            GL.Enable(EnableCap.DepthTest);
             ShaderLibrary.SsaoShader.unuse();
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             
