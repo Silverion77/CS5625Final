@@ -71,6 +71,7 @@ namespace Chireiden
         TextRenderer fairyHPText;
         TextRenderer winText;
         TextRenderer loseText;
+        TextRenderer fpsText;
 
         bool gameCleared = false;
 
@@ -143,6 +144,7 @@ namespace Chireiden
             winText.DrawString("You win!", new Font(FontFamily.GenericSansSerif, 72), Brushes.White, PointF.Empty);
             loseText = new TextRenderer(600, 300, ClientSize.Width, ClientSize.Height);
             loseText.DrawString("Press Ctrl-R to try again", new Font(FontFamily.GenericSansSerif, 36), Brushes.White, PointF.Empty);
+            fpsText = new TextRenderer(400, 40, ClientSize.Width, ClientSize.Height);
 
             Framebuffer.Init(ClientSize.Width, ClientSize.Height, this);
         }
@@ -495,6 +497,9 @@ namespace Chireiden
 
         float renderTime = 0;
         bool renderTriggered = false;
+        bool showFPS = true;
+        float fps = 0;
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             if (!updateFrameTriggered)
@@ -553,6 +558,12 @@ namespace Chireiden
             {
                 loseText.drawTextAtLoc(ScreenWidth / 2 - 270, ScreenHeight / 2 - 18);
             }
+            if (showFPS)
+            {
+                string fpsString = "FPS: " + fps.ToString("n2");
+                fpsText.DrawString(fpsString, font, Brushes.White, PointF.Empty);
+                fpsText.drawTextAtLoc(10, ScreenHeight - 50);
+            }
 
             Framebuffer.BlitToScreen();
 
@@ -566,6 +577,7 @@ namespace Chireiden
 
             renderTime = (1000.0f * stopwatch.ElapsedTicks) / Stopwatch.Frequency;
             //Console.Write("Update time: {0,2:F1} ms      Render time: {1,2:F1} ms   \r", updateTime, renderTime);
+            fps = 1000 / (renderTime + updateTime);
         }
 
         [STAThread]
