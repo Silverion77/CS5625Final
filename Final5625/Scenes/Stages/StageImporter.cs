@@ -111,7 +111,8 @@ namespace Chireiden.Scenes.Stages
             world.addChild(stage);
 
             Vector3 okuuWorldPos = new Vector3(data.TileSideLength * (data.OkuuPosition.X + 0.5f),
-                data.TileSideLength * (data.OkuuPosition.X + 0.5f), 0);
+                data.TileSideLength * (data.OkuuPosition.Y + 0.5f), 0);
+            Console.WriteLine("okuu at " + okuuWorldPos);
 
             okuu = new UtsuhoReiuji(okuuWorldPos);
             world.addChild(okuu);
