@@ -250,9 +250,12 @@ namespace Chireiden
         List<ZombieFairy> KOedFairies = new List<ZombieFairy>();
         List<ZombieProjectile> zombieProjectiles = new List<ZombieProjectile>();
 
+        bool updateFrameTriggered = false;
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             stopwatch.Restart();
+
+            updateFrameTriggered = true;
 
             // Change camera's orientation based on mouse movement
             MouseState current = OpenTK.Input.Mouse.GetState();
@@ -491,8 +494,12 @@ namespace Chireiden
         ZombieFairy lastDamaged = null;
 
         float renderTime = 0;
+        bool renderTriggered = false;
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            if (!updateFrameTriggered)
+                return;
+
             stopwatch.Restart();
 
             GL.Viewport(0, 0, Width, Height);
@@ -548,6 +555,12 @@ namespace Chireiden
             }
 
             Framebuffer.BlitToScreen();
+
+            if (!renderTriggered)
+            {
+                renderTriggered = true;
+                return; // skip rendering the first frame
+            }
 
             SwapBuffers();
 
